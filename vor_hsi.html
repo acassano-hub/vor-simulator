@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>VOR / HSI</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+    body {
+      background:#0c0d11;
+      color:#cdd0d8;
+      font-family:-apple-system,'Helvetica Neue',sans-serif;
+      height:100vh;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      overflow:hidden;
+    }
+
+    .screen {
+      width:100%;
+      max-width:420px;
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      padding-top:env(safe-area-inset-top,8px);
+      padding-bottom:env(safe-area-inset-bottom,8px);
+    }
+
+    /* ──── TOP BAR ──── */
+    .top-bar {
+      width:100%;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:6px 14px 0;
+    }
+    .btn-settings {
+      background:none; border:none;
+      color:#5a8acc; font-size:22px;
+      cursor:pointer; padding:4px 6px; border-radius:6px;
+    }
+    #gps-top {
+      font-size:12px; color:#555;
+      font-family:'Courier New',monospace; letter-spacing:.5px;
+    }
+    #gps-top.on { color:#3ac060; }
+
+    /* ──── VOR BADGE ──── */
+    .vor-badge {
+      font-size:18px;
+      font-family:'Courier New',monospace;
+      color:#5a8acc;
+      letter-spacing:3px;
+      margin:2px 0 2px;
+      font-weight:700;
+    }
+
+    /* ──── DME ROW ──── */
+    .dme-row {
+      display:flex; align-items:baseline;
+      gap:8px; margin-top:6px;
+    }
+    .dme-tag { font-size:24px; color:#fff; font-family:'Courier New',monospace; letter-spacing:1px; }
+    #dme-val { font-size:36px; font-family:'Courier New',monospace; color:#f0c040; min-width:76px; text-align:right; }
+    .dme-nm  { font-size:28px; color:#fff; font-family:'Courier New',monospace; }
+    #radial-val { font-size:18px; font-family:'Courier New',monospace; color:#5a8acc; margin-left:10px; }
+
+    /* ──── OBS + HDG CONTROLS ──── */
+    .ctrl-section {
+      width:100%; padding:6px 12px 0;
+      display:flex; flex-direction:column; gap:6px;
+    }
+    .ctrl-row {
+      display:flex; align-items:center; gap:8px;
+    }
+    .ctrl-tag {
+      font-size:22px; color:#fff;
+      font-family:'Courier New',monospace;
+      letter-spacing:1px; width:54px; text-align:right;
+      flex-shrink:0;
+    }
+    .ctrl-val {
+      font-size:28px; font-family:'Courier New',monospace;
+      letter-spacing:3px; width:85px; text-align:center;
+      flex-shrink:0;
+    }
+    #obs-display { color:#f0c040; }
+    #hdg-display { color:#e040fb; }
+
+    .ctrl-btns {
+      display:flex; gap:5px; flex:1;
+    }
+    .ctrl-btn {
+      flex:1; padding:10px 0;
+      background:#171920; border:1px solid #22242c;
+      color:#888; border-radius:9px;
+      font-size:12px; font-family:'Courier New',monospace;
+      cursor:pointer; text-align:center;
+      user-select:none; -webkit-user-select:none;
+    }
+    .ctrl-btn:active { background:#1e2028; }
+
+    /* ──── GPS COORDS ──── */
+    .gps-coords-small {
+      font-size:10px; color:#333;
+      font-family:'Courier New',monospace;
+      margin-top:4px;
+    }
+
+    /* ════ SETTINGS SCREEN ════ */
+    .settings-header {
+      width:100%; display:flex; align-items:center; gap:10px;
+      padding:10px 14px; border-bottom:1px solid #18191f;
+    }
+    .btn-back {
+      background:none; border:none; color:#5a8acc;
+      font-size:15px; cursor:pointer;
+      padding:6px 10px 6px 0;
+      display:flex; align-items:center; gap:5px;
+      letter-spacing:.5px;
+    }
+    .settings-title {
+      font-size:14px; color:#777; letter-spacing:2px;
+      font-family:'Courier New',monospace;
+    }
+    .settings-body {
+      width:100%; padding:14px;
+      display:flex; flex-direction:column; gap:18px;
+    }
+    .s-label {
+      font-size:10px; color:#444; letter-spacing:2px;
+      text-transform:uppercase; margin-bottom:8px;
+      font-family:'Courier New',monospace;
+    }
+
+    /* VOR cards */
+    .vor-cards { display:flex; flex-direction:column; gap:8px; }
+    .vor-card {
+      display:flex; align-items:center;
+      padding:14px 16px; background:#141618;
+      border:1px solid #202228; border-radius:12px;
+      cursor:pointer; gap:12px;
+    }
+    .vor-card.active { background:#0b1e38; border-color:#2a5590; }
+    .vor-card-dot {
+      width:9px; height:9px; border-radius:50%;
+      background:#252830; flex-shrink:0;
+    }
+    .vor-card.active .vor-card-dot { background:#3ac060; }
+    .vor-card-main { flex:1; }
+    .vor-card-id {
+      font-size:20px; font-weight:700;
+      font-family:'Courier New',monospace;
+      color:#cdd0d8; letter-spacing:2px;
+    }
+    .vor-card.active .vor-card-id { color:#7eb8f7; }
+    .vor-card-name { font-size:12px; color:#555; margin-top:1px; }
+    .vor-card-right { text-align:right; }
+    .vor-card-freq { font-size:15px; font-family:'Courier New',monospace; color:#888; }
+    .vor-card-coords { font-size:10px; color:#383c44; font-family:'Courier New',monospace; margin-top:2px; }
+
+    /* Mag var */
+    .magvar-row {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 16px; background:#141618;
+      border:1px solid #202228; border-radius:12px;
+    }
+    .magvar-label { font-size:13px; color:#888; }
+    #magvar-input {
+      width:90px; background:#0c0e12; border:1px solid #2d3038;
+      color:#f0c040; padding:8px 10px; border-radius:8px;
+      font-size:17px; font-family:'Courier New',monospace; text-align:center;
+    }
+
+    /* GPS */
+    .gps-section { display:flex; flex-direction:column; gap:8px; }
+    #gps-btn-settings {
+      padding:13px; background:#0d2a14; border:1px solid #1a4a22;
+      color:#4fd870; border-radius:10px; font-size:14px;
+      cursor:pointer; text-align:center; letter-spacing:.5px;
+    }
+    #gps-btn-settings.on { background:#081a0c; border-color:#2a7a36; color:#38c057; }
+    #gps-coords-settings {
+      font-size:11px; color:#383c44;
+      font-family:'Courier New',monospace; text-align:center;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════ PANTALLA PRINCIPAL ══════════════════════════════ -->
+<div id="screen-main" class="screen">
+
+  <div class="top-bar">
+    <button class="btn-settings" onclick="showSettings()">⚙</button>
+    <span id="gps-top">GPS inactivo</span>
+  </div>
+
+  <div class="vor-badge" id="vor-badge">PAR — 116.8 MHz</div>
+
+  <!-- ═══ HSI SVG ═══ -->
+  <svg id="hsi" width="300" height="300" viewBox="0 0 300 300">
+    <defs>
+      <clipPath id="clip">
+        <circle cx="150" cy="150" r="141"/>
+      </clipPath>
+    </defs>
+
+    <!-- Fondo -->
+    <circle cx="150" cy="150" r="149" fill="#090a0d" stroke="#35383f" stroke-width="2"/>
+
+    <g clip-path="url(#clip)">
+
+      <!-- ① Rosa de compass (rota con -magHeading) -->
+      <g id="g-compass"></g>
+
+      <!-- ② Heading bug (magenta, rota independiente) -->
+      <g id="g-hdg-bug">
+        <!-- Triángulo apuntando al centro desde el borde de la rosa -->
+        <polygon points="150,14 143,38 157,38" fill="#e040fb" opacity="0.95"/>
+      </g>
+
+      <!-- ③ RMI — aguja doble barra verde (apunta al VOR) -->
+      <g id="g-rmi">
+        <!-- Cabeza: diamante sólido -->
+        <polygon points="150,50 142,72 150,82 158,72" fill="#28d858"/>
+        <!-- Doble barra superior (cabeza → centro) -->
+        <line x1="143" y1="71" x2="143" y2="150" stroke="#28d858" stroke-width="2.5"/>
+        <line x1="157" y1="71" x2="157" y2="150" stroke="#28d858" stroke-width="2.5"/>
+        <!-- Barra transversal en el centro -->
+        <line x1="140" y1="150" x2="160" y2="150" stroke="#28d858" stroke-width="2"/>
+        <!-- Doble barra inferior (cola) -->
+        <line x1="143" y1="150" x2="143" y2="208" stroke="#28d858" stroke-width="2" opacity="0.5"/>
+        <line x1="157" y1="150" x2="157" y2="208" stroke="#28d858" stroke-width="2" opacity="0.5"/>
+        <!-- Remate de cola -->
+        <line x1="140" y1="204" x2="160" y2="204" stroke="#28d858" stroke-width="2" opacity="0.5"/>
+      </g>
+
+      <!-- ④ Course bar + CDI (rota con obs−magHeading) -->
+      <g id="g-course">
+
+        <!-- Eje de referencia tenue (full height, detrás de todo) -->
+        <line x1="150" y1="62" x2="150" y2="238"
+              stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+
+        <!-- Puntos de escala CDI (perpendiculares al bar, en el gap) -->
+        <circle cx="110" cy="150" r="3.5" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+        <circle cx="130" cy="150" r="3.5" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+        <circle cx="170" cy="150" r="3.5" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+        <circle cx="190" cy="150" r="3.5" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+
+        <!-- AGUJA CDI (magenta) — solo ocupa el gap central, se desplaza en X -->
+        <line id="cdi-needle" x1="150" y1="122" x2="150" y2="178"
+              stroke="#e040fb" stroke-width="5.5" stroke-linecap="round"/>
+
+        <!-- COURSE BAR SUPERIOR — flecha + shaft, se detiene antes del gap -->
+        <polygon points="150,62 143,84 157,84" fill="white"/>
+        <line x1="150" y1="84" x2="150" y2="122" stroke="white" stroke-width="3"/>
+
+        <!-- COURSE BAR INFERIOR — shaft + cola, empieza después del gap -->
+        <line x1="150" y1="178" x2="150" y2="228" stroke="white" stroke-width="3"/>
+        <line x1="141" y1="224" x2="159" y2="224" stroke="white" stroke-width="2.5"/>
+
+      </g>
+
+      <!-- ⑤ Símbolo de avión (fijo, siempre encima) -->
+      <g>
+        <circle cx="150" cy="150" r="5.5" fill="#dde0ea"/>
+        <line x1="130" y1="150" x2="170" y2="150" stroke="#dde0ea" stroke-width="3"/>
+        <line x1="138" y1="159" x2="162" y2="159" stroke="#dde0ea" stroke-width="2"/>
+      </g>
+
+      <!-- ⑥ Lubber line (fija, nariz = arriba) -->
+      <rect x="145" y="10" width="10" height="22" rx="2.5" fill="#dde0ea"/>
+
+    </g>
+
+    <!-- Bisel exterior encima del clip -->
+    <circle cx="150" cy="150" r="149" fill="none" stroke="#1a1c22" stroke-width="5"/>
+    <circle cx="150" cy="150" r="141" fill="none" stroke="#35383f" stroke-width="1"/>
+
+    <!-- TO/FROM (fijo, centrado, no rota) — posicionado BAJO el avión -->
+    <rect x="120" y="255" width="60" height="24" rx="5"
+          fill="#090a0d" stroke="#1e2028" stroke-width="1"/>
+    <text id="tofrom-text" x="150" y="272" text-anchor="middle"
+          font-size="13" font-weight="700" font-family="'Courier New',monospace"
+          fill="#333" letter-spacing="1">---</text>
+
+    <!-- Track magnético (arriba, fijo) -->
+    <text id="hdg-text" x="150" y="43" text-anchor="middle"
+          font-size="12" font-family="'Courier New',monospace" fill="#777">N↑</text>
+
+    <!-- HDG bug readout (abajo izquierda, fijo) -->
+    <rect x="4" y="250" width="76" height="22" rx="4" fill="#0c0018" stroke="#380050" stroke-width="1"/>
+    <text id="hdg-bug-svg" x="42" y="265" text-anchor="middle"
+          font-size="12" font-family="'Courier New',monospace"
+          fill="#e040fb" letter-spacing="1">HDG 000°</text>
+
+  </svg>
+
+  <!-- DME + Radial -->
+  <div class="dme-row">
+    <span class="dme-tag">DME</span>
+    <span id="dme-val">–––</span>
+    <span class="dme-nm">nm</span>
+    <span id="radial-val">R –––°</span>
+  </div>
+
+  <!-- OBS + HDG bug controls -->
+  <div class="ctrl-section">
+
+    <!-- OBS row -->
+    <div class="ctrl-row">
+      <span class="ctrl-tag">OBS</span>
+      <span id="obs-display" class="ctrl-val">000°</span>
+      <div class="ctrl-btns">
+        <div class="ctrl-btn" onclick="changeOBS(-10)">◀◀</div>
+        <div class="ctrl-btn" onclick="changeOBS(-1)">◀</div>
+        <div class="ctrl-btn" onclick="changeOBS(+1)">▶</div>
+        <div class="ctrl-btn" onclick="changeOBS(+10)">▶▶</div>
+        <div class="ctrl-btn" onclick="changeOBS(180)">+180</div>
+      </div>
+    </div>
+
+    <!-- HDG bug row -->
+    <div class="ctrl-row">
+      <span class="ctrl-tag">HDG</span>
+      <span id="hdg-display" class="ctrl-val">000°</span>
+      <div class="ctrl-btns">
+        <div class="ctrl-btn" onclick="changeHDG(-10)">◀◀</div>
+        <div class="ctrl-btn" onclick="changeHDG(-1)">◀</div>
+        <div class="ctrl-btn" onclick="changeHDG(+1)">▶</div>
+        <div class="ctrl-btn" onclick="changeHDG(+10)">▶▶</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="gps-coords-small" id="gps-coords-main">—</div>
+
+</div>
+
+
+<!-- ══════════════════════════════ CONFIGURACIÓN ══════════════════════════════ -->
+<div id="screen-settings" class="screen" style="display:none">
+
+  <div class="settings-header">
+    <button class="btn-back" onclick="showMain()">← Volver</button>
+    <span class="settings-title">CONFIGURACIÓN</span>
+  </div>
+
+  <div class="settings-body">
+
+    <div>
+      <div class="s-label">VOR activo</div>
+      <div class="vor-cards" id="vor-cards"></div>
+    </div>
+
+    <div>
+      <div class="s-label">Declinación magnética</div>
+      <div class="magvar-row">
+        <span class="magvar-label">Variación (O = negativo)</span>
+        <input type="number" id="magvar-input" class="magvar-input"
+               value="-7.5" step="0.05"
+               onchange="S.magVar = parseFloat(this.value)||S.magVar; update()">
+      </div>
+    </div>
+
+    <div class="gps-section">
+      <div class="s-label">GPS</div>
+      <div id="gps-btn-settings" onclick="toggleGPS()">▶  Iniciar GPS</div>
+      <div id="gps-coords-settings">—</div>
+    </div>
+
+  </div>
+</div>
+
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  VOR DATABASE
+// ═══════════════════════════════════════════════════════════
+const VORS = {
+  PAR: { name:'Paraná',  lat:-31.80833, lon:-60.48472, freq:'116.8' },
+  ROS: { name:'Rosario', lat:-32.90500, lon:-60.78138, freq:'117.3' },
+  CBA: { name:'Córdoba', lat:-31.31333, lon:-64.20362, freq:'114.5' }
+};
+
+// ═══════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════
+const S = {
+  acLat:null, acLon:null,
+  gpsTrack:null,   // true track del GPS (null si quieto)
+  gpsSpeed:0,      // m/s
+  gpsAcc:null,
+  gpsActive:false, watchId:null,
+  selectedVOR:'PAR',
+  obs:0,           // OBS seleccionado (°)
+  hdgBug:0,        // Heading bug (°)
+  magVar:-7.5      // Declinación (negativo = variación oeste)
+};
+
+// ═══════════════════════════════════════════════════════════
+//  MATH
+// ═══════════════════════════════════════════════════════════
+const toRad   = d => d * Math.PI / 180;
+const toDeg   = r => r * 180 / Math.PI;
+const norm360  = d => ((d % 360) + 360) % 360;
+const normPM180 = d => { d = norm360(d); return d > 180 ? d - 360 : d; };
+
+// Rumbo verdadero (lat1,lon1) → (lat2,lon2)
+function bearing(la1, lo1, la2, lo2) {
+  const φ1=toRad(la1), φ2=toRad(la2), Δλ=toRad(lo2-lo1);
+  return norm360(toDeg(Math.atan2(
+    Math.sin(Δλ)*Math.cos(φ2),
+    Math.cos(φ1)*Math.sin(φ2) - Math.sin(φ1)*Math.cos(φ2)*Math.cos(Δλ)
+  )));
+}
+
+// Distancia en millas náuticas
+function distNm(la1, lo1, la2, lo2) {
+  const R=3440.065;
+  const φ1=toRad(la1), φ2=toRad(la2);
+  const Δφ=toRad(la2-la1), Δλ=toRad(lo2-lo1);
+  const a=Math.sin(Δφ/2)**2 + Math.cos(φ1)*Math.cos(φ2)*Math.sin(Δλ/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+// CDI: flag (TO/FROM/OFF) y fracción de aguja (-1…+1)
+//  brgToVOR = mag bearing del avión al VOR
+//  toDev    = normPM180(brgToVOR − OBS)
+//  |toDev| < 87° → TO,   needle = +toDev/10
+//  |toDev| > 93° → FROM, needle = −fromDev/10
+function calcCDI(magRadial, obs) {
+  const brgToVOR = norm360(magRadial + 180);
+  const toDev    = normPM180(brgToVOR - obs);
+  const fromDev  = normPM180(magRadial - obs);
+  const F = 10;
+  if (Math.abs(toDev) < 87) return { flag:'TO',   frac: clamp( toDev/F) };
+  if (Math.abs(toDev) > 93) return { flag:'FROM', frac: clamp(-fromDev/F) };
+  return { flag:'OFF', frac:0 };
+}
+const clamp = v => Math.max(-1, Math.min(1, v));
+
+// ═══════════════════════════════════════════════════════════
+//  UPDATE — refresca el SVG completo
+// ═══════════════════════════════════════════════════════════
+function update() {
+  const vor    = VORS[S.selectedVOR];
+  const magVar = S.magVar;
+
+  // Heading magnético desde track GPS (True − magVar)
+  const useTrack   = S.acLat !== null && S.gpsTrack !== null && S.gpsSpeed > 0.5;
+  const magHeading = useTrack ? norm360(S.gpsTrack - magVar) : 0;
+
+  // ── Rotaciones SVG (funcionan con o sin GPS) ──
+  $('g-compass').setAttribute('transform', `rotate(${-magHeading},150,150)`);
+  $('g-course') .setAttribute('transform', `rotate(${norm360(S.obs-magHeading)},150,150)`);
+  $('g-hdg-bug').setAttribute('transform', `rotate(${norm360(S.hdgBug-magHeading)},150,150)`);
+
+  // Track display
+  $('hdg-text').textContent = useTrack ? pad3(Math.round(magHeading))+'°' : 'N↑';
+
+  // Sin posición: solo actualizamos rotaciones
+  if (S.acLat === null) return;
+
+  // ── Cálculos de posición ──
+  const trueRadial = bearing(vor.lat, vor.lon, S.acLat, S.acLon);
+  const magRadial  = norm360(trueRadial - magVar);
+  const brgToVOR   = norm360(magRadial + 180);
+  const dist       = distNm(S.acLat, S.acLon, vor.lat, vor.lon);
+
+  // CDI needle (se desplaza en X dentro del gap del course bar)
+  const { flag, frac } = calcCDI(magRadial, S.obs);
+  const nx = 150 + frac * 55;  // ±55px = full scale (10°)
+  $('cdi-needle').setAttribute('x1', nx);
+  $('cdi-needle').setAttribute('x2', nx);
+
+  // TO/FROM
+  const tf = $('tofrom-text');
+  tf.textContent = (flag === 'OFF') ? '---' : flag;
+  tf.setAttribute('fill', (flag==='TO'||flag==='FROM') ? '#f0c040' : '#333');
+
+  // RMI
+  $('g-rmi').setAttribute('transform', `rotate(${norm360(brgToVOR-magHeading)},150,150)`);
+
+  // DME + Radial
+  $('dme-val')    .textContent = dist.toFixed(1);
+  $('radial-val') .textContent = 'R ' + pad3(Math.round(magRadial)) + '°';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  COMPASS ROSE (dibujada una sola vez)
+// ═══════════════════════════════════════════════════════════
+function drawCompassRose() {
+  const g = $('g-compass');
+  const CX=150, CY=150, R=130;
+  const LABELS = {
+    0:'N', 30:'03', 60:'06', 90:'E',
+    120:'12', 150:'15', 180:'S',
+    210:'21', 240:'24', 270:'W', 300:'30', 330:'33'
+  };
+  const CARD = new Set([0,90,180,270]);
+
+  for (let deg=0; deg<360; deg+=5) {
+    const isMaj = deg%30===0;
+    const isMed = deg%10===0 && !isMaj;
+    const tLen  = isMaj ? 15 : isMed ? 10 : 5;
+    const color = isMaj ? '#c0c4cc' : isMed ? '#454850' : '#282c34';
+    const sw    = isMaj ? 1.5 : 1;
+
+    const rad = toRad(deg-90);
+    const x1=CX+R*Math.cos(rad),      y1=CY+R*Math.sin(rad);
+    const x2=CX+(R-tLen)*Math.cos(rad), y2=CY+(R-tLen)*Math.sin(rad);
+
+    const ln = svgEl('line');
+    ln.setAttribute('x1',x1); ln.setAttribute('y1',y1);
+    ln.setAttribute('x2',x2); ln.setAttribute('y2',y2);
+    ln.setAttribute('stroke',color); ln.setAttribute('stroke-width',sw);
+    g.appendChild(ln);
+
+    if (isMaj) {
+      const tR = R-28;
+      const tx=CX+tR*Math.cos(rad), ty=CY+tR*Math.sin(rad);
+      const isC = CARD.has(deg);
+      const t = svgEl('text');
+      t.setAttribute('x',tx); t.setAttribute('y',ty);
+      t.setAttribute('text-anchor','middle');
+      t.setAttribute('dominant-baseline','middle');
+      t.setAttribute('font-size', isC ? '34' : '28');
+      t.setAttribute('font-weight', isC ? '700' : '500');
+      t.setAttribute('fill', '#e8ecf4');
+      t.setAttribute('font-family',"'Courier New',monospace");
+      t.textContent = LABELS[deg];
+      g.appendChild(t);
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  OBS / HDG controls
+// ═══════════════════════════════════════════════════════════
+function changeOBS(delta) {
+  S.obs = norm360(S.obs + delta);
+  $('obs-display').textContent = pad3(S.obs)+'°';
+  update();
+}
+
+function changeHDG(delta) {
+  S.hdgBug = norm360(S.hdgBug + delta);
+  const str = pad3(S.hdgBug)+'°';
+  $('hdg-display').textContent  = str;
+  $('hdg-bug-svg').textContent  = 'HDG '+str;
+  update();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  NAVEGACIÓN DE PANTALLAS
+// ═══════════════════════════════════════════════════════════
+function showSettings() {
+  $('screen-main').style.display = 'none';
+  $('screen-settings').style.display = 'flex';
+  renderVORCards();
+}
+
+function showMain() {
+  $('screen-settings').style.display = 'none';
+  $('screen-main').style.display = 'flex';
+  update();
+}
+
+function renderVORCards() {
+  const c = $('vor-cards');
+  c.innerHTML = '';
+  Object.entries(VORS).forEach(([id,v]) => {
+    const card = document.createElement('div');
+    card.className = 'vor-card'+(id===S.selectedVOR?' active':'');
+    card.innerHTML = `
+      <div class="vor-card-dot"></div>
+      <div class="vor-card-main">
+        <div class="vor-card-id">${id}</div>
+        <div class="vor-card-name">${v.name}</div>
+      </div>
+      <div class="vor-card-right">
+        <div class="vor-card-freq">${v.freq} MHz</div>
+        <div class="vor-card-coords">${v.lat.toFixed(4)}°  ${v.lon.toFixed(4)}°</div>
+      </div>`;
+    card.onclick = () => {
+      S.selectedVOR = id;
+      $('vor-badge').textContent = `${id} — ${v.freq} MHz`;
+      renderVORCards();
+      update();
+    };
+    c.appendChild(card);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  GPS
+// ═══════════════════════════════════════════════════════════
+function toggleGPS() { S.gpsActive ? stopGPS() : startGPS(); }
+
+function startGPS() {
+  if (!navigator.geolocation) { setGPSMsg('GPS no disponible'); return; }
+  setGPSMsg('Solicitando…');
+  $('gps-btn-settings').textContent = '⏳  Conectando…';
+  if (S.watchId!==null) navigator.geolocation.clearWatch(S.watchId);
+
+  S.watchId = navigator.geolocation.watchPosition(
+    pos => {
+      S.acLat    = pos.coords.latitude;
+      S.acLon    = pos.coords.longitude;
+      S.gpsSpeed = pos.coords.speed   || 0;
+      S.gpsTrack = pos.coords.heading;     // true track, null si quieto
+      S.gpsAcc   = pos.coords.accuracy;
+      S.gpsActive = true;
+
+      const acc = `±${Math.round(S.gpsAcc)}m`;
+      $('gps-top').textContent = `GPS  ${acc}`;
+      $('gps-top').className   = 'on';
+      $('gps-btn-settings').textContent = '■  Detener GPS';
+      $('gps-btn-settings').className   = 'on';
+
+      const coord = `${S.acLat.toFixed(5)}°  ${S.acLon.toFixed(5)}°`;
+      $('gps-coords-main').textContent     = coord;
+      $('gps-coords-settings').textContent = coord;
+      update();
+    },
+    err => {
+      setGPSMsg(`Error: ${err.message}`);
+      $('gps-btn-settings').textContent = '↺  Reintentar';
+      $('gps-btn-settings').className   = '';
+      $('gps-top').className = '';
+      S.gpsActive = false;
+    },
+    { enableHighAccuracy:true, maximumAge:4000, timeout:20000 }
+  );
+}
+
+function stopGPS() {
+  if (S.watchId!==null) { navigator.geolocation.clearWatch(S.watchId); S.watchId=null; }
+  S.gpsActive = false;
+  $('gps-btn-settings').textContent = '▶  Iniciar GPS';
+  $('gps-btn-settings').className   = '';
+  $('gps-top').textContent = 'GPS inactivo';
+  $('gps-top').className   = '';
+}
+
+function setGPSMsg(m) { $('gps-top').textContent = m; }
+
+// ═══════════════════════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════════════════════
+const $     = id  => document.getElementById(id);
+const svgEl = tag => document.createElementNS('http://www.w3.org/2000/svg', tag);
+const pad3  = n   => String(n).padStart(3,'0');
+
+// ═══════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════
+drawCompassRose();
+</script>
+</body>
+</html>
