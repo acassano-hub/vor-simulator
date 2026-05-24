@@ -66,7 +66,7 @@
       gap:8px; margin-top:2px;
     }
     .dme-tag { font-size:24px; color:#fff; font-family:'Courier New',monospace; letter-spacing:1px; }
-    #dme-val { font-size:36px; font-family:'Courier New',monospace; color:#f0c040; min-width:76px; text-align:right; }
+    #dme-val { font-size:36px; font-family:'Courier New',monospace; color:#ff4444; font-weight:700; min-width:76px; text-align:right; }
     .dme-nm  { font-size:28px; color:#fff; font-family:'Courier New',monospace; }
     #radial-val { font-size:18px; font-family:'Courier New',monospace; color:#5a8acc; margin-left:10px; }
 
@@ -89,8 +89,8 @@
       font-size:30px; font-family:'Courier New',monospace;
       letter-spacing:3px; flex-shrink:0;
     }
-    #obs-display { color:#f0c040; }
-    #hdg-display { color:#e040fb; }
+    #obs-display { color:#f0c040; font-weight:700; }
+    #hdg-display { color:#00e5ff; font-weight:700; }
 
     .ctrl-btns {
       display:flex; gap:6px; width:100%;
@@ -296,11 +296,6 @@
     <text id="hdg-text" x="150" y="43" text-anchor="middle"
           font-size="12" font-family="'Courier New',monospace" fill="#777">N↑</text>
 
-    <!-- HDG bug readout (abajo izquierda, fijo) -->
-    <rect x="4" y="250" width="76" height="22" rx="4" fill="#0c0018" stroke="#380050" stroke-width="1"/>
-    <text id="hdg-bug-svg" x="42" y="265" text-anchor="middle"
-          font-size="12" font-family="'Courier New',monospace"
-          fill="#e040fb" letter-spacing="1">HDG 000°</text>
 
   </svg>
 
@@ -557,9 +552,7 @@ function changeOBS(delta) {
 
 function changeHDG(delta) {
   S.hdgBug = norm360(S.hdgBug + delta);
-  const str = pad3(S.hdgBug)+'°';
-  $('hdg-display').textContent  = str;
-  $('hdg-bug-svg').textContent  = 'HDG '+str;
+  $('hdg-display').textContent = pad3(S.hdgBug)+'°';
   update();
 }
 
@@ -665,9 +658,23 @@ const svgEl = tag => document.createElementNS('http://www.w3.org/2000/svg', tag)
 const pad3  = n   => String(n).padStart(3,'0');
 
 // ═══════════════════════════════════════════════════════════
+//  WAKE LOCK — mantiene la pantalla activa
+// ═══════════════════════════════════════════════════════════
+let wakeLock = null;
+async function requestWakeLock() {
+  if ('wakeLock' in navigator) {
+    try { wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {}
+  }
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') requestWakeLock();
+});
+
+// ═══════════════════════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════════════════════
 drawCompassRose();
+requestWakeLock();
 </script>
 </body>
 </html>
