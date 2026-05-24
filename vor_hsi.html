@@ -56,14 +56,14 @@
       font-family:'Courier New',monospace;
       color:#5a8acc;
       letter-spacing:3px;
-      margin:2px 0 2px;
+      margin:0;
       font-weight:700;
     }
 
     /* ──── DME ROW ──── */
     .dme-row {
       display:flex; align-items:baseline;
-      gap:8px; margin-top:6px;
+      gap:8px; margin-top:2px;
     }
     .dme-tag { font-size:24px; color:#fff; font-family:'Courier New',monospace; letter-spacing:1px; }
     #dme-val { font-size:36px; font-family:'Courier New',monospace; color:#f0c040; min-width:76px; text-align:right; }
@@ -72,11 +72,12 @@
 
     /* ──── OBS + HDG CONTROLS ──── */
     .ctrl-section {
-      width:100%; padding:6px 12px 0;
-      display:flex; flex-direction:column; gap:6px;
+      width:100%; padding:4px 10px 0;
+      display:flex; flex-direction:column; gap:4px;
     }
-    .ctrl-row {
-      display:flex; align-items:center; gap:8px;
+    .ctrl-header-row {
+      display:flex; align-items:center; gap:12px;
+      padding:2px 0;
     }
     .ctrl-tag {
       font-size:22px; color:#fff;
@@ -85,25 +86,25 @@
       flex-shrink:0;
     }
     .ctrl-val {
-      font-size:28px; font-family:'Courier New',monospace;
-      letter-spacing:3px; width:85px; text-align:center;
-      flex-shrink:0;
+      font-size:30px; font-family:'Courier New',monospace;
+      letter-spacing:3px; flex-shrink:0;
     }
     #obs-display { color:#f0c040; }
     #hdg-display { color:#e040fb; }
 
     .ctrl-btns {
-      display:flex; gap:5px; flex:1;
+      display:flex; gap:6px; width:100%;
     }
     .ctrl-btn {
-      flex:1; padding:10px 0;
+      flex:1; padding:13px 0;
       background:#171920; border:1px solid #22242c;
-      color:#888; border-radius:9px;
-      font-size:12px; font-family:'Courier New',monospace;
+      color:#bbb; border-radius:10px;
+      font-size:20px; font-family:'Courier New',monospace;
       cursor:pointer; text-align:center;
       user-select:none; -webkit-user-select:none;
     }
     .ctrl-btn:active { background:#1e2028; }
+    .ctrl-divider { height:6px; }
 
     /* ──── GPS COORDS ──── */
     .gps-coords-small {
@@ -204,7 +205,7 @@
   <div class="vor-badge" id="vor-badge">PAR — 116.8 MHz</div>
 
   <!-- ═══ HSI SVG ═══ -->
-  <svg id="hsi" width="300" height="300" viewBox="0 0 300 300">
+  <svg id="hsi" width="100%" viewBox="0 0 300 300" style="display:block">
     <defs>
       <clipPath id="clip">
         <circle cx="150" cy="150" r="141"/>
@@ -314,29 +315,31 @@
   <!-- OBS + HDG bug controls -->
   <div class="ctrl-section">
 
-    <!-- OBS row -->
-    <div class="ctrl-row">
+    <!-- OBS -->
+    <div class="ctrl-header-row">
       <span class="ctrl-tag">OBS</span>
       <span id="obs-display" class="ctrl-val">000°</span>
-      <div class="ctrl-btns">
-        <div class="ctrl-btn" onclick="changeOBS(-10)">◀◀</div>
-        <div class="ctrl-btn" onclick="changeOBS(-1)">◀</div>
-        <div class="ctrl-btn" onclick="changeOBS(+1)">▶</div>
-        <div class="ctrl-btn" onclick="changeOBS(+10)">▶▶</div>
-        <div class="ctrl-btn" onclick="changeOBS(180)">+180</div>
-      </div>
+    </div>
+    <div class="ctrl-btns">
+      <div class="ctrl-btn" onclick="changeOBS(-10)">◀◀</div>
+      <div class="ctrl-btn" onclick="changeOBS(-1)">◀</div>
+      <div class="ctrl-btn" onclick="changeOBS(+1)">▶</div>
+      <div class="ctrl-btn" onclick="changeOBS(+10)">▶▶</div>
+      <div class="ctrl-btn" onclick="changeOBS(180)">+180</div>
     </div>
 
-    <!-- HDG bug row -->
-    <div class="ctrl-row">
+    <div class="ctrl-divider"></div>
+
+    <!-- HDG -->
+    <div class="ctrl-header-row">
       <span class="ctrl-tag">HDG</span>
       <span id="hdg-display" class="ctrl-val">000°</span>
-      <div class="ctrl-btns">
-        <div class="ctrl-btn" onclick="changeHDG(-10)">◀◀</div>
-        <div class="ctrl-btn" onclick="changeHDG(-1)">◀</div>
-        <div class="ctrl-btn" onclick="changeHDG(+1)">▶</div>
-        <div class="ctrl-btn" onclick="changeHDG(+10)">▶▶</div>
-      </div>
+    </div>
+    <div class="ctrl-btns">
+      <div class="ctrl-btn" onclick="changeHDG(-10)">◀◀</div>
+      <div class="ctrl-btn" onclick="changeHDG(-1)">◀</div>
+      <div class="ctrl-btn" onclick="changeHDG(+1)">▶</div>
+      <div class="ctrl-btn" onclick="changeHDG(+10)">▶▶</div>
     </div>
 
   </div>
