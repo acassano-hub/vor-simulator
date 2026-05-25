@@ -66,9 +66,17 @@
       gap:8px; margin-top:2px;
     }
     .dme-tag { font-size:29px; color:#fff; font-family:'Courier New',monospace; letter-spacing:1px; }
-    #dme-val { font-size:43px; font-family:'Courier New',monospace; color:#ff4444; font-weight:700; min-width:90px; text-align:right; }
+    #dme-val { font-size:43px; font-family:'Courier New',monospace; color:#ff5555; font-weight:700; min-width:90px; text-align:right; }
     .dme-nm  { font-size:34px; color:#fff; font-family:'Courier New',monospace; }
-    #radial-val { font-size:18px; font-family:'Courier New',monospace; color:#5a8acc; margin-left:10px; }
+
+    /* ── Radial: blanco bold, 3× original (18px → 54px) ── */
+    #radial-val {
+      font-size:54px;
+      font-family:'Courier New',monospace;
+      color:#ffffff;
+      font-weight:700;
+      margin-left:10px;
+    }
 
     /* ──── OBS + HDG CONTROLS ──── */
     .ctrl-section {
@@ -89,13 +97,14 @@
       font-size:36px; font-family:'Courier New',monospace;
       letter-spacing:3px; flex-shrink:0;
     }
-    #obs-display { color:#f0c040; font-weight:700; }
+    /* OBS: 1.5× (36px → 54px) */
+    #obs-display { color:#f0c040; font-weight:700; font-size:54px; }
     #hdg-display { color:#00e5ff; font-weight:700; }
     #tofrom-text {
       font-size:26px; font-weight:700;
       font-family:'Courier New',monospace;
       color:#333; letter-spacing:1px;
-      margin-left:10px; flex-shrink:0;
+      margin-left:28px; flex-shrink:0;
     }
 
     .ctrl-btns {
@@ -110,6 +119,35 @@
       user-select:none; -webkit-user-select:none;
     }
     .ctrl-btn:active { background:#1e2028; }
+
+    /* Triángulos ◀◀ ◀ ▶ ▶▶: 32px, centrado */
+    .ctrl-btn-arrow {
+      font-size:32px;
+      padding:5px 0;
+      line-height:1;
+      display:flex; align-items:center; justify-content:center;
+    }
+    /* 1° — blandos: relleno suave */
+    .ctrl-btn-arrow-1 {
+      color:#aaa;
+    }
+    /* 10° — sin relleno: contorno */
+    .ctrl-btn-arrow-10 {
+      color:transparent;
+      -webkit-text-stroke:1.5px #ccc;
+    }
+
+    /* Botón +180: blanco, texto negro bold, 1.5× (20px → 30px) */
+    .ctrl-btn-180 {
+      background:#ffffff;
+      color:#000000;
+      font-weight:700;
+      font-size:30px;
+      border-color:#ffffff;
+      padding:8px 0;
+    }
+    .ctrl-btn-180:active { background:#e0e0e0; }
+
     .ctrl-divider { height:6px; }
 
     /* ──── GPS COORDS ──── */
@@ -124,23 +162,31 @@
       width:100%; display:flex; align-items:center; gap:10px;
       padding:10px 14px; border-bottom:1px solid #18191f;
     }
+
+    /* Volver: 2.5× (15px → 38px) */
     .btn-back {
       background:none; border:none; color:#5a8acc;
-      font-size:15px; cursor:pointer;
+      font-size:38px; cursor:pointer;
       padding:6px 10px 6px 0;
       display:flex; align-items:center; gap:5px;
       letter-spacing:.5px;
     }
+
+    /* Settings title: 2× (14px → 28px) */
     .settings-title {
-      font-size:14px; color:#777; letter-spacing:2px;
+      font-size:28px; color:#777; letter-spacing:2px;
       font-family:'Courier New',monospace;
     }
+
     .settings-body {
       width:100%; padding:14px;
       display:flex; flex-direction:column; gap:18px;
+      overflow-y:auto; -webkit-overflow-scrolling:touch;
     }
+
+    /* s-label: 2× (10px → 20px) */
     .s-label {
-      font-size:10px; color:#444; letter-spacing:2px;
+      font-size:20px; color:#888; letter-spacing:2px;
       text-transform:uppercase; margin-bottom:8px;
       font-family:'Courier New',monospace;
     }
@@ -160,40 +206,56 @@
     }
     .vor-card.active .vor-card-dot { background:#3ac060; }
     .vor-card-main { flex:1; }
+
+    /* vor-card-id: 2× (20px → 40px) */
     .vor-card-id {
-      font-size:20px; font-weight:700;
+      font-size:40px; font-weight:700;
       font-family:'Courier New',monospace;
       color:#cdd0d8; letter-spacing:2px;
     }
     .vor-card.active .vor-card-id { color:#7eb8f7; }
-    .vor-card-name { font-size:12px; color:#555; margin-top:1px; }
-    .vor-card-right { text-align:right; }
-    .vor-card-freq { font-size:15px; font-family:'Courier New',monospace; color:#888; }
-    .vor-card-coords { font-size:10px; color:#383c44; font-family:'Courier New',monospace; margin-top:2px; }
 
-    /* Mag var */
+    /* vor-card-name: 2× (12px → 24px) */
+    .vor-card-name { font-size:24px; color:#888; margin-top:1px; }
+
+    .vor-card-right { text-align:right; }
+
+    /* vor-card-freq: 2× (15px → 30px) */
+    .vor-card-freq { font-size:30px; font-family:'Courier New',monospace; color:#aaa; }
+
+    /* vor-card-coords: 2× (10px → 20px) */
+    .vor-card-coords { font-size:20px; color:#555; font-family:'Courier New',monospace; margin-top:2px; }
+
+    /* Mag var — 2.5× */
     .magvar-row {
       display:flex; align-items:center; justify-content:space-between;
       padding:14px 16px; background:#141618;
       border:1px solid #202228; border-radius:12px;
+      gap:10px;
     }
-    .magvar-label { font-size:13px; color:#888; }
+    /* magvar-label reducido */
+    .magvar-label { font-size:28px; color:#ccc; white-space:nowrap; }
+    /* magvar-input: ancho para 2 cifras + 2 decimales */
     #magvar-input {
-      width:90px; background:#0c0e12; border:1px solid #2d3038;
+      width:210px; background:#0c0e12; border:1px solid #2d3038;
       color:#f0c040; padding:8px 10px; border-radius:8px;
-      font-size:17px; font-family:'Courier New',monospace; text-align:center;
+      font-size:42px; font-family:'Courier New',monospace; text-align:center;
     }
 
     /* GPS */
     .gps-section { display:flex; flex-direction:column; gap:8px; }
+
+    /* gps-btn-settings: 2× (14px → 28px) */
     #gps-btn-settings {
       padding:13px; background:#0d2a14; border:1px solid #1a4a22;
-      color:#4fd870; border-radius:10px; font-size:14px;
+      color:#4fd870; border-radius:10px; font-size:28px;
       cursor:pointer; text-align:center; letter-spacing:.5px;
     }
     #gps-btn-settings.on { background:#081a0c; border-color:#2a7a36; color:#38c057; }
+
+    /* gps-coords-settings: 2× (11px → 22px) */
     #gps-coords-settings {
-      font-size:11px; color:#383c44;
+      font-size:22px; color:#555;
       font-family:'Courier New',monospace; text-align:center;
     }
   </style>
@@ -228,60 +290,46 @@
 
       <!-- ② Heading bug (cyan, rota independiente) — forma herradura clásica (Π) -->
       <g id="g-hdg-bug">
-        <!-- Barra superior + dos patas: abre hacia el centro del HSI -->
         <path d="M 140,11 L 160,11 L 160,36 L 154,36 L 154,17 L 146,17 L 146,36 L 140,36 Z"
               fill="#00e5ff" opacity="0.92"/>
       </g>
 
       <!-- ③ RMI — aguja doble barra verde (apunta al VOR) -->
       <g id="g-rmi">
-        <!-- Cabeza: diamante sólido -->
         <polygon points="150,50 142,72 150,82 158,72" fill="#28d858"/>
-        <!-- Doble barra superior (cabeza → centro) -->
         <line x1="143" y1="71" x2="143" y2="150" stroke="#28d858" stroke-width="2.5"/>
         <line x1="157" y1="71" x2="157" y2="150" stroke="#28d858" stroke-width="2.5"/>
-        <!-- Barra transversal en el centro -->
         <line x1="140" y1="150" x2="160" y2="150" stroke="#28d858" stroke-width="2"/>
-        <!-- Doble barra inferior (cola) -->
         <line x1="143" y1="150" x2="143" y2="208" stroke="#28d858" stroke-width="2" opacity="0.5"/>
         <line x1="157" y1="150" x2="157" y2="208" stroke="#28d858" stroke-width="2" opacity="0.5"/>
-        <!-- Remate de cola -->
         <line x1="140" y1="204" x2="160" y2="204" stroke="#28d858" stroke-width="2" opacity="0.5"/>
       </g>
 
       <!-- ④ Course bar + CDI (rota con obs−magHeading) -->
       <g id="g-course">
-
-        <!-- Eje de referencia tenue (full height, detrás de todo) -->
         <line x1="150" y1="62" x2="150" y2="238"
               stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
-
-        <!-- Puntos de escala CDI (perpendiculares al bar, en el gap) -->
-        <circle cx="110" cy="150" r="3.5" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
-        <circle cx="130" cy="150" r="3.5" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
-        <circle cx="170" cy="150" r="3.5" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
-        <circle cx="190" cy="150" r="3.5" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
-
-        <!-- AGUJA CDI (amarilla) — solo ocupa el gap central, se desplaza en X -->
+        <!-- Ticks CDI: 5 por lado, cada 2° (±2°…±10°), 1°=5.5px -->
+        <line x1="95"  y1="143" x2="95"  y2="157" stroke="#ffffff" stroke-width="1.5"/>
+        <line x1="106" y1="143" x2="106" y2="157" stroke="#ffffff" stroke-width="1.5"/>
+        <line x1="117" y1="143" x2="117" y2="157" stroke="#ffffff" stroke-width="1.5"/>
+        <line x1="128" y1="143" x2="128" y2="157" stroke="#ffffff" stroke-width="1.5"/>
+        <line x1="139" y1="143" x2="139" y2="157" stroke="#ffffff" stroke-width="1.5"/>
+        <line x1="161" y1="143" x2="161" y2="157" stroke="#ffffff" stroke-width="1.5"/>
+        <line x1="172" y1="143" x2="172" y2="157" stroke="#ffffff" stroke-width="1.5"/>
+        <line x1="183" y1="143" x2="183" y2="157" stroke="#ffffff" stroke-width="1.5"/>
+        <line x1="194" y1="143" x2="194" y2="157" stroke="#ffffff" stroke-width="1.5"/>
+        <line x1="205" y1="143" x2="205" y2="157" stroke="#ffffff" stroke-width="1.5"/>
         <line id="cdi-needle" x1="150" y1="122" x2="150" y2="178"
               stroke="#f0c040" stroke-width="5.5" stroke-linecap="round"/>
-
-        <!-- COURSE BAR SUPERIOR — flecha + shaft, se detiene antes del gap -->
         <polygon points="150,62 143,84 157,84" fill="#f0c040"/>
         <line x1="150" y1="84" x2="150" y2="122" stroke="#f0c040" stroke-width="3"/>
-
-        <!-- COURSE BAR INFERIOR — shaft + cola, empieza después del gap -->
         <line x1="150" y1="178" x2="150" y2="228" stroke="#f0c040" stroke-width="3"/>
         <line x1="141" y1="224" x2="159" y2="224" stroke="#f0c040" stroke-width="2.5"/>
-
       </g>
 
-      <!-- ⑤ Símbolo de avión (fijo, siempre encima) -->
-      <g>
-        <circle cx="150" cy="150" r="5.5" fill="#dde0ea"/>
-        <line x1="130" y1="150" x2="170" y2="150" stroke="#dde0ea" stroke-width="3"/>
-        <line x1="138" y1="159" x2="162" y2="159" stroke="#dde0ea" stroke-width="2"/>
-      </g>
+      <!-- ⑤ Símbolo de avión (fijo) — solo círculo central -->
+      <circle cx="150" cy="150" r="5.5" fill="#dde0ea"/>
 
       <!-- ⑥ Lubber line (fija, nariz = arriba) -->
       <rect x="145" y="10" width="10" height="22" rx="2.5" fill="#dde0ea"/>
@@ -295,7 +343,6 @@
     <!-- Track magnético (arriba, fijo) -->
     <text id="hdg-text" x="150" y="43" text-anchor="middle"
           font-size="12" font-family="'Courier New',monospace" fill="#777">N↑</text>
-
 
   </svg>
 
@@ -317,11 +364,11 @@
       <span id="tofrom-text">---</span>
     </div>
     <div class="ctrl-btns">
-      <div class="ctrl-btn" onclick="changeOBS(-10)">◀◀</div>
-      <div class="ctrl-btn" onclick="changeOBS(-1)">◀</div>
-      <div class="ctrl-btn" onclick="changeOBS(+1)">▶</div>
-      <div class="ctrl-btn" onclick="changeOBS(+10)">▶▶</div>
-      <div class="ctrl-btn" onclick="changeOBS(180)">+180</div>
+      <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeOBS(-10)">◀◀</div>
+      <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeOBS(-1)">◀</div>
+      <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeOBS(+1)">▶</div>
+      <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeOBS(+10)">▶▶</div>
+      <div class="ctrl-btn ctrl-btn-180" onclick="changeOBS(180)">+180</div>
     </div>
 
     <div class="ctrl-divider"></div>
@@ -332,10 +379,10 @@
       <span id="hdg-display" class="ctrl-val">000°</span>
     </div>
     <div class="ctrl-btns">
-      <div class="ctrl-btn" onclick="changeHDG(-10)">◀◀</div>
-      <div class="ctrl-btn" onclick="changeHDG(-1)">◀</div>
-      <div class="ctrl-btn" onclick="changeHDG(+1)">▶</div>
-      <div class="ctrl-btn" onclick="changeHDG(+10)">▶▶</div>
+      <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeHDG(-10)">◀◀</div>
+      <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeHDG(-1)">◀</div>
+      <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeHDG(+1)">▶</div>
+      <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeHDG(+10)">▶▶</div>
     </div>
 
   </div>
@@ -363,7 +410,7 @@
     <div>
       <div class="s-label">Declinación magnética</div>
       <div class="magvar-row">
-        <span class="magvar-label">Variación (O = negativo)</span>
+        <span class="magvar-label">W = (-)</span>
         <input type="number" id="magvar-input" class="magvar-input"
                value="-7.5" step="0.05"
                onchange="S.magVar = parseFloat(this.value)||S.magVar; localStorage.setItem('magVar', S.magVar); update()">
@@ -395,14 +442,14 @@ const VORS = {
 // ═══════════════════════════════════════════════════════════
 const S = {
   acLat:null, acLon:null,
-  gpsTrack:null,   // true track del GPS (null si quieto)
-  gpsSpeed:0,      // m/s
+  gpsTrack:null,
+  gpsSpeed:0,
   gpsAcc:null,
   gpsActive:false, watchId:null,
   selectedVOR:'PAR',
-  obs:0,           // OBS seleccionado (°)
-  hdgBug:0,        // Heading bug (°)
-  magVar: parseFloat(localStorage.getItem('magVar') ?? '-7.5') || -7.5  // Declinación (negativo = variación oeste)
+  obs:0,
+  hdgBug:0,
+  magVar: parseFloat(localStorage.getItem('magVar') ?? '-7.5') || -7.5
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -413,7 +460,6 @@ const toDeg   = r => r * 180 / Math.PI;
 const norm360  = d => ((d % 360) + 360) % 360;
 const normPM180 = d => { d = norm360(d); return d > 180 ? d - 360 : d; };
 
-// Rumbo verdadero (lat1,lon1) → (lat2,lon2)
 function bearing(la1, lo1, la2, lo2) {
   const φ1=toRad(la1), φ2=toRad(la2), Δλ=toRad(lo2-lo1);
   return norm360(toDeg(Math.atan2(
@@ -422,7 +468,6 @@ function bearing(la1, lo1, la2, lo2) {
   )));
 }
 
-// Distancia en millas náuticas
 function distNm(la1, lo1, la2, lo2) {
   const R=3440.065;
   const φ1=toRad(la1), φ2=toRad(la2);
@@ -431,11 +476,6 @@ function distNm(la1, lo1, la2, lo2) {
   return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
 
-// CDI: flag (TO/FROM/OFF) y fracción de aguja (-1…+1)
-//  brgToVOR = mag bearing del avión al VOR
-//  toDev    = normPM180(brgToVOR − OBS)
-//  |toDev| < 87° → TO,   needle = +toDev/10
-//  |toDev| > 93° → FROM, needle = −fromDev/10
 function calcCDI(magRadial, obs) {
   const brgToVOR = norm360(magRadial + 180);
   const toDev    = normPM180(brgToVOR - obs);
@@ -448,54 +488,45 @@ function calcCDI(magRadial, obs) {
 const clamp = v => Math.max(-1, Math.min(1, v));
 
 // ═══════════════════════════════════════════════════════════
-//  UPDATE — refresca el SVG completo
+//  UPDATE
 // ═══════════════════════════════════════════════════════════
 function update() {
   const vor    = VORS[S.selectedVOR];
   const magVar = S.magVar;
 
-  // Heading magnético desde track GPS (True − magVar)
   const useTrack   = S.acLat !== null && S.gpsTrack !== null && S.gpsSpeed > 0.5;
   const magHeading = useTrack ? norm360(S.gpsTrack - magVar) : 0;
 
-  // ── Rotaciones SVG (funcionan con o sin GPS) ──
   $('g-compass').setAttribute('transform', `rotate(${-magHeading},150,150)`);
   $('g-course') .setAttribute('transform', `rotate(${norm360(S.obs-magHeading)},150,150)`);
   $('g-hdg-bug').setAttribute('transform', `rotate(${norm360(S.hdgBug-magHeading)},150,150)`);
 
-  // Track display
   $('hdg-text').textContent = useTrack ? pad3(Math.round(magHeading))+'°' : 'N↑';
 
-  // Sin posición: solo actualizamos rotaciones
   if (S.acLat === null) return;
 
-  // ── Cálculos de posición ──
   const trueRadial = bearing(vor.lat, vor.lon, S.acLat, S.acLon);
   const magRadial  = norm360(trueRadial - magVar);
   const brgToVOR   = norm360(magRadial + 180);
   const dist       = distNm(S.acLat, S.acLon, vor.lat, vor.lon);
 
-  // CDI needle (se desplaza en X dentro del gap del course bar)
   const { flag, frac } = calcCDI(magRadial, S.obs);
-  const nx = 150 + frac * 55;  // ±55px = full scale (10°)
+  const nx = 150 + frac * 55;
   $('cdi-needle').setAttribute('x1', nx);
   $('cdi-needle').setAttribute('x2', nx);
 
-  // TO/FROM
   const tf = $('tofrom-text');
   tf.textContent = (flag === 'OFF') ? '---' : flag;
   tf.style.color = (flag==='TO'||flag==='FROM') ? '#f0c040' : '#333';
 
-  // RMI
   $('g-rmi').setAttribute('transform', `rotate(${norm360(brgToVOR-magHeading)},150,150)`);
 
-  // DME + Radial
   $('dme-val')    .textContent = dist.toFixed(1);
   $('radial-val') .textContent = 'R ' + pad3(Math.round(magRadial)) + '°';
 }
 
 // ═══════════════════════════════════════════════════════════
-//  COMPASS ROSE (dibujada una sola vez)
+//  COMPASS ROSE
 // ═══════════════════════════════════════════════════════════
 function drawCompassRose() {
   const g = $('g-compass');
@@ -586,7 +617,6 @@ function renderVORCards() {
       </div>
       <div class="vor-card-right">
         <div class="vor-card-freq">${v.freq} MHz</div>
-        <div class="vor-card-coords">${v.lat.toFixed(4)}°  ${v.lon.toFixed(4)}°</div>
       </div>`;
     card.onclick = () => {
       S.selectedVOR = id;
@@ -614,7 +644,7 @@ function startGPS() {
       S.acLat    = pos.coords.latitude;
       S.acLon    = pos.coords.longitude;
       S.gpsSpeed = pos.coords.speed   || 0;
-      S.gpsTrack = pos.coords.heading;     // true track, null si quieto
+      S.gpsTrack = pos.coords.heading;
       S.gpsAcc   = pos.coords.accuracy;
       S.gpsActive = true;
 
@@ -659,7 +689,7 @@ const svgEl = tag => document.createElementNS('http://www.w3.org/2000/svg', tag)
 const pad3  = n   => String(n).padStart(3,'0');
 
 // ═══════════════════════════════════════════════════════════
-//  WAKE LOCK — mantiene la pantalla activa
+//  WAKE LOCK
 // ═══════════════════════════════════════════════════════════
 let wakeLock = null;
 
@@ -668,21 +698,17 @@ async function requestWakeLock() {
   try {
     wakeLock = await navigator.wakeLock.request('screen');
     wakeLock.addEventListener('release', () => {
-      // Si se libera inesperadamente, reintenta al segundo
       setTimeout(requestWakeLock, 1000);
     });
   } catch(e) {}
 }
 
-// iOS requiere gesto del usuario para activarlo
 document.addEventListener('touchstart', requestWakeLock, { once: true });
 
-// Re-adquirir cuando la app vuelve al foco
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') requestWakeLock();
 });
 
-// Reintentar cada 30s como seguro adicional
 setInterval(() => {
   if (!wakeLock || wakeLock.released) requestWakeLock();
 }, 30000);
@@ -691,7 +717,6 @@ setInterval(() => {
 //  INIT
 // ═══════════════════════════════════════════════════════════
 drawCompassRose();
-// Restaurar valor de declinación guardado en el input
 $('magvar-input').value = S.magVar;
 requestWakeLock();
 </script>
