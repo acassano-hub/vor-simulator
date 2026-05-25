@@ -220,10 +220,11 @@
       <!-- ① Rosa de compass (rota con -magHeading) -->
       <g id="g-compass"></g>
 
-      <!-- ② Heading bug (magenta, rota independiente) -->
+      <!-- ② Heading bug (cyan, rota independiente) — forma herradura clásica (Π) -->
       <g id="g-hdg-bug">
-        <!-- Triángulo apuntando al centro desde el borde de la rosa -->
-        <polygon points="150,14 143,38 157,38" fill="#00e5ff" opacity="0.95"/>
+        <!-- Barra superior + dos patas: abre hacia el centro del HSI -->
+        <path d="M 140,11 L 160,11 L 160,36 L 154,36 L 154,17 L 146,17 L 146,36 L 140,36 Z"
+              fill="#00e5ff" opacity="0.92"/>
       </g>
 
       <!-- ③ RMI — aguja doble barra verde (apunta al VOR) -->
@@ -365,7 +366,7 @@
         <span class="magvar-label">Variación (O = negativo)</span>
         <input type="number" id="magvar-input" class="magvar-input"
                value="-7.5" step="0.05"
-               onchange="S.magVar = parseFloat(this.value)||S.magVar; update()">
+               onchange="S.magVar = parseFloat(this.value)||S.magVar; localStorage.setItem('magVar', S.magVar); update()">
       </div>
     </div>
 
@@ -401,7 +402,7 @@ const S = {
   selectedVOR:'PAR',
   obs:0,           // OBS seleccionado (°)
   hdgBug:0,        // Heading bug (°)
-  magVar:-7.5      // Declinación (negativo = variación oeste)
+  magVar: parseFloat(localStorage.getItem('magVar') ?? '-7.5') || -7.5  // Declinación (negativo = variación oeste)
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -690,6 +691,8 @@ setInterval(() => {
 //  INIT
 // ═══════════════════════════════════════════════════════════
 drawCompassRose();
+// Restaurar valor de declinación guardado en el input
+$('magvar-input').value = S.magVar;
 requestWakeLock();
 </script>
 </body>
