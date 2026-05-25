@@ -223,7 +223,7 @@
       <!-- ② Heading bug (magenta, rota independiente) -->
       <g id="g-hdg-bug">
         <!-- Triángulo apuntando al centro desde el borde de la rosa -->
-        <polygon points="150,14 143,38 157,38" fill="#e040fb" opacity="0.95"/>
+        <polygon points="150,14 143,38 157,38" fill="#00e5ff" opacity="0.95"/>
       </g>
 
       <!-- ③ RMI — aguja doble barra verde (apunta al VOR) -->
@@ -255,17 +255,17 @@
         <circle cx="170" cy="150" r="3.5" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
         <circle cx="190" cy="150" r="3.5" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
 
-        <!-- AGUJA CDI (magenta) — solo ocupa el gap central, se desplaza en X -->
+        <!-- AGUJA CDI (amarilla) — solo ocupa el gap central, se desplaza en X -->
         <line id="cdi-needle" x1="150" y1="122" x2="150" y2="178"
-              stroke="#e040fb" stroke-width="5.5" stroke-linecap="round"/>
+              stroke="#f0c040" stroke-width="5.5" stroke-linecap="round"/>
 
         <!-- COURSE BAR SUPERIOR — flecha + shaft, se detiene antes del gap -->
-        <polygon points="150,62 143,84 157,84" fill="white"/>
-        <line x1="150" y1="84" x2="150" y2="122" stroke="white" stroke-width="3"/>
+        <polygon points="150,62 143,84 157,84" fill="#f0c040"/>
+        <line x1="150" y1="84" x2="150" y2="122" stroke="#f0c040" stroke-width="3"/>
 
         <!-- COURSE BAR INFERIOR — shaft + cola, empieza después del gap -->
-        <line x1="150" y1="178" x2="150" y2="228" stroke="white" stroke-width="3"/>
-        <line x1="141" y1="224" x2="159" y2="224" stroke="white" stroke-width="2.5"/>
+        <line x1="150" y1="178" x2="150" y2="228" stroke="#f0c040" stroke-width="3"/>
+        <line x1="141" y1="224" x2="159" y2="224" stroke="#f0c040" stroke-width="2.5"/>
 
       </g>
 
@@ -661,14 +661,30 @@ const pad3  = n   => String(n).padStart(3,'0');
 //  WAKE LOCK — mantiene la pantalla activa
 // ═══════════════════════════════════════════════════════════
 let wakeLock = null;
+
 async function requestWakeLock() {
-  if ('wakeLock' in navigator) {
-    try { wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {}
-  }
+  if (!('wakeLock' in navigator)) return;
+  try {
+    wakeLock = await navigator.wakeLock.request('screen');
+    wakeLock.addEventListener('release', () => {
+      // Si se libera inesperadamente, reintenta al segundo
+      setTimeout(requestWakeLock, 1000);
+    });
+  } catch(e) {}
 }
+
+// iOS requiere gesto del usuario para activarlo
+document.addEventListener('touchstart', requestWakeLock, { once: true });
+
+// Re-adquirir cuando la app vuelve al foco
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') requestWakeLock();
 });
+
+// Reintentar cada 30s como seguro adicional
+setInterval(() => {
+  if (!wakeLock || wakeLock.released) requestWakeLock();
+}, 30000);
 
 // ═══════════════════════════════════════════════════════════
 //  INIT
