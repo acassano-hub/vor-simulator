@@ -714,6 +714,32 @@ setInterval(() => {
 }, 30000);
 
 // ═══════════════════════════════════════════════════════════
+//  AUTO-UPDATE — detecta nueva versión en GitHub Pages
+// ═══════════════════════════════════════════════════════════
+let _lastEtag = null;
+
+async function checkForUpdate() {
+  if (!navigator.onLine) return;
+  try {
+    const r = await fetch(location.href, { method:'HEAD', cache:'no-store' });
+    const tag = r.headers.get('etag') || r.headers.get('last-modified');
+    if (!tag) return;
+    if (_lastEtag && tag !== _lastEtag) {
+      location.reload(true);   // nueva versión detectada → recarga desde red
+      return;
+    }
+    _lastEtag = tag;
+  } catch(e) {}
+}
+
+// Al volver al foco y cada 60s
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') checkForUpdate();
+});
+setInterval(checkForUpdate, 60000);
+checkForUpdate();  // primera vez al cargar
+
+// ═══════════════════════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════════════════════
 drawCompassRose();
