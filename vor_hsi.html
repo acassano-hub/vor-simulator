@@ -71,7 +71,7 @@
 
     /* ── Radial: blanco bold, 3× original (18px → 54px) ── */
     #radial-val {
-      font-size:54px;
+      font-size:38px;
       font-family:'Courier New',monospace;
       color:#ffffff;
       font-weight:700;
@@ -543,7 +543,7 @@ function drawCompassRose() {
     const isMed = deg%10===0 && !isMaj;
     const tLen  = isMaj ? 15 : isMed ? 10 : 5;
     const color = isMaj ? '#c0c4cc' : isMed ? '#e8ecf4' : '#282c34';
-    const sw    = isMaj ? 1.5 : 1;
+    const sw    = isMaj ? 3 : 1;
 
     const rad = toRad(deg-90);
     const x1=CX+R*Math.cos(rad),      y1=CY+R*Math.sin(rad);
