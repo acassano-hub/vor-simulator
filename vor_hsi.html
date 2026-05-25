@@ -510,7 +510,8 @@ function update() {
   const brgToVOR   = norm360(magRadial + 180);
   const dist       = distNm(S.acLat, S.acLon, vor.lat, vor.lon);
 
-  const { flag, frac } = calcCDI(magRadial, S.obs);
+  const magRadialRnd = Math.round(magRadial);   // mismo redondeo que el display
+  const { flag, frac } = calcCDI(magRadialRnd, S.obs);
   const nx = 150 + frac * 55;
   $('cdi-needle').setAttribute('x1', nx);
   $('cdi-needle').setAttribute('x2', nx);
