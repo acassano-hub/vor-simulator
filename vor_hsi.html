@@ -52,9 +52,9 @@
 
     /* ──── VOR BADGE ──── */
     .vor-badge {
-      font-size:18px;
+      font-size:27px;
       font-family:'Courier New',monospace;
-      color:#5a8acc;
+      color:#28d858;
       letter-spacing:3px;
       margin:0;
       font-weight:700;
@@ -65,9 +65,9 @@
       display:flex; align-items:baseline;
       gap:8px; margin-top:2px;
     }
-    .dme-tag { font-size:24px; color:#fff; font-family:'Courier New',monospace; letter-spacing:1px; }
-    #dme-val { font-size:36px; font-family:'Courier New',monospace; color:#ff4444; font-weight:700; min-width:76px; text-align:right; }
-    .dme-nm  { font-size:28px; color:#fff; font-family:'Courier New',monospace; }
+    .dme-tag { font-size:29px; color:#fff; font-family:'Courier New',monospace; letter-spacing:1px; }
+    #dme-val { font-size:43px; font-family:'Courier New',monospace; color:#ff4444; font-weight:700; min-width:90px; text-align:right; }
+    .dme-nm  { font-size:34px; color:#fff; font-family:'Courier New',monospace; }
     #radial-val { font-size:18px; font-family:'Courier New',monospace; color:#5a8acc; margin-left:10px; }
 
     /* ──── OBS + HDG CONTROLS ──── */
@@ -80,17 +80,23 @@
       padding:2px 0;
     }
     .ctrl-tag {
-      font-size:22px; color:#fff;
+      font-size:26px; color:#fff;
       font-family:'Courier New',monospace;
-      letter-spacing:1px; width:54px; text-align:right;
+      letter-spacing:1px; width:64px; text-align:right;
       flex-shrink:0;
     }
     .ctrl-val {
-      font-size:30px; font-family:'Courier New',monospace;
+      font-size:36px; font-family:'Courier New',monospace;
       letter-spacing:3px; flex-shrink:0;
     }
     #obs-display { color:#f0c040; font-weight:700; }
     #hdg-display { color:#00e5ff; font-weight:700; }
+    #tofrom-text {
+      font-size:26px; font-weight:700;
+      font-family:'Courier New',monospace;
+      color:#333; letter-spacing:1px;
+      margin-left:10px; flex-shrink:0;
+    }
 
     .ctrl-btns {
       display:flex; gap:6px; width:100%;
@@ -286,13 +292,6 @@
     <circle cx="150" cy="150" r="149" fill="none" stroke="#1a1c22" stroke-width="5"/>
     <circle cx="150" cy="150" r="141" fill="none" stroke="#35383f" stroke-width="1"/>
 
-    <!-- TO/FROM (fijo, centrado, no rota) — posicionado BAJO el avión -->
-    <rect x="120" y="255" width="60" height="24" rx="5"
-          fill="#090a0d" stroke="#1e2028" stroke-width="1"/>
-    <text id="tofrom-text" x="150" y="272" text-anchor="middle"
-          font-size="13" font-weight="700" font-family="'Courier New',monospace"
-          fill="#333" letter-spacing="1">---</text>
-
     <!-- Track magnético (arriba, fijo) -->
     <text id="hdg-text" x="150" y="43" text-anchor="middle"
           font-size="12" font-family="'Courier New',monospace" fill="#777">N↑</text>
@@ -315,6 +314,7 @@
     <div class="ctrl-header-row">
       <span class="ctrl-tag">OBS</span>
       <span id="obs-display" class="ctrl-val">000°</span>
+      <span id="tofrom-text">---</span>
     </div>
     <div class="ctrl-btns">
       <div class="ctrl-btn" onclick="changeOBS(-10)">◀◀</div>
@@ -484,7 +484,7 @@ function update() {
   // TO/FROM
   const tf = $('tofrom-text');
   tf.textContent = (flag === 'OFF') ? '---' : flag;
-  tf.setAttribute('fill', (flag==='TO'||flag==='FROM') ? '#f0c040' : '#333');
+  tf.style.color = (flag==='TO'||flag==='FROM') ? '#f0c040' : '#333';
 
   // RMI
   $('g-rmi').setAttribute('transform', `rotate(${norm360(brgToVOR-magHeading)},150,150)`);
@@ -511,7 +511,7 @@ function drawCompassRose() {
     const isMaj = deg%30===0;
     const isMed = deg%10===0 && !isMaj;
     const tLen  = isMaj ? 15 : isMed ? 10 : 5;
-    const color = isMaj ? '#c0c4cc' : isMed ? '#454850' : '#282c34';
+    const color = isMaj ? '#c0c4cc' : isMed ? '#e8ecf4' : '#282c34';
     const sw    = isMaj ? 1.5 : 1;
 
     const rad = toRad(deg-90);
