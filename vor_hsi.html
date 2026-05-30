@@ -50,11 +50,11 @@
     }
     #gps-top.on { color:#3ac060; }
 
-    /* ──── VOR BADGE ──── */
+    /* ──── NAV AID BADGE ──── */
     .vor-badge {
       font-size:27px;
       font-family:'Courier New',monospace;
-      color:#28d858;
+      color:#e8ecf4;
       letter-spacing:3px;
       margin:0;
       font-weight:700;
@@ -69,7 +69,7 @@
     #dme-val { font-size:43px; font-family:'Courier New',monospace; color:#ff5555; font-weight:700; min-width:90px; text-align:right; }
     .dme-nm  { font-size:34px; color:#fff; font-family:'Courier New',monospace; }
 
-    /* ── Radial: blanco bold, 3× original (18px → 54px) ── */
+    /* ── Radial: blanco bold ── */
     #radial-val {
       font-size:38px;
       font-family:'Courier New',monospace;
@@ -81,8 +81,22 @@
     /* ──── OBS + HDG CONTROLS ──── */
     .ctrl-section {
       width:100%; padding:4px 10px 0;
+      display:flex; flex-direction:column; gap:6px;
+    }
+
+    /* Rectángulo contenedor por grupo */
+    .ctrl-group {
+      background:#111318;
+      border:1px solid #2a2d38;
+      border-radius:14px;
+      padding:8px 10px 8px;
       display:flex; flex-direction:column; gap:4px;
     }
+    .ctrl-group-obs {
+      border-color:#f0c040;
+      border-width:2px;
+    }
+
     .ctrl-header-row {
       display:flex; align-items:center; gap:12px;
       padding:2px 0;
@@ -97,7 +111,6 @@
       font-size:36px; font-family:'Courier New',monospace;
       letter-spacing:3px; flex-shrink:0;
     }
-    /* OBS: 1.5× (36px → 54px) */
     #obs-display { color:#f0c040; font-weight:700; font-size:54px; }
     #hdg-display { color:#00e5ff; font-weight:700; }
     #tofrom-text {
@@ -120,24 +133,17 @@
     }
     .ctrl-btn:active { background:#1e2028; }
 
-    /* Triángulos ◀◀ ◀ ▶ ▶▶: 32px, centrado */
+    /* Triángulos ◀◀ ◀ ▶ ▶▶: 32px */
     .ctrl-btn-arrow {
       font-size:32px;
       padding:5px 0;
       line-height:1;
       display:flex; align-items:center; justify-content:center;
     }
-    /* 1° — blandos: relleno suave */
-    .ctrl-btn-arrow-1 {
-      color:#aaa;
-    }
-    /* 10° — sin relleno: contorno */
-    .ctrl-btn-arrow-10 {
-      color:transparent;
-      -webkit-text-stroke:1.5px #ccc;
-    }
+    .ctrl-btn-arrow-1  { color:#aaa; }
+    .ctrl-btn-arrow-10 { color:transparent; -webkit-text-stroke:1.5px #ccc; }
 
-    /* Botón +180: blanco, texto negro bold, 1.5× (20px → 30px) */
+    /* Botón +180 */
     .ctrl-btn-180 {
       background:#ffffff;
       color:#000000;
@@ -147,8 +153,6 @@
       padding:8px 0;
     }
     .ctrl-btn-180:active { background:#e0e0e0; }
-
-    .ctrl-divider { height:6px; }
 
     /* ──── GPS COORDS ──── */
     .gps-coords-small {
@@ -163,7 +167,6 @@
       padding:10px 14px; border-bottom:1px solid #18191f;
     }
 
-    /* Volver: 2.5× (15px → 38px) */
     .btn-back {
       background:none; border:none; color:#5a8acc;
       font-size:38px; cursor:pointer;
@@ -172,7 +175,6 @@
       letter-spacing:.5px;
     }
 
-    /* Settings title: 2× (14px → 28px) */
     .settings-title {
       font-size:28px; color:#777; letter-spacing:2px;
       font-family:'Courier New',monospace;
@@ -184,14 +186,13 @@
       overflow-y:auto; -webkit-overflow-scrolling:touch;
     }
 
-    /* s-label: 2× (10px → 20px) */
     .s-label {
       font-size:20px; color:#888; letter-spacing:2px;
       text-transform:uppercase; margin-bottom:8px;
       font-family:'Courier New',monospace;
     }
 
-    /* VOR cards */
+    /* NAV AID cards */
     .vor-cards { display:flex; flex-direction:column; gap:8px; }
     .vor-card {
       display:flex; align-items:center;
@@ -207,35 +208,31 @@
     .vor-card.active .vor-card-dot { background:#3ac060; }
     .vor-card-main { flex:1; }
 
-    /* vor-card-id: 2× (20px → 40px) */
     .vor-card-id {
       font-size:40px; font-weight:700;
       font-family:'Courier New',monospace;
       color:#cdd0d8; letter-spacing:2px;
     }
     .vor-card.active .vor-card-id { color:#7eb8f7; }
-
-    /* vor-card-name: 2× (12px → 24px) */
     .vor-card-name { font-size:24px; color:#888; margin-top:1px; }
 
     .vor-card-right { text-align:right; }
+    .vor-card-magvar { font-size:26px; font-family:'Courier New',monospace; color:#f0c040; }
 
-    /* vor-card-freq: 2× (15px → 30px) */
-    .vor-card-freq { font-size:30px; font-family:'Courier New',monospace; color:#aaa; }
-
-    /* vor-card-coords: 2× (10px → 20px) */
-    .vor-card-coords { font-size:20px; color:#555; font-family:'Courier New',monospace; margin-top:2px; }
-
-    /* Mag var — 2.5× */
+    /* Mag var por navaid */
+    .magvar-section { display:flex; flex-direction:column; gap:8px; }
+    .magvar-title {
+      font-size:20px; color:#888; letter-spacing:2px;
+      text-transform:uppercase;
+      font-family:'Courier New',monospace;
+    }
     .magvar-row {
       display:flex; align-items:center; justify-content:space-between;
       padding:14px 16px; background:#141618;
       border:1px solid #202228; border-radius:12px;
       gap:10px;
     }
-    /* magvar-label reducido */
     .magvar-label { font-size:28px; color:#ccc; white-space:nowrap; }
-    /* magvar-input: ancho para 2 cifras + 2 decimales */
     #magvar-input {
       width:210px; background:#0c0e12; border:1px solid #2d3038;
       color:#f0c040; padding:8px 10px; border-radius:8px;
@@ -245,7 +242,6 @@
     /* GPS */
     .gps-section { display:flex; flex-direction:column; gap:8px; }
 
-    /* gps-btn-settings: 2× (14px → 28px) */
     #gps-btn-settings {
       padding:13px; background:#0d2a14; border:1px solid #1a4a22;
       color:#4fd870; border-radius:10px; font-size:28px;
@@ -253,7 +249,6 @@
     }
     #gps-btn-settings.on { background:#081a0c; border-color:#2a7a36; color:#38c057; }
 
-    /* gps-coords-settings: 2× (11px → 22px) */
     #gps-coords-settings {
       font-size:22px; color:#555;
       font-family:'Courier New',monospace; text-align:center;
@@ -270,7 +265,7 @@
     <span id="gps-top">GPS inactivo</span>
   </div>
 
-  <div class="vor-badge" id="vor-badge">PAR — 116.8 MHz</div>
+  <div class="vor-badge" id="vor-badge">PAR — Paraná</div>
 
   <!-- ═══ HSI SVG ═══ -->
   <svg id="hsi" width="100%" viewBox="0 0 300 300" style="display:block">
@@ -309,7 +304,7 @@
       <g id="g-course">
         <line x1="150" y1="62" x2="150" y2="238"
               stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
-        <!-- Ticks CDI: 5 por lado, cada 2° (±2°…±10°), 1°=5.5px -->
+        <!-- Ticks CDI: 5 por lado, cada 2° -->
         <line x1="95"  y1="143" x2="95"  y2="157" stroke="#ffffff" stroke-width="1.5"/>
         <line x1="106" y1="143" x2="106" y2="157" stroke="#ffffff" stroke-width="1.5"/>
         <line x1="117" y1="143" x2="117" y2="157" stroke="#ffffff" stroke-width="1.5"/>
@@ -328,7 +323,7 @@
         <line x1="141" y1="224" x2="159" y2="224" stroke="#f0c040" stroke-width="2.5"/>
       </g>
 
-      <!-- ⑤ Símbolo de avión (fijo) — solo círculo central -->
+      <!-- ⑤ Símbolo de avión (fijo) -->
       <circle cx="150" cy="150" r="5.5" fill="#dde0ea"/>
 
       <!-- ⑥ Lubber line (fija, nariz = arriba) -->
@@ -357,32 +352,35 @@
   <!-- OBS + HDG bug controls -->
   <div class="ctrl-section">
 
-    <!-- OBS -->
-    <div class="ctrl-header-row">
-      <span class="ctrl-tag">OBS</span>
-      <span id="obs-display" class="ctrl-val">000°</span>
-      <span id="tofrom-text">---</span>
-    </div>
-    <div class="ctrl-btns">
-      <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeOBS(-10)">◀◀</div>
-      <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeOBS(-1)">◀</div>
-      <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeOBS(+1)">▶</div>
-      <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeOBS(+10)">▶▶</div>
-      <div class="ctrl-btn ctrl-btn-180" onclick="changeOBS(180)">+180</div>
+    <!-- OBS group -->
+    <div class="ctrl-group ctrl-group-obs">
+      <div class="ctrl-header-row">
+        <span class="ctrl-tag">OBS</span>
+        <span id="obs-display" class="ctrl-val">000°</span>
+        <span id="tofrom-text">---</span>
+      </div>
+      <div class="ctrl-btns">
+        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeOBS(-10)">◀◀</div>
+        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeOBS(-1)">◀</div>
+        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeOBS(+1)">▶</div>
+        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeOBS(+10)">▶▶</div>
+        <div class="ctrl-btn ctrl-btn-180" onclick="changeOBS(180)">+180</div>
+      </div>
     </div>
 
-    <div class="ctrl-divider"></div>
-
-    <!-- HDG -->
-    <div class="ctrl-header-row">
-      <span class="ctrl-tag">HDG</span>
-      <span id="hdg-display" class="ctrl-val">000°</span>
-    </div>
-    <div class="ctrl-btns">
-      <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeHDG(-10)">◀◀</div>
-      <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeHDG(-1)">◀</div>
-      <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeHDG(+1)">▶</div>
-      <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeHDG(+10)">▶▶</div>
+    <!-- HDG group -->
+    <div class="ctrl-group">
+      <div class="ctrl-header-row">
+        <span class="ctrl-tag">HDG</span>
+        <span id="hdg-display" class="ctrl-val">000°</span>
+      </div>
+      <div class="ctrl-btns">
+        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeHDG(-10)">◀◀</div>
+        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeHDG(-1)">◀</div>
+        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeHDG(+1)">▶</div>
+        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeHDG(+10)">▶▶</div>
+        <div class="ctrl-btn ctrl-btn-180" onclick="changeHDG(180)">+180</div>
+      </div>
     </div>
 
   </div>
@@ -403,17 +401,17 @@
   <div class="settings-body">
 
     <div>
-      <div class="s-label">VOR activo</div>
+      <div class="s-label">NAV AID activa</div>
       <div class="vor-cards" id="vor-cards"></div>
     </div>
 
-    <div>
-      <div class="s-label">Declinación magnética</div>
+    <div class="magvar-section">
+      <div class="magvar-title">Declinación — <span id="magvar-navid">PAR</span></div>
       <div class="magvar-row">
         <span class="magvar-label">W = (-)</span>
         <input type="number" id="magvar-input" class="magvar-input"
-               value="-7.5" step="0.05"
-               onchange="S.magVar = parseFloat(this.value)||S.magVar; localStorage.setItem('magVar', S.magVar); update()">
+               value="-9.55" step="0.05"
+               onchange="saveMagVar(parseFloat(this.value))">
       </div>
     </div>
 
@@ -429,13 +427,25 @@
 
 <script>
 // ═══════════════════════════════════════════════════════════
-//  VOR DATABASE
+//  NAV AIDS DATABASE
 // ═══════════════════════════════════════════════════════════
-const VORS = {
-  PAR: { name:'Paraná',  lat:-31.80833, lon:-60.48472, freq:'116.8' },
-  ROS: { name:'Rosario', lat:-32.90500, lon:-60.78138, freq:'117.3' },
-  CBA: { name:'Córdoba', lat:-31.31333, lon:-64.20362, freq:'114.5' }
+const NAVAIDS = {
+  PAR: { name:'Paraná',  lat:-31.80833, lon:-60.48472, freq:'116.8', magVarDefault:-9.55 },
+  ROS: { name:'Rosario', lat:-32.90500, lon:-60.78138, freq:'117.3', magVarDefault:-9.55 },
+  CBA: { name:'Córdoba', lat:-31.31333, lon:-64.20362, freq:'114.5', magVarDefault:-7.40 }
 };
+
+function getMagVar(id) {
+  const stored = localStorage.getItem('magVar_' + id);
+  return stored !== null ? parseFloat(stored) : NAVAIDS[id].magVarDefault;
+}
+
+function saveMagVar(val) {
+  if (isNaN(val)) return;
+  S.magVar = val;
+  localStorage.setItem('magVar_' + S.selectedVOR, val);
+  update();
+}
 
 // ═══════════════════════════════════════════════════════════
 //  STATE
@@ -449,14 +459,14 @@ const S = {
   selectedVOR:'PAR',
   obs:0,
   hdgBug:0,
-  magVar: parseFloat(localStorage.getItem('magVar') ?? '-7.5') || -7.5
+  magVar: getMagVar('PAR')
 };
 
 // ═══════════════════════════════════════════════════════════
 //  MATH
 // ═══════════════════════════════════════════════════════════
-const toRad   = d => d * Math.PI / 180;
-const toDeg   = r => r * 180 / Math.PI;
+const toRad    = d => d * Math.PI / 180;
+const toDeg    = r => r * 180 / Math.PI;
 const norm360  = d => ((d % 360) + 360) % 360;
 const normPM180 = d => { d = norm360(d); return d > 180 ? d - 360 : d; };
 
@@ -491,7 +501,7 @@ const clamp = v => Math.max(-1, Math.min(1, v));
 //  UPDATE
 // ═══════════════════════════════════════════════════════════
 function update() {
-  const vor    = VORS[S.selectedVOR];
+  const vor    = NAVAIDS[S.selectedVOR];
   const magVar = S.magVar;
 
   const useTrack   = S.acLat !== null && S.gpsTrack !== null && S.gpsSpeed > 0.5;
@@ -510,7 +520,7 @@ function update() {
   const brgToVOR   = norm360(magRadial + 180);
   const dist       = distNm(S.acLat, S.acLon, vor.lat, vor.lon);
 
-  const magRadialRnd = Math.round(magRadial);   // mismo redondeo que el display
+  const magRadialRnd = Math.round(magRadial);
   const { flag, frac } = calcCDI(magRadialRnd, S.obs);
   const nx = 150 + frac * 55;
   $('cdi-needle').setAttribute('x1', nx);
@@ -547,7 +557,7 @@ function drawCompassRose() {
     const sw    = isMaj ? 3 : 1;
 
     const rad = toRad(deg-90);
-    const x1=CX+R*Math.cos(rad),      y1=CY+R*Math.sin(rad);
+    const x1=CX+R*Math.cos(rad),       y1=CY+R*Math.sin(rad);
     const x2=CX+(R-tLen)*Math.cos(rad), y2=CY+(R-tLen)*Math.sin(rad);
 
     const ln = svgEl('line');
@@ -556,15 +566,16 @@ function drawCompassRose() {
     ln.setAttribute('stroke',color); ln.setAttribute('stroke-width',sw);
     g.appendChild(ln);
 
+    // Labels solo cada 30° — más chicos y más alejados de los ticks
     if (isMaj) {
-      const tR = R-28;
+      const tR = R - 42;   // antes R-28: más separación del bisel
       const tx=CX+tR*Math.cos(rad), ty=CY+tR*Math.sin(rad);
       const isC = CARD.has(deg);
       const t = svgEl('text');
       t.setAttribute('x',tx); t.setAttribute('y',ty);
       t.setAttribute('text-anchor','middle');
       t.setAttribute('dominant-baseline','middle');
-      t.setAttribute('font-size', isC ? '34' : '28');
+      t.setAttribute('font-size', isC ? '26' : '20');   // antes 34/28
       t.setAttribute('font-weight', isC ? '700' : '500');
       t.setAttribute('fill', '#e8ecf4');
       t.setAttribute('font-family',"'Courier New',monospace");
@@ -595,7 +606,7 @@ function changeHDG(delta) {
 function showSettings() {
   $('screen-main').style.display = 'none';
   $('screen-settings').style.display = 'flex';
-  renderVORCards();
+  renderNAVCards();
 }
 
 function showMain() {
@@ -604,10 +615,11 @@ function showMain() {
   update();
 }
 
-function renderVORCards() {
+function renderNAVCards() {
   const c = $('vor-cards');
   c.innerHTML = '';
-  Object.entries(VORS).forEach(([id,v]) => {
+  Object.entries(NAVAIDS).forEach(([id, v]) => {
+    const mv = getMagVar(id);
     const card = document.createElement('div');
     card.className = 'vor-card'+(id===S.selectedVOR?' active':'');
     card.innerHTML = `
@@ -617,12 +629,15 @@ function renderVORCards() {
         <div class="vor-card-name">${v.name}</div>
       </div>
       <div class="vor-card-right">
-        <div class="vor-card-freq">${v.freq} MHz</div>
+        <div class="vor-card-magvar">${mv > 0 ? '+' : ''}${mv}°</div>
       </div>`;
     card.onclick = () => {
       S.selectedVOR = id;
-      $('vor-badge').textContent = `${id} — ${v.freq} MHz`;
-      renderVORCards();
+      S.magVar = getMagVar(id);
+      $('vor-badge').textContent = `${id} — ${v.name}`;
+      $('magvar-input').value = S.magVar;
+      $('magvar-navid').textContent = id;
+      renderNAVCards();
       update();
     };
     c.appendChild(card);
@@ -726,25 +741,25 @@ async function checkForUpdate() {
     const tag = r.headers.get('etag') || r.headers.get('last-modified');
     if (!tag) return;
     if (_lastEtag && tag !== _lastEtag) {
-      location.reload(true);   // nueva versión detectada → recarga desde red
+      location.reload(true);
       return;
     }
     _lastEtag = tag;
   } catch(e) {}
 }
 
-// Al volver al foco y cada 60s
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') checkForUpdate();
 });
 setInterval(checkForUpdate, 60000);
-checkForUpdate();  // primera vez al cargar
+checkForUpdate();
 
 // ═══════════════════════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════════════════════
 drawCompassRose();
 $('magvar-input').value = S.magVar;
+$('magvar-navid').textContent = S.selectedVOR;
 requestWakeLock();
 </script>
 </body>
