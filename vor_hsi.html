@@ -180,10 +180,17 @@
       font-family:'Courier New',monospace;
     }
 
+    .settings-gps-fixed {
+      width:100%; padding:10px 14px;
+      border-bottom:1px solid #18191f;
+      flex-shrink:0;
+    }
+
     .settings-body {
       width:100%; padding:14px;
       display:flex; flex-direction:column; gap:18px;
       overflow-y:auto; -webkit-overflow-scrolling:touch;
+      flex:1;
     }
 
     .s-label {
@@ -398,6 +405,14 @@
     <span class="settings-title">CONFIGURACIÓN</span>
   </div>
 
+  <!-- GPS fijo arriba -->
+  <div class="settings-gps-fixed">
+    <div class="s-label" style="margin-bottom:6px">GPS</div>
+    <div id="gps-btn-settings" onclick="toggleGPS()">▶  Iniciar GPS</div>
+    <div id="gps-coords-settings">—</div>
+  </div>
+
+  <!-- Lista scrollable -->
   <div class="settings-body">
 
     <div>
@@ -413,12 +428,6 @@
                value="-9.55" step="0.05"
                onchange="saveMagVar(parseFloat(this.value))">
       </div>
-    </div>
-
-    <div class="gps-section">
-      <div class="s-label">GPS</div>
-      <div id="gps-btn-settings" onclick="toggleGPS()">▶  Iniciar GPS</div>
-      <div id="gps-coords-settings">—</div>
     </div>
 
   </div>
