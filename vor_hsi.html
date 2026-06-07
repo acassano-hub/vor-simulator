@@ -13,152 +13,165 @@
       background:#0c0d11;
       color:#cdd0d8;
       font-family:-apple-system,'Helvetica Neue',sans-serif;
-      height:100vh;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
+      width:100vw; height:100vh;
       overflow:hidden;
     }
 
+    /* ══════════════════════════════
+       LAYOUT LANDSCAPE (siempre)
+    ══════════════════════════════ */
     .screen {
-      width:100%;
-      max-width:420px;
-      flex:1;
+      width:100%; height:100%;
       display:flex;
-      flex-direction:column;
-      align-items:center;
-      padding-top:env(safe-area-inset-top,8px);
-      padding-bottom:env(safe-area-inset-bottom,8px);
+      flex-direction:row;
+      align-items:stretch;
+      overflow:hidden;
     }
 
-    /* ──── TOP BAR ──── */
-    .top-bar {
-      width:100%;
-      display:flex;
-      justify-content:space-between;
+    /* ── Panel central ── */
+    .center-panel {
+      flex:1; min-width:0;
+      display:flex; flex-direction:column;
       align-items:center;
-      padding:6px 14px 0;
+      overflow:hidden;
+      padding:3px 2px;
+    }
+
+    /* ── Paneles laterales ── */
+    .side-panel {
+      width:300px; flex-shrink:0;
+      display:flex; align-items:stretch;
+      padding:6px;
+    }
+    .side-obs { padding-left:max(6px, env(safe-area-inset-left)); }
+    .side-hdg { padding-right:max(6px, env(safe-area-inset-right)); }
+
+    /* Grupo: dos columnas (botones | valor) */
+    .ctrl-group {
+      flex:1;
+      background:#111318;
+      border:1px solid #2a2d38;
+      border-radius:12px;
+      padding:6px; gap:5px;
+      display:flex; flex-direction:row;
+    }
+    .ctrl-group-obs { border-color:#f0c040; border-width:2px; }
+
+    /* Columna exterior: botones ▲▲ ▲ ▼ ▼▼ */
+    .ctrl-col-btns {
+      width:100px; flex-shrink:0;
+      display:flex; flex-direction:column;
+      gap:4px;
+    }
+
+    /* Columna interior: etiqueta + valor + TO/FROM + +180 */
+    .ctrl-col-val {
+      flex:1; min-width:0;
+      display:flex; flex-direction:column;
+      align-items:center;
+      justify-content:space-between;
+      padding:3px 0;
+      overflow:hidden;
+    }
+
+    .ctrl-tag {
+      font-size:22px; color:#888;
+      font-family:'Courier New',monospace;
+      letter-spacing:1px;
+    }
+    #obs-display {
+      font-size:70px; color:#f0c040;
+      font-weight:700; letter-spacing:0;
+      font-family:'Courier New',monospace;
+      line-height:1;
+    }
+    #hdg-display {
+      font-size:64px; color:#00e5ff;
+      font-weight:700; letter-spacing:0;
+      font-family:'Courier New',monospace;
+      line-height:1;
+    }
+    #tofrom-text {
+      font-size:30px; font-weight:700;
+      font-family:'Courier New',monospace;
+      color:#333; letter-spacing:1px;
+    }
+
+    /* Botones flecha */
+    .ctrl-btn {
+      flex:1;
+      background:#171920; border:1px solid #22242c;
+      border-radius:8px;
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; min-height:0;
+      user-select:none; -webkit-user-select:none;
+    }
+    .ctrl-btn:active { background:#1e2028; }
+    .ctrl-btn-arrow    { font-size:48px; font-family:'Courier New',monospace; }
+    .ctrl-btn-arrow-1  { color:#aaa; }
+    .ctrl-btn-arrow-10 { color:transparent; -webkit-text-stroke:2px #ccc; }
+
+    /* Botón +180 */
+    .ctrl-btn-180 {
+      width:100%; flex-shrink:0;
+      background:#ffffff; color:#000;
+      font-weight:700; font-size:32px;
+      border:1px solid #fff; border-radius:8px;
+      padding:7px 0; text-align:center;
+      cursor:pointer;
+      user-select:none; -webkit-user-select:none;
+      font-family:'Courier New',monospace;
+    }
+    .ctrl-btn-180:active { background:#e0e0e0; }
+
+    /* ── TOP BAR ── */
+    .top-bar {
+      width:100%; flex-shrink:0;
+      display:flex; justify-content:space-between; align-items:center;
+      padding:3px 8px 0;
     }
     .btn-settings {
       background:none; border:none;
-      color:#5a8acc; font-size:22px;
-      cursor:pointer; padding:4px 6px; border-radius:6px;
+      color:#5a8acc; font-size:20px;
+      cursor:pointer; padding:3px 5px; border-radius:6px;
     }
     #gps-top {
-      font-size:12px; color:#555;
+      font-size:11px; color:#555;
       font-family:'Courier New',monospace; letter-spacing:.5px;
     }
     #gps-top.on { color:#3ac060; }
 
-    /* ──── NAV AID BADGE ──── */
-    .vor-badge {
-      font-size:27px;
-      font-family:'Courier New',monospace;
-      color:#e8ecf4;
-      letter-spacing:3px;
-      margin:0;
-      font-weight:700;
-    }
-
-    /* ──── DME ROW ──── */
-    .dme-row {
-      display:flex; align-items:baseline;
-      gap:8px; margin-top:2px;
-    }
-    .dme-tag { font-size:29px; color:#fff; font-family:'Courier New',monospace; letter-spacing:1px; }
-    #dme-val { font-size:43px; font-family:'Courier New',monospace; color:#ff5555; font-weight:700; min-width:90px; text-align:right; }
-    .dme-nm  { font-size:34px; color:#fff; font-family:'Courier New',monospace; }
-
-    /* ── Radial: blanco bold ── */
-    #radial-val {
-      font-size:38px;
-      font-family:'Courier New',monospace;
-      color:#ffffff;
-      font-weight:700;
-      margin-left:10px;
-    }
-
-    /* ──── OBS + HDG CONTROLS ──── */
-    .ctrl-section {
-      width:100%; padding:4px 10px 0;
-      display:flex; flex-direction:column; gap:6px;
-    }
-
-    /* Rectángulo contenedor por grupo */
-    .ctrl-group {
-      background:#111318;
-      border:1px solid #2a2d38;
-      border-radius:14px;
-      padding:8px 10px 8px;
-      display:flex; flex-direction:column; gap:4px;
-    }
-    .ctrl-group-obs {
-      border-color:#f0c040;
-      border-width:2px;
-    }
-
-    .ctrl-header-row {
-      display:flex; align-items:center; gap:12px;
-      padding:2px 0;
-    }
-    .ctrl-tag {
-      font-size:26px; color:#fff;
-      font-family:'Courier New',monospace;
-      letter-spacing:1px; width:64px; text-align:right;
-      flex-shrink:0;
-    }
-    .ctrl-val {
-      font-size:36px; font-family:'Courier New',monospace;
-      letter-spacing:3px; flex-shrink:0;
-    }
-    #obs-display { color:#f0c040; font-weight:700; font-size:54px; }
-    #hdg-display { color:#00e5ff; font-weight:700; }
-    #tofrom-text {
-      font-size:26px; font-weight:700;
-      font-family:'Courier New',monospace;
-      color:#333; letter-spacing:1px;
-      margin-left:28px; flex-shrink:0;
-    }
-
-    .ctrl-btns {
-      display:flex; gap:6px; width:100%;
-    }
-    .ctrl-btn {
-      flex:1; padding:13px 0;
-      background:#171920; border:1px solid #22242c;
-      color:#bbb; border-radius:10px;
-      font-size:20px; font-family:'Courier New',monospace;
-      cursor:pointer; text-align:center;
-      user-select:none; -webkit-user-select:none;
-    }
-    .ctrl-btn:active { background:#1e2028; }
-
-    /* Triángulos ◀◀ ◀ ▶ ▶▶: 32px */
-    .ctrl-btn-arrow {
-      font-size:32px;
-      padding:5px 0;
-      line-height:1;
+    /* ── HSI container (crece para llenar espacio) ── */
+    .hsi-container {
+      flex:1; min-height:0;
+      width:100%;
       display:flex; align-items:center; justify-content:center;
     }
-    .ctrl-btn-arrow-1  { color:#aaa; }
-    .ctrl-btn-arrow-10 { color:transparent; -webkit-text-stroke:1.5px #ccc; }
+    #hsi { display:block; max-height:100%; max-width:100%; }
 
-    /* Botón +180 */
-    .ctrl-btn-180 {
-      background:#ffffff;
-      color:#000000;
-      font-weight:700;
-      font-size:30px;
-      border-color:#ffffff;
-      padding:8px 0;
+    /* ── Info-bar: VOR+DME izquierda | Radial derecha ── */
+    .info-bar {
+      width:100%; flex-shrink:0;
+      display:flex; flex-direction:row;
+      align-items:center; justify-content:space-between;
+      padding:2px 4px 4px;
+      overflow:hidden;
     }
-    .ctrl-btn-180:active { background:#e0e0e0; }
+    .info-left  { display:flex; flex-direction:column; align-items:flex-start; gap:2px; flex-shrink:0; }
+    .info-right { display:flex; align-items:center; flex-shrink:0; }
+    .dme-group  { display:flex; align-items:baseline; gap:5px; }
 
-    /* ──── GPS COORDS ──── */
-    .gps-coords-small {
-      font-size:10px; color:#333;
+    .vor-badge {
+      font-size:38px;
       font-family:'Courier New',monospace;
-      margin-top:4px;
+      color:#e8ecf4; letter-spacing:2px;
+      font-weight:700; line-height:1;
+    }
+    #dme-val  { font-size:40px; font-family:'Courier New',monospace; color:#ff5555; font-weight:700; }
+    .dme-nm   { font-size:20px; color:#fff; font-family:'Courier New',monospace; }
+    #radial-val {
+      font-size:40px; font-family:'Courier New',monospace;
+      color:#fff; font-weight:700;
     }
 
     /* ════ SETTINGS SCREEN ════ */
@@ -166,40 +179,30 @@
       width:100%; display:flex; align-items:center; gap:10px;
       padding:10px 14px; border-bottom:1px solid #18191f;
     }
-
     .btn-back {
       background:none; border:none; color:#5a8acc;
       font-size:38px; cursor:pointer;
       padding:6px 10px 6px 0;
       display:flex; align-items:center; gap:5px;
-      letter-spacing:.5px;
     }
-
     .settings-title {
       font-size:28px; color:#777; letter-spacing:2px;
       font-family:'Courier New',monospace;
     }
-
     .settings-gps-fixed {
       width:100%; padding:10px 14px;
-      border-bottom:1px solid #18191f;
-      flex-shrink:0;
+      border-bottom:1px solid #18191f; flex-shrink:0;
     }
-
     .settings-body {
       width:100%; padding:14px;
       display:flex; flex-direction:column; gap:18px;
-      overflow-y:auto; -webkit-overflow-scrolling:touch;
-      flex:1;
+      overflow-y:auto; -webkit-overflow-scrolling:touch; flex:1;
     }
-
     .s-label {
       font-size:20px; color:#888; letter-spacing:2px;
       text-transform:uppercase; margin-bottom:8px;
       font-family:'Courier New',monospace;
     }
-
-    /* NAV AID cards */
     .vor-cards { display:flex; flex-direction:column; gap:8px; }
     .vor-card {
       display:flex; align-items:center;
@@ -208,36 +211,20 @@
       cursor:pointer; gap:12px;
     }
     .vor-card.active { background:#0b1e38; border-color:#2a5590; }
-    .vor-card-dot {
-      width:9px; height:9px; border-radius:50%;
-      background:#252830; flex-shrink:0;
-    }
+    .vor-card-dot { width:9px; height:9px; border-radius:50%; background:#252830; flex-shrink:0; }
     .vor-card.active .vor-card-dot { background:#3ac060; }
     .vor-card-main { flex:1; }
-
-    .vor-card-id {
-      font-size:40px; font-weight:700;
-      font-family:'Courier New',monospace;
-      color:#cdd0d8; letter-spacing:2px;
-    }
+    .vor-card-id { font-size:40px; font-weight:700; font-family:'Courier New',monospace; color:#cdd0d8; letter-spacing:2px; }
     .vor-card.active .vor-card-id { color:#7eb8f7; }
     .vor-card-name { font-size:24px; color:#888; margin-top:1px; }
-
     .vor-card-right { text-align:right; }
     .vor-card-magvar { font-size:26px; font-family:'Courier New',monospace; color:#f0c040; }
-
-    /* Mag var por navaid */
     .magvar-section { display:flex; flex-direction:column; gap:8px; }
-    .magvar-title {
-      font-size:20px; color:#888; letter-spacing:2px;
-      text-transform:uppercase;
-      font-family:'Courier New',monospace;
-    }
+    .magvar-title { font-size:20px; color:#888; letter-spacing:2px; text-transform:uppercase; font-family:'Courier New',monospace; }
     .magvar-row {
       display:flex; align-items:center; justify-content:space-between;
       padding:14px 16px; background:#141618;
-      border:1px solid #202228; border-radius:12px;
-      gap:10px;
+      border:1px solid #202228; border-radius:12px; gap:10px;
     }
     .magvar-label { font-size:28px; color:#ccc; white-space:nowrap; }
     #magvar-input {
@@ -245,181 +232,179 @@
       color:#f0c040; padding:8px 10px; border-radius:8px;
       font-size:42px; font-family:'Courier New',monospace; text-align:center;
     }
-
-    /* GPS */
-    .gps-section { display:flex; flex-direction:column; gap:8px; }
-
     #gps-btn-settings {
       padding:13px; background:#0d2a14; border:1px solid #1a4a22;
       color:#4fd870; border-radius:10px; font-size:28px;
       cursor:pointer; text-align:center; letter-spacing:.5px;
     }
     #gps-btn-settings.on { background:#081a0c; border-color:#2a7a36; color:#38c057; }
-
-    #gps-coords-settings {
-      font-size:22px; color:#555;
-      font-family:'Courier New',monospace; text-align:center;
-    }
+    #gps-coords-settings { font-size:22px; color:#555; font-family:'Courier New',monospace; text-align:center; }
   </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════ PANTALLA PRINCIPAL ══════════════════════════════ -->
+<!-- ══════════════════ PANTALLA PRINCIPAL ══════════════════ -->
 <div id="screen-main" class="screen">
 
-  <div class="top-bar">
-    <button class="btn-settings" onclick="showSettings()">⚙</button>
-    <span id="gps-top">GPS inactivo</span>
-  </div>
-
-  <div class="vor-badge" id="vor-badge">PAR — Paraná</div>
-
-  <!-- ═══ HSI SVG ═══ -->
-  <svg id="hsi" width="100%" viewBox="0 0 300 300" style="display:block">
-    <defs>
-      <clipPath id="clip">
-        <circle cx="150" cy="150" r="141"/>
-      </clipPath>
-    </defs>
-
-    <!-- Fondo -->
-    <circle cx="150" cy="150" r="149" fill="#090a0d" stroke="#35383f" stroke-width="2"/>
-
-    <g clip-path="url(#clip)">
-
-      <!-- ① Rosa de compass (rota con -magHeading) -->
-      <g id="g-compass"></g>
-
-      <!-- ② Heading bug (cyan, rota independiente) — forma herradura clásica (Π) -->
-      <g id="g-hdg-bug">
-        <path d="M 140,11 L 160,11 L 160,36 L 154,36 L 154,17 L 146,17 L 146,36 L 140,36 Z"
-              fill="#00e5ff" opacity="0.92"/>
-      </g>
-
-      <!-- ③ RMI — aguja doble barra verde (apunta al VOR) -->
-      <g id="g-rmi">
-        <polygon points="150,50 142,72 150,82 158,72" fill="#28d858"/>
-        <line x1="143" y1="71" x2="143" y2="150" stroke="#28d858" stroke-width="2.5"/>
-        <line x1="157" y1="71" x2="157" y2="150" stroke="#28d858" stroke-width="2.5"/>
-        <line x1="140" y1="150" x2="160" y2="150" stroke="#28d858" stroke-width="2"/>
-        <line x1="143" y1="150" x2="143" y2="208" stroke="#28d858" stroke-width="2" opacity="0.5"/>
-        <line x1="157" y1="150" x2="157" y2="208" stroke="#28d858" stroke-width="2" opacity="0.5"/>
-        <line x1="140" y1="204" x2="160" y2="204" stroke="#28d858" stroke-width="2" opacity="0.5"/>
-      </g>
-
-      <!-- ④ Course bar + CDI (rota con obs−magHeading) -->
-      <g id="g-course">
-        <line x1="150" y1="62" x2="150" y2="238"
-              stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
-        <!-- Ticks CDI: 5 por lado, cada 2° -->
-        <line x1="95"  y1="143" x2="95"  y2="157" stroke="#ffffff" stroke-width="1.5"/>
-        <line x1="106" y1="143" x2="106" y2="157" stroke="#ffffff" stroke-width="1.5"/>
-        <line x1="117" y1="143" x2="117" y2="157" stroke="#ffffff" stroke-width="1.5"/>
-        <line x1="128" y1="143" x2="128" y2="157" stroke="#ffffff" stroke-width="1.5"/>
-        <line x1="139" y1="143" x2="139" y2="157" stroke="#ffffff" stroke-width="1.5"/>
-        <line x1="161" y1="143" x2="161" y2="157" stroke="#ffffff" stroke-width="1.5"/>
-        <line x1="172" y1="143" x2="172" y2="157" stroke="#ffffff" stroke-width="1.5"/>
-        <line x1="183" y1="143" x2="183" y2="157" stroke="#ffffff" stroke-width="1.5"/>
-        <line x1="194" y1="143" x2="194" y2="157" stroke="#ffffff" stroke-width="1.5"/>
-        <line x1="205" y1="143" x2="205" y2="157" stroke="#ffffff" stroke-width="1.5"/>
-        <line id="cdi-needle" x1="150" y1="122" x2="150" y2="178"
-              stroke="#f0c040" stroke-width="5.5" stroke-linecap="round"/>
-        <polygon points="150,62 143,84 157,84" fill="#f0c040"/>
-        <line x1="150" y1="84" x2="150" y2="122" stroke="#f0c040" stroke-width="3"/>
-        <line x1="150" y1="178" x2="150" y2="228" stroke="#f0c040" stroke-width="3"/>
-        <line x1="141" y1="224" x2="159" y2="224" stroke="#f0c040" stroke-width="2.5"/>
-      </g>
-
-      <!-- ⑤ Símbolo de avión (fijo) -->
-      <circle cx="150" cy="150" r="5.5" fill="#dde0ea"/>
-
-      <!-- ⑥ Lubber line (fija, nariz = arriba) -->
-      <rect x="145" y="10" width="10" height="22" rx="2.5" fill="#dde0ea"/>
-
-    </g>
-
-    <!-- Bisel exterior encima del clip -->
-    <circle cx="150" cy="150" r="149" fill="none" stroke="#1a1c22" stroke-width="5"/>
-    <circle cx="150" cy="150" r="141" fill="none" stroke="#35383f" stroke-width="1"/>
-
-    <!-- Track magnético (arriba, fijo) -->
-    <text id="hdg-text" x="150" y="43" text-anchor="middle"
-          font-size="12" font-family="'Courier New',monospace" fill="#777">N↑</text>
-
-  </svg>
-
-  <!-- DME + Radial -->
-  <div class="dme-row">
-    <span class="dme-tag">DME</span>
-    <span id="dme-val">–––</span>
-    <span class="dme-nm">nm</span>
-    <span id="radial-val">R –––°</span>
-  </div>
-
-  <!-- OBS + HDG bug controls -->
-  <div class="ctrl-section">
-
-    <!-- OBS group -->
+  <!-- OBS — panel izquierdo -->
+  <div class="side-panel side-obs">
     <div class="ctrl-group ctrl-group-obs">
-      <div class="ctrl-header-row">
+
+      <!-- Columna exterior: botones ▲▲ ▲ ▼ ▼▼ -->
+      <div class="ctrl-col-btns">
+        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeOBS(+10)">▲▲</div>
+        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeOBS(+1)">▲</div>
+        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeOBS(-1)">▼</div>
+        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeOBS(-10)">▼▼</div>
+      </div>
+
+      <!-- Columna interior: +180 arriba + label + valor + TO/FROM -->
+      <div class="ctrl-col-val">
+        <div class="ctrl-btn-180" onclick="changeOBS(180)">+180</div>
         <span class="ctrl-tag">OBS</span>
-        <span id="obs-display" class="ctrl-val">000°</span>
+        <span id="obs-display">000°</span>
         <span id="tofrom-text">---</span>
       </div>
-      <div class="ctrl-btns">
-        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeOBS(-10)">◀◀</div>
-        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeOBS(-1)">◀</div>
-        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeOBS(+1)">▶</div>
-        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeOBS(+10)">▶▶</div>
-        <div class="ctrl-btn ctrl-btn-180" onclick="changeOBS(180)">+180</div>
-      </div>
-    </div>
 
-    <!-- HDG group -->
-    <div class="ctrl-group">
-      <div class="ctrl-header-row">
-        <span class="ctrl-tag">HDG</span>
-        <span id="hdg-display" class="ctrl-val">000°</span>
-      </div>
-      <div class="ctrl-btns">
-        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeHDG(-10)">◀◀</div>
-        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeHDG(-1)">◀</div>
-        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeHDG(+1)">▶</div>
-        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeHDG(+10)">▶▶</div>
-        <div class="ctrl-btn ctrl-btn-180" onclick="changeHDG(180)">+180</div>
-      </div>
     </div>
-
   </div>
 
-  <div class="gps-coords-small" id="gps-coords-main">—</div>
+  <!-- Centro: GPS / badge / HSI / DME -->
+  <div class="center-panel">
 
-</div>
+    <div class="top-bar">
+      <button class="btn-settings" onclick="showSettings()">⚙</button>
+      <span id="gps-top">GPS inactivo</span>
+    </div>
+
+    <div class="hsi-container">
+      <svg id="hsi" viewBox="0 0 300 300">
+        <defs>
+          <clipPath id="clip">
+            <circle cx="150" cy="150" r="141"/>
+          </clipPath>
+        </defs>
+
+        <circle cx="150" cy="150" r="149" fill="#090a0d" stroke="#35383f" stroke-width="2"/>
+
+        <g clip-path="url(#clip)">
+
+          <!-- ① Rosa de compass -->
+          <g id="g-compass"></g>
+
+          <!-- ② Heading bug — herradura (Π) cyan -->
+          <g id="g-hdg-bug">
+            <path d="M 140,11 L 160,11 L 160,36 L 154,36 L 154,17 L 146,17 L 146,36 L 140,36 Z"
+                  fill="#00e5ff" opacity="0.92"/>
+          </g>
+
+          <!-- ③ RMI — aguja doble barra verde -->
+          <g id="g-rmi">
+            <polygon points="150,50 142,72 150,82 158,72" fill="#28d858"/>
+            <line x1="143" y1="71" x2="143" y2="150" stroke="#28d858" stroke-width="2.5"/>
+            <line x1="157" y1="71" x2="157" y2="150" stroke="#28d858" stroke-width="2.5"/>
+            <line x1="140" y1="150" x2="160" y2="150" stroke="#28d858" stroke-width="2"/>
+            <line x1="143" y1="150" x2="143" y2="208" stroke="#28d858" stroke-width="2" opacity="0.5"/>
+            <line x1="157" y1="150" x2="157" y2="208" stroke="#28d858" stroke-width="2" opacity="0.5"/>
+            <line x1="140" y1="204" x2="160" y2="204" stroke="#28d858" stroke-width="2" opacity="0.5"/>
+          </g>
+
+          <!-- ④ Course bar + CDI -->
+          <g id="g-course">
+            <line x1="150" y1="62" x2="150" y2="238" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            <line x1="95"  y1="143" x2="95"  y2="157" stroke="#ffffff" stroke-width="1.5"/>
+            <line x1="106" y1="143" x2="106" y2="157" stroke="#ffffff" stroke-width="1.5"/>
+            <line x1="117" y1="143" x2="117" y2="157" stroke="#ffffff" stroke-width="1.5"/>
+            <line x1="128" y1="143" x2="128" y2="157" stroke="#ffffff" stroke-width="1.5"/>
+            <line x1="139" y1="143" x2="139" y2="157" stroke="#ffffff" stroke-width="1.5"/>
+            <line x1="161" y1="143" x2="161" y2="157" stroke="#ffffff" stroke-width="1.5"/>
+            <line x1="172" y1="143" x2="172" y2="157" stroke="#ffffff" stroke-width="1.5"/>
+            <line x1="183" y1="143" x2="183" y2="157" stroke="#ffffff" stroke-width="1.5"/>
+            <line x1="194" y1="143" x2="194" y2="157" stroke="#ffffff" stroke-width="1.5"/>
+            <line x1="205" y1="143" x2="205" y2="157" stroke="#ffffff" stroke-width="1.5"/>
+            <line id="cdi-needle" x1="150" y1="122" x2="150" y2="178"
+                  stroke="#f0c040" stroke-width="5.5" stroke-linecap="round"/>
+            <polygon points="150,62 143,84 157,84" fill="#f0c040"/>
+            <line x1="150" y1="84"  x2="150" y2="122" stroke="#f0c040" stroke-width="3"/>
+            <line x1="150" y1="178" x2="150" y2="228" stroke="#f0c040" stroke-width="3"/>
+            <line x1="141" y1="224" x2="159" y2="224" stroke="#f0c040" stroke-width="2.5"/>
+          </g>
+
+          <!-- ⑤ Avión -->
+          <circle cx="150" cy="150" r="5.5" fill="#dde0ea"/>
+
+          <!-- ⑥ Lubber line -->
+          <rect x="145" y="10" width="10" height="22" rx="2.5" fill="#dde0ea"/>
+
+        </g>
+
+        <circle cx="150" cy="150" r="149" fill="none" stroke="#1a1c22" stroke-width="5"/>
+        <circle cx="150" cy="150" r="141" fill="none" stroke="#35383f" stroke-width="1"/>
+
+        <text id="hdg-text" x="150" y="43" text-anchor="middle"
+              font-size="12" font-family="'Courier New',monospace" fill="#777">N↑</text>
+      </svg>
+    </div>
+
+    <div class="info-bar">
+      <div class="info-left">
+        <span class="vor-badge" id="vor-badge">PAR</span>
+        <div class="dme-group">
+          <span id="dme-val">–––</span>
+          <span class="dme-nm">nm</span>
+        </div>
+      </div>
+      <div class="info-right">
+        <span id="radial-val">R –––°</span>
+      </div>
+    </div>
+
+  </div><!-- /center-panel -->
+
+  <!-- HDG — panel derecho -->
+  <div class="side-panel side-hdg">
+    <div class="ctrl-group">
+
+      <!-- Columna interior: +180 arriba + label + valor -->
+      <div class="ctrl-col-val">
+        <div class="ctrl-btn-180" onclick="changeHDG(180)">+180</div>
+        <span class="ctrl-tag">HDG</span>
+        <span id="hdg-display">000°</span>
+      </div>
+
+      <!-- Columna exterior: botones ▲▲ ▲ ▼ ▼▼ -->
+      <div class="ctrl-col-btns">
+        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeHDG(+10)">▲▲</div>
+        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeHDG(+1)">▲</div>
+        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeHDG(-1)">▼</div>
+        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeHDG(-10)">▼▼</div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /screen-main -->
 
 
-<!-- ══════════════════════════════ CONFIGURACIÓN ══════════════════════════════ -->
-<div id="screen-settings" class="screen" style="display:none">
+<!-- ══════════════════ CONFIGURACIÓN ══════════════════ -->
+<div id="screen-settings" class="screen" style="display:none; flex-direction:column;">
 
   <div class="settings-header">
     <button class="btn-back" onclick="showMain()">← Volver</button>
     <span class="settings-title">CONFIGURACIÓN</span>
   </div>
 
-  <!-- GPS fijo arriba -->
   <div class="settings-gps-fixed">
     <div class="s-label" style="margin-bottom:6px">GPS</div>
     <div id="gps-btn-settings" onclick="toggleGPS()">▶  Iniciar GPS</div>
     <div id="gps-coords-settings">—</div>
   </div>
 
-  <!-- Lista scrollable -->
   <div class="settings-body">
-
     <div>
       <div class="s-label">NAV AID activa</div>
       <div class="vor-cards" id="vor-cards"></div>
     </div>
-
     <div class="magvar-section">
       <div class="magvar-title">Declinación — <span id="magvar-navid">PAR</span></div>
       <div class="magvar-row">
@@ -429,8 +414,8 @@
                onchange="saveMagVar(parseFloat(this.value))">
       </div>
     </div>
-
   </div>
+
 </div>
 
 
@@ -462,22 +447,18 @@ function saveMagVar(val) {
 // ═══════════════════════════════════════════════════════════
 const S = {
   acLat:null, acLon:null,
-  gpsTrack:null,
-  gpsSpeed:0,
-  gpsAcc:null,
+  gpsTrack:null, gpsSpeed:0, gpsAcc:null,
   gpsActive:false, watchId:null,
-  selectedVOR:'PAR',
-  obs:0,
-  hdgBug:0,
+  selectedVOR:'PAR', obs:0, hdgBug:0,
   magVar: getMagVar('PAR')
 };
 
 // ═══════════════════════════════════════════════════════════
 //  MATH
 // ═══════════════════════════════════════════════════════════
-const toRad    = d => d * Math.PI / 180;
-const toDeg    = r => r * 180 / Math.PI;
-const norm360  = d => ((d % 360) + 360) % 360;
+const toRad     = d => d * Math.PI / 180;
+const toDeg     = r => r * 180 / Math.PI;
+const norm360   = d => ((d % 360) + 360) % 360;
 const normPM180 = d => { d = norm360(d); return d > 180 ? d - 360 : d; };
 
 function bearing(la1, lo1, la2, lo2) {
@@ -520,7 +501,6 @@ function update() {
   $('g-compass').setAttribute('transform', `rotate(${-magHeading},150,150)`);
   $('g-course') .setAttribute('transform', `rotate(${norm360(S.obs-magHeading)},150,150)`);
   $('g-hdg-bug').setAttribute('transform', `rotate(${norm360(S.hdgBug-magHeading)},150,150)`);
-
   $('hdg-text').textContent = useTrack ? pad3(Math.round(magHeading))+'°' : 'N↑';
 
   if (S.acLat === null) return;
@@ -530,8 +510,7 @@ function update() {
   const brgToVOR   = norm360(magRadial + 180);
   const dist       = distNm(S.acLat, S.acLon, vor.lat, vor.lon);
 
-  const magRadialRnd = Math.round(magRadial);
-  const { flag, frac } = calcCDI(magRadialRnd, S.obs);
+  const { flag, frac } = calcCDI(Math.round(magRadial), S.obs);
   const nx = 150 + frac * 55;
   $('cdi-needle').setAttribute('x1', nx);
   $('cdi-needle').setAttribute('x2', nx);
@@ -541,9 +520,8 @@ function update() {
   tf.style.color = (flag==='TO'||flag==='FROM') ? '#f0c040' : '#333';
 
   $('g-rmi').setAttribute('transform', `rotate(${norm360(brgToVOR-magHeading)},150,150)`);
-
-  $('dme-val')    .textContent = dist.toFixed(1);
-  $('radial-val') .textContent = 'R ' + pad3(Math.round(magRadial)) + '°';
+  $('dme-val')   .textContent = dist.toFixed(1);
+  $('radial-val').textContent = 'R ' + pad3(Math.round(magRadial)) + '°';
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -565,9 +543,8 @@ function drawCompassRose() {
     const tLen  = isMaj ? 15 : isMed ? 10 : 5;
     const color = isMaj ? '#c0c4cc' : isMed ? '#e8ecf4' : '#282c34';
     const sw    = isMaj ? 3 : 1;
-
-    const rad = toRad(deg-90);
-    const x1=CX+R*Math.cos(rad),       y1=CY+R*Math.sin(rad);
+    const rad   = toRad(deg-90);
+    const x1=CX+R*Math.cos(rad),        y1=CY+R*Math.sin(rad);
     const x2=CX+(R-tLen)*Math.cos(rad), y2=CY+(R-tLen)*Math.sin(rad);
 
     const ln = svgEl('line');
@@ -576,18 +553,17 @@ function drawCompassRose() {
     ln.setAttribute('stroke',color); ln.setAttribute('stroke-width',sw);
     g.appendChild(ln);
 
-    // Labels solo cada 30° — más chicos y más alejados de los ticks
     if (isMaj) {
-      const tR = R - 42;   // antes R-28: más separación del bisel
+      const tR = R - 42;
       const tx=CX+tR*Math.cos(rad), ty=CY+tR*Math.sin(rad);
       const isC = CARD.has(deg);
       const t = svgEl('text');
       t.setAttribute('x',tx); t.setAttribute('y',ty);
       t.setAttribute('text-anchor','middle');
       t.setAttribute('dominant-baseline','middle');
-      t.setAttribute('font-size', isC ? '26' : '20');   // antes 34/28
+      t.setAttribute('font-size', isC ? '26' : '20');
       t.setAttribute('font-weight', isC ? '700' : '500');
-      t.setAttribute('fill', '#e8ecf4');
+      t.setAttribute('fill','#e8ecf4');
       t.setAttribute('font-family',"'Courier New',monospace");
       t.textContent = LABELS[deg];
       g.appendChild(t);
@@ -596,7 +572,7 @@ function drawCompassRose() {
 }
 
 // ═══════════════════════════════════════════════════════════
-//  OBS / HDG controls
+//  CONTROLES
 // ═══════════════════════════════════════════════════════════
 function changeOBS(delta) {
   S.obs = norm360(S.obs + delta);
@@ -611,7 +587,7 @@ function changeHDG(delta) {
 }
 
 // ═══════════════════════════════════════════════════════════
-//  NAVEGACIÓN DE PANTALLAS
+//  PANTALLAS
 // ═══════════════════════════════════════════════════════════
 function showSettings() {
   $('screen-main').style.display = 'none';
@@ -644,7 +620,7 @@ function renderNAVCards() {
     card.onclick = () => {
       S.selectedVOR = id;
       S.magVar = getMagVar(id);
-      $('vor-badge').textContent = `${id} — ${v.name}`;
+      $('vor-badge').textContent = id;
       $('magvar-input').value = S.magVar;
       $('magvar-navid').textContent = id;
       renderNAVCards();
@@ -681,7 +657,6 @@ function startGPS() {
       $('gps-btn-settings').className   = 'on';
 
       const coord = `${S.acLat.toFixed(5)}°  ${S.acLon.toFixed(5)}°`;
-      $('gps-coords-main').textContent     = coord;
       $('gps-coords-settings').textContent = coord;
       update();
     },
@@ -718,46 +693,33 @@ const pad3  = n   => String(n).padStart(3,'0');
 //  WAKE LOCK
 // ═══════════════════════════════════════════════════════════
 let wakeLock = null;
-
 async function requestWakeLock() {
   if (!('wakeLock' in navigator)) return;
   try {
     wakeLock = await navigator.wakeLock.request('screen');
-    wakeLock.addEventListener('release', () => {
-      setTimeout(requestWakeLock, 1000);
-    });
+    wakeLock.addEventListener('release', () => setTimeout(requestWakeLock, 1000));
   } catch(e) {}
 }
-
-document.addEventListener('touchstart', requestWakeLock, { once: true });
-
+document.addEventListener('touchstart', requestWakeLock, { once:true });
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') requestWakeLock();
 });
-
-setInterval(() => {
-  if (!wakeLock || wakeLock.released) requestWakeLock();
-}, 30000);
+setInterval(() => { if (!wakeLock || wakeLock.released) requestWakeLock(); }, 30000);
 
 // ═══════════════════════════════════════════════════════════
-//  AUTO-UPDATE — detecta nueva versión en GitHub Pages
+//  AUTO-UPDATE
 // ═══════════════════════════════════════════════════════════
 let _lastEtag = null;
-
 async function checkForUpdate() {
   if (!navigator.onLine) return;
   try {
     const r = await fetch(location.href, { method:'HEAD', cache:'no-store' });
     const tag = r.headers.get('etag') || r.headers.get('last-modified');
     if (!tag) return;
-    if (_lastEtag && tag !== _lastEtag) {
-      location.reload(true);
-      return;
-    }
+    if (_lastEtag && tag !== _lastEtag) { location.reload(true); return; }
     _lastEtag = tag;
   } catch(e) {}
 }
-
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') checkForUpdate();
 });
