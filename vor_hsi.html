@@ -37,87 +37,78 @@
       padding:3px 2px;
     }
 
-    /* ── Paneles laterales ── */
+    /* ── Paneles laterales — columna vertical ── */
     .side-panel {
-      width:300px; flex-shrink:0;
-      display:flex; align-items:stretch;
-      padding:6px;
+      width:170px; flex-shrink:0;
+      display:flex; flex-direction:column;
+      align-items:stretch;
+      padding:6px; gap:5px;
     }
     .side-obs { padding-left:max(6px, env(safe-area-inset-left)); }
     .side-hdg { padding-right:max(6px, env(safe-area-inset-right)); }
 
-    /* Grupo: dos columnas (botones | valor) */
+    /* Encabezado (label + valor + TO/FROM) — fuera del rectángulo */
+    .ctrl-header {
+      flex-shrink:0;
+      display:flex; flex-direction:column;
+      align-items:center; gap:1px;
+    }
+
+    /* Grupo: solo botones flecha apilados */
     .ctrl-group {
-      flex:1;
+      flex:1; min-height:0;
       background:#111318;
       border:1px solid #2a2d38;
       border-radius:12px;
-      padding:6px; gap:5px;
-      display:flex; flex-direction:row;
+      padding:5px; gap:5px;
+      display:flex; flex-direction:column;
     }
     .ctrl-group-obs { border-color:#f0c040; border-width:2px; }
 
-    /* Columna exterior: botones ▲▲ ▲ ▼ ▼▼ */
-    .ctrl-col-btns {
-      width:100px; flex-shrink:0;
-      display:flex; flex-direction:column;
-      gap:4px;
-    }
-
-    /* Columna interior: etiqueta + valor + TO/FROM + +180 */
-    .ctrl-col-val {
-      flex:1; min-width:0;
-      display:flex; flex-direction:column;
-      align-items:center;
-      justify-content:space-between;
-      padding:3px 0;
-      overflow:hidden;
-    }
-
     .ctrl-tag {
-      font-size:22px; color:#888;
+      font-size:16px; color:#888;
       font-family:'Courier New',monospace;
       letter-spacing:1px;
     }
     #obs-display {
-      font-size:70px; color:#f0c040;
-      font-weight:700; letter-spacing:0;
+      font-size:52px; color:#f0c040;
+      font-weight:700;
       font-family:'Courier New',monospace;
       line-height:1;
     }
     #hdg-display {
-      font-size:64px; color:#00e5ff;
-      font-weight:700; letter-spacing:0;
+      font-size:52px; color:#00e5ff;
+      font-weight:700;
       font-family:'Courier New',monospace;
       line-height:1;
     }
     #tofrom-text {
-      font-size:30px; font-weight:700;
+      font-size:22px; font-weight:700;
       font-family:'Courier New',monospace;
       color:#333; letter-spacing:1px;
     }
 
     /* Botones flecha */
     .ctrl-btn {
-      flex:1;
+      flex:1; min-height:0;
       background:#171920; border:1px solid #22242c;
       border-radius:8px;
       display:flex; align-items:center; justify-content:center;
-      cursor:pointer; min-height:0;
+      cursor:pointer;
       user-select:none; -webkit-user-select:none;
     }
     .ctrl-btn:active { background:#1e2028; }
-    .ctrl-btn-arrow    { font-size:48px; font-family:'Courier New',monospace; }
+    .ctrl-btn-arrow    { font-size:40px; font-family:'Courier New',monospace; }
     .ctrl-btn-arrow-1  { color:#aaa; }
     .ctrl-btn-arrow-10 { color:transparent; -webkit-text-stroke:2px #ccc; }
 
-    /* Botón +180 */
+    /* Botón +180 — fuera del rectángulo */
     .ctrl-btn-180 {
       width:100%; flex-shrink:0;
       background:#ffffff; color:#000;
-      font-weight:700; font-size:32px;
+      font-weight:700; font-size:26px;
       border:1px solid #fff; border-radius:8px;
-      padding:7px 0; text-align:center;
+      padding:5px 0; text-align:center;
       cursor:pointer;
       user-select:none; -webkit-user-select:none;
       font-family:'Courier New',monospace;
@@ -149,20 +140,18 @@
     }
     #hsi { display:block; max-height:100%; max-width:100%; }
 
-    /* ── Info-bar: VOR+DME izquierda | Radial derecha ── */
+    /* ── Info-bar: VOR · DME izquierda | Radial derecha — una fila ── */
     .info-bar {
       width:100%; flex-shrink:0;
       display:flex; flex-direction:row;
       align-items:center; justify-content:space-between;
-      padding:2px 4px 4px;
-      overflow:hidden;
+      padding:3px 6px 5px;
     }
-    .info-left  { display:flex; flex-direction:column; align-items:flex-start; gap:2px; flex-shrink:0; }
-    .info-right { display:flex; align-items:center; flex-shrink:0; }
-    .dme-group  { display:flex; align-items:baseline; gap:5px; }
+    .info-left  { display:flex; flex-direction:row; align-items:baseline; gap:8px; flex-shrink:0; }
+    .info-right { flex-shrink:0; }
 
     .vor-badge {
-      font-size:38px;
+      font-size:40px;
       font-family:'Courier New',monospace;
       color:#e8ecf4; letter-spacing:2px;
       font-weight:700; line-height:1;
@@ -248,24 +237,17 @@
 
   <!-- OBS — panel izquierdo -->
   <div class="side-panel side-obs">
+    <div class="ctrl-header">
+      <span class="ctrl-tag">OBS</span>
+      <span id="obs-display">000°</span>
+      <span id="tofrom-text">---</span>
+    </div>
+    <div class="ctrl-btn-180" onclick="changeOBS(180)">+180</div>
     <div class="ctrl-group ctrl-group-obs">
-
-      <!-- Columna exterior: botones ▲▲ ▲ ▼ ▼▼ -->
-      <div class="ctrl-col-btns">
-        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeOBS(+10)">▲▲</div>
-        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeOBS(+1)">▲</div>
-        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeOBS(-1)">▼</div>
-        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeOBS(-10)">▼▼</div>
-      </div>
-
-      <!-- Columna interior: +180 arriba + label + valor + TO/FROM -->
-      <div class="ctrl-col-val">
-        <div class="ctrl-btn-180" onclick="changeOBS(180)">+180</div>
-        <span class="ctrl-tag">OBS</span>
-        <span id="obs-display">000°</span>
-        <span id="tofrom-text">---</span>
-      </div>
-
+      <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeOBS(+10)">▲▲</div>
+      <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeOBS(+1)">▲</div>
+      <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeOBS(-1)">▼</div>
+      <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeOBS(-10)">▼▼</div>
     </div>
   </div>
 
@@ -349,10 +331,8 @@
     <div class="info-bar">
       <div class="info-left">
         <span class="vor-badge" id="vor-badge">PAR</span>
-        <div class="dme-group">
-          <span id="dme-val">–––</span>
-          <span class="dme-nm">nm</span>
-        </div>
+        <span id="dme-val">–––</span>
+        <span class="dme-nm">nm</span>
       </div>
       <div class="info-right">
         <span id="radial-val">R –––°</span>
@@ -363,23 +343,16 @@
 
   <!-- HDG — panel derecho -->
   <div class="side-panel side-hdg">
+    <div class="ctrl-header">
+      <span class="ctrl-tag">HDG</span>
+      <span id="hdg-display">000°</span>
+    </div>
+    <div class="ctrl-btn-180" onclick="changeHDG(180)">+180</div>
     <div class="ctrl-group">
-
-      <!-- Columna interior: +180 arriba + label + valor -->
-      <div class="ctrl-col-val">
-        <div class="ctrl-btn-180" onclick="changeHDG(180)">+180</div>
-        <span class="ctrl-tag">HDG</span>
-        <span id="hdg-display">000°</span>
-      </div>
-
-      <!-- Columna exterior: botones ▲▲ ▲ ▼ ▼▼ -->
-      <div class="ctrl-col-btns">
-        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeHDG(+10)">▲▲</div>
-        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeHDG(+1)">▲</div>
-        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeHDG(-1)">▼</div>
-        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeHDG(-10)">▼▼</div>
-      </div>
-
+      <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeHDG(+10)">▲▲</div>
+      <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeHDG(+1)">▲</div>
+      <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeHDG(-1)">▼</div>
+      <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeHDG(-10)">▼▼</div>
     </div>
   </div>
 
