@@ -144,18 +144,18 @@
     .info-col-r { align-items:flex-end; }
     .info-numrow { display:flex; align-items:baseline; gap:4px; }
     #vor-badge {
-      font-size:20px; color:#f0c040; font-weight:700;
+      font-size:30px; color:#f0c040; font-weight:700;
       font-family:'Courier New',monospace; letter-spacing:1px; line-height:1;
     }
     .info-r-label {
-      font-size:20px; color:#ffffff; font-weight:700;
+      font-size:30px; color:#ffffff; font-weight:700;
       font-family:'Courier New',monospace; letter-spacing:1px; line-height:1;
     }
-    #dme-val    { font-size:40px; font-family:'Courier New',monospace; color:#ff5555; font-weight:700; line-height:1; }
+    #dme-val    { font-size:56px; font-family:'Courier New',monospace; color:#ff5555; font-weight:700; line-height:1; }
     .dme-nm     { font-size:16px; color:#fff; font-family:'Courier New',monospace; }
-    #radial-val { font-size:32px; font-family:'Courier New',monospace; color:#fff; font-weight:700; line-height:1; }
+    #radial-val { font-size:56px; font-family:'Courier New',monospace; color:#fff; font-weight:700; line-height:1; }
     #tofrom-text {
-      font-size:22px; font-weight:700; line-height:1;
+      font-size:30px; font-weight:700; line-height:1;
       font-family:'Courier New',monospace;
       color:#333; letter-spacing:1px;
     }
@@ -268,7 +268,7 @@
 
         <g clip-path="url(#clip)">
 
-          <circle cx="150" cy="150" r="149" fill="#090a0d" stroke="#35383f" stroke-width="2"/>
+          <circle cx="150" cy="150" r="149" fill="#090a0d"/>
 
           <!-- ① Rosa de compass -->
           <g id="g-compass"></g>
@@ -317,8 +317,6 @@
           <!-- ⑥ Lubber line -->
           <rect x="145" y="10" width="10" height="22" rx="2.5" fill="#dde0ea"/>
 
-          <circle cx="150" cy="150" r="149" fill="none" stroke="#1a1c22" stroke-width="5"/>
-          <circle cx="150" cy="150" r="141" fill="none" stroke="#35383f" stroke-width="1"/>
 
         </g>
 
@@ -504,7 +502,7 @@ function update() {
 // ═══════════════════════════════════════════════════════════
 function drawCompassRose() {
   const g = $('g-compass');
-  const CX=150, CY=150, R=130;
+  const CX=150, CY=150, R=140;
   const LABELS = {
     0:'N', 30:'03', 60:'06', 90:'E',
     120:'12', 150:'15', 180:'S',
