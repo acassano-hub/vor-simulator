@@ -144,11 +144,11 @@
     .info-col-r { align-items:flex-end; }
     .info-numrow { display:flex; align-items:baseline; gap:4px; }
     #vor-badge {
-      font-size:14px; color:#f0c040; font-weight:700;
+      font-size:20px; color:#f0c040; font-weight:700;
       font-family:'Courier New',monospace; letter-spacing:1px; line-height:1;
     }
     .info-r-label {
-      font-size:14px; color:#ffffff; font-weight:700;
+      font-size:20px; color:#ffffff; font-weight:700;
       font-family:'Courier New',monospace; letter-spacing:1px; line-height:1;
     }
     #dme-val    { font-size:40px; font-family:'Courier New',monospace; color:#ff5555; font-weight:700; line-height:1; }
@@ -257,16 +257,18 @@
     </div>
 
     <div class="hsi-container">
-      <svg id="hsi" viewBox="0 0 300 300">
+      <svg id="hsi" viewBox="14 14 272 272">
         <defs>
           <clipPath id="clip">
             <circle cx="150" cy="150" r="141"/>
           </clipPath>
         </defs>
 
-        <circle cx="150" cy="150" r="149" fill="#090a0d" stroke="#35383f" stroke-width="2"/>
+        <rect x="0" y="0" width="300" height="300" fill="#090a0d"/>
 
         <g clip-path="url(#clip)">
+
+          <circle cx="150" cy="150" r="149" fill="#090a0d" stroke="#35383f" stroke-width="2"/>
 
           <!-- ① Rosa de compass -->
           <g id="g-compass"></g>
@@ -315,10 +317,10 @@
           <!-- ⑥ Lubber line -->
           <rect x="145" y="10" width="10" height="22" rx="2.5" fill="#dde0ea"/>
 
-        </g>
+          <circle cx="150" cy="150" r="149" fill="none" stroke="#1a1c22" stroke-width="5"/>
+          <circle cx="150" cy="150" r="141" fill="none" stroke="#35383f" stroke-width="1"/>
 
-        <circle cx="150" cy="150" r="149" fill="none" stroke="#1a1c22" stroke-width="5"/>
-        <circle cx="150" cy="150" r="141" fill="none" stroke="#35383f" stroke-width="1"/>
+        </g>
 
         <text id="hdg-text" x="150" y="43" text-anchor="middle"
               font-size="12" font-family="'Courier New',monospace" fill="#777">N↑</text>
