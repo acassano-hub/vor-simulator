@@ -111,6 +111,21 @@
     }
     .ctrl-btn-180:active { background:#e0e0e0; }
 
+    /* ── Botón activación modo VAR ── */
+    .btn-varmode {
+      width:100%; flex-shrink:0;
+      background:none; border:1px solid #2a2d38; color:#555;
+      font-size:15px; font-family:'Courier New',monospace;
+      border-radius:6px; padding:3px 0; cursor:pointer;
+      text-align:center; letter-spacing:1px;
+      user-select:none; -webkit-user-select:none;
+    }
+    .btn-varmode.active { border-color:#ff9900; color:#ff9900; background:#1a1200; }
+    .side-hdg.hdg-varmode .ctrl-tag    { color:#ff9900; }
+    .side-hdg.hdg-varmode #hdg-display { color:#ff9900; font-size:42px; }
+    .side-hdg.hdg-varmode .ctrl-group  { border-color:#ff9900; border-width:2px; }
+    .side-hdg.hdg-varmode .ctrl-btn-180 { background:#ff9900; color:#000; border-color:#ff9900; }
+
     /* ── TOP BAR ── */
     .top-bar {
       width:100%; flex-shrink:0;
@@ -344,10 +359,11 @@
   <!-- HDG — panel derecho -->
   <div class="side-panel side-hdg">
     <div class="ctrl-header">
-      <span class="ctrl-tag">HDG</span>
+      <span class="ctrl-tag" id="hdg-ctrl-tag">HDG</span>
       <span id="hdg-display">000°</span>
     </div>
-    <div class="ctrl-btn-180" onclick="changeHDG(180)">+180</div>
+    <button id="btn-varmode" class="btn-varmode" onclick="toggleMagVarEdit()">▶ VAR</button>
+    <div id="hdg-plus180" class="ctrl-btn-180" onclick="changeHDG(180)">+180</div>
     <div class="ctrl-group">
       <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeHDG(+10)">▲▲</div>
       <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeHDG(+1)">▲</div>
@@ -423,7 +439,8 @@ const S = {
   gpsTrack:null, gpsSpeed:0, gpsAcc:null,
   gpsActive:false, watchId:null,
   selectedVOR:'PAR', obs:0, hdgBug:0,
-  magVar: getMagVar('PAR')
+  magVar: getMagVar('PAR'),
+  editMagVar: false
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -554,9 +571,47 @@ function changeOBS(delta) {
 }
 
 function changeHDG(delta) {
+  if (S.editMagVar) {
+    if (delta === 180) { toggleMagVarEdit(); return; }
+    changeMagVar(delta * 0.1);
+    return;
+  }
   S.hdgBug = norm360(S.hdgBug + delta);
   $('hdg-display').textContent = pad3(S.hdgBug)+'°';
   update();
+}
+
+function toggleMagVarEdit() {
+  S.editMagVar = !S.editMagVar;
+  const panel = document.querySelector('.side-hdg');
+  const btn   = $('btn-varmode');
+  const disp  = $('hdg-display');
+  const btn180 = $('hdg-plus180');
+
+  if (S.editMagVar) {
+    panel.classList.add('hdg-varmode');
+    btn.classList.add('active');
+    btn.textContent = '● VAR';
+    btn180.textContent = '✓ LISTO';
+    showMagVar();
+  } else {
+    localStorage.setItem('magVar_' + S.selectedVOR, S.magVar);
+    panel.classList.remove('hdg-varmode');
+    btn.classList.remove('active');
+    btn.textContent = '▶ VAR';
+    btn180.textContent = '+180';
+    disp.textContent = pad3(S.hdgBug) + '°';
+  }
+}
+
+function changeMagVar(delta) {
+  S.magVar = Math.round((S.magVar + delta) * 10) / 10;
+  showMagVar();
+  update();
+}
+
+function showMagVar() {
+  $('hdg-display').textContent = (S.magVar >= 0 ? '+' : '') + S.magVar.toFixed(1);
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -591,6 +646,7 @@ function renderNAVCards() {
         <div class="vor-card-magvar">${mv > 0 ? '+' : ''}${mv}°</div>
       </div>`;
     card.onclick = () => {
+      if (S.editMagVar) { S.editMagVar = false; /* cancelar modo sin guardar */ }
       S.selectedVOR = id;
       S.magVar = getMagVar(id);
       $('vor-badge').textContent = id;
