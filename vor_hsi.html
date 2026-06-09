@@ -39,7 +39,7 @@
 
     /* ── Paneles laterales — columna vertical ── */
     .side-panel {
-      width:170px; flex-shrink:0;
+      width:155px; flex-shrink:0;
       display:flex; flex-direction:column;
       align-items:stretch;
       padding:6px; gap:5px;
@@ -66,10 +66,12 @@
     .ctrl-group-obs { border-color:#f0c040; border-width:2px; }
 
     .ctrl-tag {
-      font-size:16px; color:#888;
+      font-size:26px; font-weight:700;
       font-family:'Courier New',monospace;
       letter-spacing:1px;
     }
+    .side-obs .ctrl-tag { color:#f0c040; }
+    .side-hdg .ctrl-tag { color:#00e5ff; }
     #obs-display {
       font-size:52px; color:#f0c040;
       font-weight:700;
@@ -140,27 +142,28 @@
     }
     #hsi { display:block; max-height:100%; max-width:100%; }
 
-    /* ── Info-bar: VOR · DME izquierda | Radial derecha — una fila ── */
+    /* ── Info-bar: label arriba + número abajo ── */
     .info-bar {
       width:100%; flex-shrink:0;
       display:flex; flex-direction:row;
-      align-items:center; justify-content:space-between;
-      padding:3px 6px 5px;
+      align-items:flex-end; justify-content:space-between;
+      padding:2px 6px 4px;
     }
-    .info-left  { display:flex; flex-direction:row; align-items:baseline; gap:8px; flex-shrink:0; }
-    .info-right { flex-shrink:0; }
-
-    .vor-badge {
-      font-size:40px;
+    .info-col   { display:flex; flex-direction:column; align-items:flex-start; flex-shrink:0; }
+    .info-col-r { align-items:flex-end; }
+    .info-tofrom { flex-shrink:0; display:flex; align-items:flex-end; padding-bottom:8px; }
+    .info-label {
+      font-size:18px; color:#777;
+      font-family:'Courier New',monospace; letter-spacing:2px; line-height:1.2;
+    }
+    .info-numrow { display:flex; align-items:baseline; gap:4px; }
+    #dme-val    { font-size:56px; font-family:'Courier New',monospace; color:#ff5555; font-weight:700; line-height:1; }
+    .dme-nm     { font-size:22px; color:#fff; font-family:'Courier New',monospace; }
+    #radial-val { font-size:56px; font-family:'Courier New',monospace; color:#fff; font-weight:700; line-height:1; }
+    #tofrom-text {
+      font-size:26px; font-weight:700;
       font-family:'Courier New',monospace;
-      color:#e8ecf4; letter-spacing:2px;
-      font-weight:700; line-height:1;
-    }
-    #dme-val  { font-size:40px; font-family:'Courier New',monospace; color:#ff5555; font-weight:700; }
-    .dme-nm   { font-size:20px; color:#fff; font-family:'Courier New',monospace; }
-    #radial-val {
-      font-size:40px; font-family:'Courier New',monospace;
-      color:#fff; font-weight:700;
+      color:#333; letter-spacing:1px;
     }
 
     /* ════ SETTINGS SCREEN ════ */
@@ -240,7 +243,6 @@
     <div class="ctrl-header">
       <span class="ctrl-tag">OBS</span>
       <span id="obs-display">000°</span>
-      <span id="tofrom-text">---</span>
     </div>
     <div class="ctrl-btn-180" onclick="changeOBS(180)">+180</div>
     <div class="ctrl-group ctrl-group-obs">
@@ -329,13 +331,19 @@
     </div>
 
     <div class="info-bar">
-      <div class="info-left">
-        <span class="vor-badge" id="vor-badge">PAR</span>
-        <span id="dme-val">–––</span>
-        <span class="dme-nm">nm</span>
+      <div class="info-col">
+        <span class="info-label" id="vor-badge">PAR</span>
+        <div class="info-numrow">
+          <span id="dme-val">–––</span>
+          <span class="dme-nm">nm</span>
+        </div>
       </div>
-      <div class="info-right">
-        <span id="radial-val">R –––°</span>
+      <div class="info-tofrom">
+        <span id="tofrom-text">---</span>
+      </div>
+      <div class="info-col info-col-r">
+        <span class="info-label">R</span>
+        <span id="radial-val">–––°</span>
       </div>
     </div>
 
@@ -494,7 +502,7 @@ function update() {
 
   $('g-rmi').setAttribute('transform', `rotate(${norm360(brgToVOR-magHeading)},150,150)`);
   $('dme-val')   .textContent = dist.toFixed(1);
-  $('radial-val').textContent = 'R ' + pad3(Math.round(magRadial)) + '°';
+  $('radial-val').textContent = pad3(Math.round(magRadial)) + '°';
 }
 
 // ═══════════════════════════════════════════════════════════
