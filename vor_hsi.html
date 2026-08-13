@@ -53,6 +53,14 @@
       display:flex; flex-direction:column;
       align-items:center; gap:1px;
     }
+    /* Encabezado tocable (HDG ⇄ HOLD) */
+    .ctrl-header.tap {
+      cursor:pointer;
+      border:1px solid #2a2d38; border-radius:10px;
+      padding:2px 0;
+      user-select:none; -webkit-user-select:none;
+    }
+    .ctrl-header.tap:active { background:#1a1d24; }
 
     /* Grupo: solo botones flecha apilados */
     .ctrl-group {
@@ -126,16 +134,23 @@
     .side-hdg.hdg-varmode .ctrl-group  { border-color:#ff9900; border-width:2px; }
     .side-hdg.hdg-varmode .ctrl-btn-180 { background:#ff9900; color:#000; border-color:#ff9900; }
 
+    /* ── Modo HOLD (circuito de espera) — violeta ── */
+    .side-hdg.hdg-holdmode .ctrl-tag     { color:#d060ff; }
+    .side-hdg.hdg-holdmode #hdg-display  { color:#d060ff; }
+    .side-hdg.hdg-holdmode .ctrl-header  { border-color:#d060ff; }
+    .side-hdg.hdg-holdmode .ctrl-group   { border-color:#d060ff; border-width:2px; }
+    .side-hdg.hdg-holdmode .ctrl-btn-180 { background:#d060ff; color:#000; border-color:#d060ff; }
+    .btn-varmode.hold { border-color:#d060ff; color:#d060ff; background:#1a0a22; }
+
     /* ── TOP BAR ── */
     .top-bar {
       width:100%; flex-shrink:0;
       display:flex; justify-content:space-between; align-items:center;
       padding:1px 6px 0;
     }
-    .btn-settings {
-      background:none; border:none;
-      color:#5a8acc; font-size:28px; line-height:1;
-      cursor:pointer; padding:2px 4px; border-radius:6px;
+    #hold-entry {
+      font-size:22px; color:#d060ff; font-weight:700;
+      font-family:'Courier New',monospace; letter-spacing:1px; line-height:1;
     }
     #gps-top { display:none; }
     #gps-top.on { display:none; }
@@ -158,10 +173,16 @@
     .info-col   { display:flex; flex-direction:column; align-items:flex-start; flex-shrink:0; }
     .info-col-r { align-items:flex-end; }
     .info-numrow { display:flex; align-items:baseline; gap:4px; }
+    /* Badge de la NAV AID — tocarlo abre la configuración */
     #vor-badge {
       font-size:30px; color:#f0c040; font-weight:700;
       font-family:'Courier New',monospace; letter-spacing:1px; line-height:1;
+      display:inline-block;
+      border:1px solid #4a5568; border-radius:8px;
+      padding:3px 9px 4px; cursor:pointer;
+      user-select:none; -webkit-user-select:none;
     }
+    #vor-badge:active { background:#1a1d24; }
     .info-r-label {
       font-size:30px; color:#ffffff; font-weight:700;
       font-family:'Courier New',monospace; letter-spacing:1px; line-height:1;
@@ -266,7 +287,7 @@
   <div class="center-panel">
 
     <div class="top-bar">
-      <button class="btn-settings" onclick="showSettings()">⚙</button>
+      <span id="hold-entry"></span>
       <span id="gps-top" style="display:none">GPS inactivo</span>
       <span id="tofrom-text">---</span>
     </div>
@@ -326,10 +347,19 @@
             <line x1="141" y1="224" x2="159" y2="224" stroke="#f0c040" stroke-width="2.5"/>
           </g>
 
-          <!-- ⑤ Avión -->
+          <!-- ⑤ Circuito de espera (HOLD) — fijo en el centro, gira con el compás -->
+          <g id="g-hold" style="display:none">
+            <path id="hold-path" fill="none" stroke="#d060ff" stroke-width="3.5"
+                  stroke-linejoin="round" opacity="0.95"/>
+            <polygon id="hold-arr-in"  fill="#d060ff"/>
+            <polygon id="hold-arr-out" fill="#d060ff"/>
+            <circle cx="150" cy="150" r="10" fill="none" stroke="#d060ff" stroke-width="2.5"/>
+          </g>
+
+          <!-- ⑥ Avión -->
           <circle cx="150" cy="150" r="5.5" fill="#dde0ea"/>
 
-          <!-- ⑥ Lubber line -->
+          <!-- ⑦ Lubber line -->
           <rect x="145" y="10" width="10" height="22" rx="2.5" fill="#dde0ea"/>
 
 
@@ -342,7 +372,7 @@
 
     <div class="info-bar">
       <div class="info-col">
-        <span id="vor-badge">PAR</span>
+        <span id="vor-badge" onclick="showSettings()">PAR</span>
         <div class="info-numrow">
           <span id="dme-val">–––</span>
           <span class="dme-nm">nm</span>
@@ -358,11 +388,11 @@
 
   <!-- HDG — panel derecho -->
   <div class="side-panel side-hdg">
-    <div class="ctrl-header">
+    <div class="ctrl-header tap" onclick="toggleHoldMode()">
       <span class="ctrl-tag" id="hdg-ctrl-tag">HDG</span>
       <span id="hdg-display">000°</span>
     </div>
-    <button id="btn-varmode" class="btn-varmode" onclick="toggleMagVarEdit()">▶ VAR</button>
+    <button id="btn-varmode" class="btn-varmode" onclick="varBtnTap()">▶ VAR</button>
     <div id="hdg-plus180" class="ctrl-btn-180" onclick="changeHDG(180)">+180</div>
     <div class="ctrl-group">
       <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeHDG(+10)">▲▲</div>
@@ -440,7 +470,8 @@ const S = {
   gpsActive:false, watchId:null,
   selectedVOR:'PAR', obs:0, hdgBug:0,
   magVar: getMagVar('PAR'),
-  editMagVar: false
+  editMagVar: false,
+  holdMode: false, holdCourse: null, holdRight: true
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -492,6 +523,14 @@ function update() {
   $('g-course') .setAttribute('transform', `rotate(${norm360(S.obs-magHeading)},150,150)`);
   $('g-hdg-bug').setAttribute('transform', `rotate(${norm360(S.hdgBug-magHeading)},150,150)`);
   $('hdg-text').textContent = useTrack ? pad3(Math.round(magHeading))+'°' : 'N↑';
+
+  if (S.holdMode) {
+    // El circuito se orienta con su rumbo de acercamiento, igual que el course bar
+    $('g-hold').setAttribute('transform',
+      `rotate(${norm360(S.holdCourse-magHeading)},150,150)`);
+    $('hold-entry').textContent = 'ENTRADA ' + (useTrack
+      ? holdEntry(magHeading, S.holdCourse, S.holdRight) : '—');
+  }
 
   if (S.acLat === null) return;
 
@@ -562,6 +601,91 @@ function drawCompassRose() {
 }
 
 // ═══════════════════════════════════════════════════════════
+//  CIRCUITO DE ESPERA (HOLD)
+// ═══════════════════════════════════════════════════════════
+//  Se dibuja sin rotar con la pata de acercamiento apuntando
+//  hacia arriba y el fijo en el centro del HSI (150,150).
+//  El transform rotate(holdCourse - magHeading) lo orienta.
+//
+//  Estándar (virajes a la derecha): al cruzar el fijo se vira
+//  180° a la derecha, se vuela la pata de alejamiento paralela
+//  y en sentido opuesto, y otro 180° reintercepta el acercamiento.
+// ═══════════════════════════════════════════════════════════
+const HOLD_R = 22;   // radio de viraje (px SVG)
+const HOLD_L = 58;   // largo de las patas
+
+function buildHoldGeometry() {
+  const CX=150, CY=150;
+  const s     = S.holdRight ?  1 : -1;   // lado del circuito
+  const sweep = S.holdRight ? '1' : '0'; // sentido de los arcos SVG
+  const xo    = CX + s * 2 * HOLD_R;     // eje de la pata de alejamiento
+  const yb    = CY + HOLD_L;             // extremo lejano de las patas
+
+  $('hold-path').setAttribute('d',
+    `M ${CX},${CY} A ${HOLD_R},${HOLD_R} 0 0 ${sweep} ${xo},${CY} ` +
+    `L ${xo},${yb} A ${HOLD_R},${HOLD_R} 0 0 ${sweep} ${CX},${yb} Z`);
+
+  // Flechas de sentido: acercamiento sube al fijo, alejamiento baja
+  const ym = CY + HOLD_L/2;
+  $('hold-arr-in') .setAttribute('points', `${CX},${ym-10} ${CX-7},${ym+4} ${CX+7},${ym+4}`);
+  $('hold-arr-out').setAttribute('points', `${xo},${ym+10} ${xo-7},${ym-4} ${xo+7},${ym-4}`);
+}
+
+// Sector de entrada según rumbo magnético al cruzar el fijo (regla 70°/110°).
+// d = giro desde el curso de acercamiento hacia el lado de la espera:
+//   0–180°   sector directo (180°)
+//   180–290° sector paralelo (110°, lado de no espera)
+//   290–360° sector gota (70°, pegado al lado de la espera)
+function holdEntry(magHeading, course, right) {
+  const d = right ? norm360(magHeading - course) : norm360(course - magHeading);
+  if (d < 180) return 'DIRECTA';
+  if (d < 290) return 'PARALELA';
+  return 'GOTA';
+}
+
+function toggleHoldMode() {
+  if (S.editMagVar) toggleMagVarEdit();   // el modo VAR no convive con HOLD
+  S.holdMode = !S.holdMode;
+
+  const panel = document.querySelector('.side-hdg');
+  const btn   = $('btn-varmode');
+
+  if (S.holdMode) {
+    if (S.holdCourse === null) S.holdCourse = S.obs;  // arranca en el curso seleccionado
+    panel.classList.add('hdg-holdmode');
+    btn.classList.add('hold');
+    $('hdg-ctrl-tag').textContent = 'HOLD';
+    $('hdg-display') .textContent = pad3(S.holdCourse)+'°';
+    $('g-hold').style.display = '';
+    buildHoldGeometry();
+    showHoldTurn();
+  } else {
+    panel.classList.remove('hdg-holdmode');
+    btn.classList.remove('hold');
+    btn.textContent = '▶ VAR';
+    $('hdg-ctrl-tag').textContent = 'HDG';
+    $('hdg-display') .textContent = pad3(S.hdgBug)+'°';
+    $('g-hold').style.display  = 'none';
+    $('hold-entry').textContent = '';
+  }
+  update();
+}
+
+function showHoldTurn() {
+  $('btn-varmode').textContent = S.holdRight ? '↻ DER' : '↺ IZQ';
+}
+
+function toggleHoldTurn() {
+  S.holdRight = !S.holdRight;
+  showHoldTurn();
+  buildHoldGeometry();
+  update();
+}
+
+// El botón bajo el encabezado cambia de función según el modo
+function varBtnTap() { S.holdMode ? toggleHoldTurn() : toggleMagVarEdit(); }
+
+// ═══════════════════════════════════════════════════════════
 //  CONTROLES
 // ═══════════════════════════════════════════════════════════
 function changeOBS(delta) {
@@ -571,6 +695,12 @@ function changeOBS(delta) {
 }
 
 function changeHDG(delta) {
+  if (S.holdMode) {
+    S.holdCourse = norm360(S.holdCourse + delta);
+    $('hdg-display').textContent = pad3(S.holdCourse)+'°';
+    update();
+    return;
+  }
   if (S.editMagVar) {
     if (delta === 180) { toggleMagVarEdit(); return; }
     changeMagVar(delta * 0.1);
@@ -759,6 +889,7 @@ checkForUpdate();
 //  INIT
 // ═══════════════════════════════════════════════════════════
 drawCompassRose();
+buildHoldGeometry();
 $('magvar-input').value = S.magVar;
 $('magvar-navid').textContent = S.selectedVOR;
 requestWakeLock();
