@@ -47,7 +47,7 @@
     .side-obs { padding-left:max(6px, env(safe-area-inset-left)); }
     .side-hdg { padding-right:max(6px, env(safe-area-inset-right)); }
 
-    /* Encabezado (label + valor + TO/FROM) — fuera del rectángulo */
+    /* Encabezado (label + valor) — fuera del rectángulo */
     .ctrl-header {
       flex-shrink:0;
       display:flex; flex-direction:column;
@@ -62,7 +62,7 @@
     }
     .ctrl-header.tap:active { background:#1a1d24; }
 
-    /* Grupo: solo botones flecha apilados */
+    /* Grupo: botones flecha apilados */
     .ctrl-group {
       flex:1; min-height:0;
       background:#111318;
@@ -119,7 +119,7 @@
     }
     .ctrl-btn-180:active { background:#e0e0e0; }
 
-    /* ── Botón activación modo VAR ── */
+    /* ── Botón secundario (VAR / HOLD-TURN) ── */
     .btn-varmode {
       width:100%; flex-shrink:0;
       background:#1e2028; border:1px solid #555; color:#fff;
@@ -134,7 +134,7 @@
     .side-hdg.hdg-varmode .ctrl-group  { border-color:#ff9900; border-width:2px; }
     .side-hdg.hdg-varmode .ctrl-btn-180 { background:#ff9900; color:#000; border-color:#ff9900; }
 
-    /* ── Modo HOLD (circuito de espera) — violeta ── */
+    /* ── Modo HOLD — violeta ── */
     .side-hdg.hdg-holdmode .ctrl-tag     { color:#d060ff; }
     .side-hdg.hdg-holdmode #hdg-display  { color:#d060ff; }
     .side-hdg.hdg-holdmode .ctrl-header  { border-color:#d060ff; }
@@ -152,10 +152,12 @@
       font-size:22px; color:#d060ff; font-weight:700;
       font-family:'Courier New',monospace; letter-spacing:1px; line-height:1;
     }
-    #gps-top { display:none; }
-    #gps-top.on { display:none; }
+    #gps-top {
+      display:none;
+      font-size:16px; color:#666; font-family:'Courier New',monospace;
+    }
 
-    /* ── HSI container (crece para llenar espacio) ── */
+    /* ── HSI container ── */
     .hsi-container {
       flex:1; min-height:0;
       width:100%;
@@ -163,7 +165,7 @@
     }
     #hsi { display:block; width:100%; height:100%; max-width:100%; max-height:100%; }
 
-    /* ── Info-bar: 2 columnas, label arriba + número abajo ── */
+    /* ── Info-bar ── */
     .info-bar {
       width:100%; flex-shrink:0;
       display:flex; flex-direction:row;
@@ -173,7 +175,6 @@
     .info-col   { display:flex; flex-direction:column; align-items:flex-start; flex-shrink:0; }
     .info-col-r { align-items:flex-end; }
     .info-numrow { display:flex; align-items:baseline; gap:4px; }
-    /* Badge de la NAV AID — tocarlo abre la configuración */
     #vor-badge {
       font-size:30px; color:#f0c040; font-weight:700;
       font-family:'Courier New',monospace; letter-spacing:1px; line-height:1;
@@ -200,6 +201,7 @@
     .settings-header {
       width:100%; display:flex; align-items:center; gap:10px;
       padding:10px 14px; border-bottom:1px solid #18191f;
+      flex-shrink:0;
     }
     .btn-back {
       background:none; border:none; color:#5a8acc;
@@ -211,19 +213,10 @@
       font-size:28px; color:#777; letter-spacing:2px;
       font-family:'Courier New',monospace;
     }
-    .settings-gps-fixed {
-      width:100%; padding:10px 14px;
-      border-bottom:1px solid #18191f; flex-shrink:0;
-    }
     .settings-body {
-      width:100%; padding:14px;
-      display:flex; flex-direction:column; gap:18px;
+      width:100%; padding:10px;
+      display:flex; flex-direction:column;
       overflow-y:auto; -webkit-overflow-scrolling:touch; flex:1;
-    }
-    .s-label {
-      font-size:20px; color:#888; letter-spacing:2px;
-      text-transform:uppercase; margin-bottom:8px;
-      font-family:'Courier New',monospace;
     }
     .vor-cards { display:flex; flex-direction:column; gap:8px; }
     .vor-card {
@@ -239,28 +232,10 @@
     .vor-card-id { font-size:40px; font-weight:700; font-family:'Courier New',monospace; color:#cdd0d8; letter-spacing:2px; }
     .vor-card.active .vor-card-id { color:#7eb8f7; }
     .vor-card-name { font-size:24px; color:#888; margin-top:1px; }
-    .vor-card-right { text-align:right; }
-    .vor-card-magvar { font-size:26px; font-family:'Courier New',monospace; color:#f0c040; }
-    .magvar-section { display:flex; flex-direction:column; gap:8px; }
-    .magvar-title { font-size:20px; color:#888; letter-spacing:2px; text-transform:uppercase; font-family:'Courier New',monospace; }
-    .magvar-row {
-      display:flex; align-items:center; justify-content:space-between;
-      padding:14px 16px; background:#141618;
-      border:1px solid #202228; border-radius:12px; gap:10px;
-    }
-    .magvar-label { font-size:28px; color:#ccc; white-space:nowrap; }
-    #magvar-input {
-      width:210px; background:#0c0e12; border:1px solid #2d3038;
-      color:#f0c040; padding:8px 10px; border-radius:8px;
-      font-size:42px; font-family:'Courier New',monospace; text-align:center;
-    }
-    #gps-btn-settings {
-      padding:13px; background:#0d2a14; border:1px solid #1a4a22;
-      color:#4fd870; border-radius:10px; font-size:28px;
-      cursor:pointer; text-align:center; letter-spacing:.5px;
-    }
-    #gps-btn-settings.on { background:#081a0c; border-color:#2a7a36; color:#38c057; }
-    #gps-coords-settings { font-size:22px; color:#555; font-family:'Courier New',monospace; text-align:center; }
+    .vor-card-right { text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:2px; }
+    .vor-card-brg { font-size:22px; font-family:'Courier New',monospace; color:#00e5ff; letter-spacing:1px; }
+    .vor-card-dme { font-size:22px; font-family:'Courier New',monospace; color:#ff5555; }
+    .vor-card-dme-nm { font-size:14px; color:#555; }
   </style>
 </head>
 <body>
@@ -283,12 +258,12 @@
     </div>
   </div>
 
-  <!-- Centro: GPS / badge / HSI / DME -->
+  <!-- Centro: top-bar / HSI / info-bar -->
   <div class="center-panel">
 
     <div class="top-bar">
       <span id="hold-entry"></span>
-      <span id="gps-top" style="display:none">GPS inactivo</span>
+      <span id="gps-top"></span>
       <span id="tofrom-text">---</span>
     </div>
 
@@ -347,7 +322,7 @@
             <line x1="141" y1="224" x2="159" y2="224" stroke="#f0c040" stroke-width="2.5"/>
           </g>
 
-          <!-- ⑤ Circuito de espera (HOLD) — fijo en el centro, gira con el compás -->
+          <!-- ⑤ Circuito de espera (HOLD) -->
           <g id="g-hold" style="display:none">
             <path id="hold-path" fill="none" stroke="#d060ff" stroke-width="3.5"
                   stroke-linejoin="round" opacity="0.95"/>
@@ -361,7 +336,6 @@
 
           <!-- ⑦ Lubber line -->
           <rect x="145" y="10" width="10" height="22" rx="2.5" fill="#dde0ea"/>
-
 
         </g>
 
@@ -405,34 +379,16 @@
 </div><!-- /screen-main -->
 
 
-<!-- ══════════════════ CONFIGURACIÓN ══════════════════ -->
+<!-- ══════════════════ SELECCIÓN NAV AID ══════════════════ -->
 <div id="screen-settings" class="screen" style="display:none; flex-direction:column;">
 
   <div class="settings-header">
     <button class="btn-back" onclick="showMain()">← Volver</button>
-    <span class="settings-title">CONFIGURACIÓN</span>
-  </div>
-
-  <div class="settings-gps-fixed">
-    <div class="s-label" style="margin-bottom:6px">GPS</div>
-    <div id="gps-btn-settings" onclick="toggleGPS()">▶  Iniciar GPS</div>
-    <div id="gps-coords-settings">—</div>
+    <span class="settings-title">NAV AID</span>
   </div>
 
   <div class="settings-body">
-    <div>
-      <div class="s-label">NAV AID activa</div>
-      <div class="vor-cards" id="vor-cards"></div>
-    </div>
-    <div class="magvar-section">
-      <div class="magvar-title">Declinación — <span id="magvar-navid">PAR</span></div>
-      <div class="magvar-row">
-        <span class="magvar-label">W = (-)</span>
-        <input type="number" id="magvar-input" class="magvar-input"
-               value="-9.55" step="0.05"
-               onchange="saveMagVar(parseFloat(this.value))">
-      </div>
-    </div>
+    <div class="vor-cards" id="vor-cards"></div>
   </div>
 
 </div>
@@ -452,13 +408,6 @@ const NAVAIDS = {
 function getMagVar(id) {
   const stored = localStorage.getItem('magVar_' + id);
   return stored !== null ? parseFloat(stored) : NAVAIDS[id].magVarDefault;
-}
-
-function saveMagVar(val) {
-  if (isNaN(val)) return;
-  S.magVar = val;
-  localStorage.setItem('magVar_' + S.selectedVOR, val);
-  update();
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -525,11 +474,10 @@ function update() {
   $('hdg-text').textContent = useTrack ? pad3(Math.round(magHeading))+'°' : 'N↑';
 
   if (S.holdMode) {
-    // El circuito se orienta con su rumbo de acercamiento, igual que el course bar
     $('g-hold').setAttribute('transform',
       `rotate(${norm360(S.holdCourse-magHeading)},150,150)`);
-    $('hold-entry').textContent = 'ENTRADA ' + (useTrack
-      ? holdEntry(magHeading, S.holdCourse, S.holdRight) : '—');
+    $('hold-entry').textContent = useTrack
+      ? holdEntry(magHeading, S.holdCourse, S.holdRight) : '—';
   }
 
   if (S.acLat === null) return;
@@ -554,7 +502,9 @@ function update() {
 }
 
 // ═══════════════════════════════════════════════════════════
-//  COMPASS ROSE
+//  COMPASS ROSE — labels orientados radialmente
+//  Cada label se rota rotate(deg, tx, ty) para que su base
+//  quede perpendicular al radio (legible desde el borde).
 // ═══════════════════════════════════════════════════════════
 function drawCompassRose() {
   const g = $('g-compass');
@@ -594,6 +544,8 @@ function drawCompassRose() {
       t.setAttribute('font-weight', isC ? '700' : '500');
       t.setAttribute('fill','#e8ecf4');
       t.setAttribute('font-family',"'Courier New',monospace");
+      // orientación radial: base del número perpendicular al radio
+      t.setAttribute('transform', `rotate(${deg},${tx},${ty})`);
       t.textContent = LABELS[deg];
       g.appendChild(t);
     }
@@ -603,55 +555,43 @@ function drawCompassRose() {
 // ═══════════════════════════════════════════════════════════
 //  CIRCUITO DE ESPERA (HOLD)
 // ═══════════════════════════════════════════════════════════
-//  Se dibuja sin rotar con la pata de acercamiento apuntando
-//  hacia arriba y el fijo en el centro del HSI (150,150).
-//  El transform rotate(holdCourse - magHeading) lo orienta.
-//
-//  Estándar (virajes a la derecha): al cruzar el fijo se vira
-//  180° a la derecha, se vuela la pata de alejamiento paralela
-//  y en sentido opuesto, y otro 180° reintercepta el acercamiento.
-// ═══════════════════════════════════════════════════════════
-const HOLD_R = 22;   // radio de viraje (px SVG)
-const HOLD_L = 58;   // largo de las patas
+const HOLD_R = 22;
+const HOLD_L = 58;
 
 function buildHoldGeometry() {
   const CX=150, CY=150;
-  const s     = S.holdRight ?  1 : -1;   // lado del circuito
-  const sweep = S.holdRight ? '1' : '0'; // sentido de los arcos SVG
-  const xo    = CX + s * 2 * HOLD_R;     // eje de la pata de alejamiento
-  const yb    = CY + HOLD_L;             // extremo lejano de las patas
+  const s     = S.holdRight ?  1 : -1;
+  const sweep = S.holdRight ? '1' : '0';
+  const xo    = CX + s * 2 * HOLD_R;
+  const yb    = CY + HOLD_L;
 
   $('hold-path').setAttribute('d',
     `M ${CX},${CY} A ${HOLD_R},${HOLD_R} 0 0 ${sweep} ${xo},${CY} ` +
     `L ${xo},${yb} A ${HOLD_R},${HOLD_R} 0 0 ${sweep} ${CX},${yb} Z`);
 
-  // Flechas de sentido: acercamiento sube al fijo, alejamiento baja
   const ym = CY + HOLD_L/2;
   $('hold-arr-in') .setAttribute('points', `${CX},${ym-10} ${CX-7},${ym+4} ${CX+7},${ym+4}`);
   $('hold-arr-out').setAttribute('points', `${xo},${ym+10} ${xo-7},${ym-4} ${xo+7},${ym-4}`);
 }
 
-// Sector de entrada según rumbo magnético al cruzar el fijo (regla 70°/110°).
-// d = giro desde el curso de acercamiento hacia el lado de la espera:
-//   0–180°   sector directo (180°)
-//   180–290° sector paralelo (110°, lado de no espera)
-//   290–360° sector gota (70°, pegado al lado de la espera)
+// Sector de entrada estándar (regla 70°/110°).
+// Devuelve 'DIRECTA', 'PARALELO' o 'GOTA'
 function holdEntry(magHeading, course, right) {
   const d = right ? norm360(magHeading - course) : norm360(course - magHeading);
   if (d < 180) return 'DIRECTA';
-  if (d < 290) return 'PARALELA';
+  if (d < 290) return 'PARALELO';
   return 'GOTA';
 }
 
 function toggleHoldMode() {
-  if (S.editMagVar) toggleMagVarEdit();   // el modo VAR no convive con HOLD
+  if (S.editMagVar) toggleMagVarEdit();
   S.holdMode = !S.holdMode;
 
   const panel = document.querySelector('.side-hdg');
   const btn   = $('btn-varmode');
 
   if (S.holdMode) {
-    if (S.holdCourse === null) S.holdCourse = S.obs;  // arranca en el curso seleccionado
+    if (S.holdCourse === null) S.holdCourse = S.obs;
     panel.classList.add('hdg-holdmode');
     btn.classList.add('hold');
     $('hdg-ctrl-tag').textContent = 'HOLD';
@@ -682,7 +622,6 @@ function toggleHoldTurn() {
   update();
 }
 
-// El botón bajo el encabezado cambia de función según el modo
 function varBtnTap() { S.holdMode ? toggleHoldTurn() : toggleMagVarEdit(); }
 
 // ═══════════════════════════════════════════════════════════
@@ -759,13 +698,33 @@ function showMain() {
   update();
 }
 
+// Cards ordenadas por distancia (si hay GPS), con BRG y DME.
+// Al tocar → selecciona y regresa a pantalla principal.
 function renderNAVCards() {
   const c = $('vor-cards');
   c.innerHTML = '';
-  Object.entries(NAVAIDS).forEach(([id, v]) => {
-    const mv = getMagVar(id);
+
+  const entries = Object.entries(NAVAIDS);
+
+  // Ordenar por distancia si hay posición GPS
+  if (S.acLat !== null) {
+    entries.sort(([,a], [,b]) =>
+      distNm(S.acLat, S.acLon, a.lat, a.lon) -
+      distNm(S.acLat, S.acLon, b.lat, b.lon)
+    );
+  }
+
+  entries.forEach(([id, v]) => {
+    let brgStr = '---°', dmeStr = '---';
+    if (S.acLat !== null) {
+      const trueBRG = bearing(S.acLat, S.acLon, v.lat, v.lon);
+      const magBRG  = norm360(trueBRG - getMagVar(id));
+      brgStr = pad3(Math.round(magBRG)) + '°';
+      dmeStr = distNm(S.acLat, S.acLon, v.lat, v.lon).toFixed(1);
+    }
+
     const card = document.createElement('div');
-    card.className = 'vor-card'+(id===S.selectedVOR?' active':'');
+    card.className = 'vor-card' + (id === S.selectedVOR ? ' active' : '');
     card.innerHTML = `
       <div class="vor-card-dot"></div>
       <div class="vor-card-main">
@@ -773,32 +732,27 @@ function renderNAVCards() {
         <div class="vor-card-name">${v.name}</div>
       </div>
       <div class="vor-card-right">
-        <div class="vor-card-magvar">${mv > 0 ? '+' : ''}${mv}°</div>
+        <div class="vor-card-brg">${brgStr}</div>
+        <div class="vor-card-dme">${dmeStr}<span class="vor-card-dme-nm"> nm</span></div>
       </div>`;
+
     card.onclick = () => {
-      if (S.editMagVar) { S.editMagVar = false; /* cancelar modo sin guardar */ }
+      if (S.editMagVar) S.editMagVar = false;
       S.selectedVOR = id;
       S.magVar = getMagVar(id);
       $('vor-badge').textContent = id;
-      $('magvar-input').value = S.magVar;
-      $('magvar-navid').textContent = id;
-      renderNAVCards();
-      update();
+      showMain(); // regresa automáticamente al seleccionar
     };
     c.appendChild(card);
   });
 }
 
 // ═══════════════════════════════════════════════════════════
-//  GPS
+//  GPS — arranca automáticamente al abrir la app
 // ═══════════════════════════════════════════════════════════
-function toggleGPS() { S.gpsActive ? stopGPS() : startGPS(); }
-
 function startGPS() {
-  if (!navigator.geolocation) { setGPSMsg('GPS no disponible'); return; }
-  setGPSMsg('Solicitando…');
-  $('gps-btn-settings').textContent = '⏳  Conectando…';
-  if (S.watchId!==null) navigator.geolocation.clearWatch(S.watchId);
+  if (!navigator.geolocation) return;
+  if (S.watchId !== null) navigator.geolocation.clearWatch(S.watchId);
 
   S.watchId = navigator.geolocation.watchPosition(
     pos => {
@@ -808,38 +762,18 @@ function startGPS() {
       S.gpsTrack = pos.coords.heading;
       S.gpsAcc   = pos.coords.accuracy;
       S.gpsActive = true;
-
-      const acc = `±${Math.round(S.gpsAcc)}m`;
-      $('gps-top').textContent = `GPS  ${acc}`;
-      $('gps-top').className   = 'on';
-      $('gps-btn-settings').textContent = '■  Detener GPS';
-      $('gps-btn-settings').className   = 'on';
-
-      const coord = `${S.acLat.toFixed(5)}°  ${S.acLon.toFixed(5)}°`;
-      $('gps-coords-settings').textContent = coord;
+      $('gps-top').style.display = 'none';
       update();
     },
-    err => {
-      setGPSMsg(`Error: ${err.message}`);
-      $('gps-btn-settings').textContent = '↺  Reintentar';
-      $('gps-btn-settings').className   = '';
-      $('gps-top').className = '';
+    _err => {
       S.gpsActive = false;
+      const t = $('gps-top');
+      t.textContent = '⚠ GPS'; t.style.display = '';
+      setTimeout(startGPS, 15000); // reintento automático
     },
     { enableHighAccuracy:true, maximumAge:4000, timeout:20000 }
   );
 }
-
-function stopGPS() {
-  if (S.watchId!==null) { navigator.geolocation.clearWatch(S.watchId); S.watchId=null; }
-  S.gpsActive = false;
-  $('gps-btn-settings').textContent = '▶  Iniciar GPS';
-  $('gps-btn-settings').className   = '';
-  $('gps-top').textContent = 'GPS inactivo';
-  $('gps-top').className   = '';
-}
-
-function setGPSMsg(m) { $('gps-top').textContent = m; }
 
 // ═══════════════════════════════════════════════════════════
 //  UTILS
@@ -890,8 +824,7 @@ checkForUpdate();
 // ═══════════════════════════════════════════════════════════
 drawCompassRose();
 buildHoldGeometry();
-$('magvar-input').value = S.magVar;
-$('magvar-navid').textContent = S.selectedVOR;
+startGPS();
 requestWakeLock();
 </script>
 </body>
