@@ -245,7 +245,7 @@
 
   <!-- OBS — panel izquierdo -->
   <div class="side-panel side-obs">
-    <div class="ctrl-header">
+    <div class="ctrl-header tap" onclick="obsDirectTo()">
       <span class="ctrl-tag">OBS</span>
       <span id="obs-display">000°</span>
     </div>
@@ -627,6 +627,16 @@ function varBtnTap() { S.holdMode ? toggleHoldTurn() : toggleMagVarEdit(); }
 // ═══════════════════════════════════════════════════════════
 //  CONTROLES
 // ═══════════════════════════════════════════════════════════
+function obsDirectTo() {
+  if (S.acLat === null) return;
+  const vor        = NAVAIDS[S.selectedVOR];
+  const trueRadial = bearing(vor.lat, vor.lon, S.acLat, S.acLon);
+  const magRadial  = norm360(trueRadial - S.magVar);
+  S.obs = Math.round(norm360(magRadial + 180));
+  $('obs-display').textContent = pad3(S.obs) + '°';
+  update();
+}
+
 function changeOBS(delta) {
   S.obs = norm360(S.obs + delta);
   $('obs-display').textContent = pad3(S.obs)+'°';
