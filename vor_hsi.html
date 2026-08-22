@@ -152,11 +152,8 @@
       font-size:22px; color:#d060ff; font-weight:700;
       font-family:'Courier New',monospace; letter-spacing:1px; line-height:1;
       display:none; cursor:pointer;
-      border:1px solid #d060ff; border-radius:6px;
-      padding:3px 10px;
       user-select:none; -webkit-user-select:none;
     }
-    #hold-entry:active { background:#1a0a22; }
     #gps-top {
       display:none;
       font-size:16px; color:#666; font-family:'Courier New',monospace;
@@ -330,12 +327,12 @@
           <!-- ⑤ Circuito de espera (HOLD) -->
           <g id="g-hold" style="display:none">
             <!-- Líneas de sectores de entrada (punteadas) -->
-            <!-- Sector 1: perpendicular al course (separa DIRECTA de PARALELA+GOTA) -->
-            <line id="hold-sec1" x1="30" y1="150" x2="270" y2="150"
-                  stroke="#d060ff" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.5"/>
-            <!-- Sector 2: separa PARALELA de GOTA (70° desde inbound, lado de espera) -->
+            <!-- Sector 1: media línea hacia adelante del OBS (inbound track ahead) -->
+            <line id="hold-sec1" x1="150" y1="150" x2="150" y2="25"
+                  stroke="#d060ff" stroke-width="2.5" stroke-dasharray="6,4" opacity="0.55"/>
+            <!-- Sector 2: separa PARALELA de GOTA (70°/110° desde inbound, lado de espera) -->
             <line id="hold-sec2" x1="37" y1="109" x2="263" y2="191"
-                  stroke="#d060ff" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.5"/>
+                  stroke="#d060ff" stroke-width="2.5" stroke-dasharray="6,4" opacity="0.55"/>
             <path id="hold-path" fill="none" stroke="#d060ff" stroke-width="3.5"
                   stroke-linejoin="round" opacity="0.95"/>
             <polygon id="hold-arr-in"  fill="#d060ff"/>
@@ -642,13 +639,22 @@ function toggleHoldMode() {
 const HT = { active:false, flashing:false, secs:60, itvl:null, flashItvl:null };
 
 function holdTimerTap() {
-  if (!HT.active && !HT.flashing) {
-    // Iniciar cuenta regresiva
-    HT.secs = 60; HT.active = true; HT.flashing = false;
+  if (HT.flashing) {
+    // Al terminar y titilar → reinicia la cuenta
+    clearInterval(HT.flashItvl);
+    HT.flashing = false;
+    HT.secs = 60; HT.active = true;
+    clearInterval(HT.itvl);
+    HT.itvl = setInterval(holdTimerTick, 1000);
+    holdTimerRender();
+  } else if (!HT.active) {
+    // TIME → iniciar
+    HT.secs = 60; HT.active = true;
     clearInterval(HT.itvl);
     HT.itvl = setInterval(holdTimerTick, 1000);
     holdTimerRender();
   } else {
+    // Contando → detener y volver a TIME
     holdTimerReset();
   }
 }
@@ -682,12 +688,15 @@ function holdTimerRender() {
   const el = $('hold-entry');
   if (!el) return;
   if (HT.flashing) {
-    el.textContent = '0:00';
+    el.textContent   = '0:00';
+    el.style.fontSize = '33px';
     return;  // color manejado por flashItvl
   }
-  el.textContent   = HT.active
+  const nums = HT.active;
+  el.textContent    = nums
     ? (Math.floor(HT.secs/60) + ':' + String(HT.secs%60).padStart(2,'0'))
     : 'TIME';
+  el.style.fontSize  = nums ? '33px' : '22px';
   el.style.color       = '#d060ff';
   el.style.borderColor = '#d060ff';
 }
