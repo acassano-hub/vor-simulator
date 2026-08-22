@@ -151,7 +151,12 @@
     #hold-entry {
       font-size:22px; color:#d060ff; font-weight:700;
       font-family:'Courier New',monospace; letter-spacing:1px; line-height:1;
+      display:none; cursor:pointer;
+      border:1px solid #d060ff; border-radius:6px;
+      padding:3px 10px;
+      user-select:none; -webkit-user-select:none;
     }
+    #hold-entry:active { background:#1a0a22; }
     #gps-top {
       display:none;
       font-size:16px; color:#666; font-family:'Courier New',monospace;
@@ -262,7 +267,7 @@
   <div class="center-panel">
 
     <div class="top-bar">
-      <span id="hold-entry"></span>
+      <span id="hold-entry" onclick="holdTimerTap()">TIME</span>
       <span id="gps-top"></span>
       <span id="tofrom-text">---</span>
     </div>
@@ -324,6 +329,13 @@
 
           <!-- ⑤ Circuito de espera (HOLD) -->
           <g id="g-hold" style="display:none">
+            <!-- Líneas de sectores de entrada (punteadas) -->
+            <!-- Sector 1: perpendicular al course (separa DIRECTA de PARALELA+GOTA) -->
+            <line id="hold-sec1" x1="30" y1="150" x2="270" y2="150"
+                  stroke="#d060ff" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.5"/>
+            <!-- Sector 2: separa PARALELA de GOTA (70° desde inbound, lado de espera) -->
+            <line id="hold-sec2" x1="37" y1="109" x2="263" y2="191"
+                  stroke="#d060ff" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.5"/>
             <path id="hold-path" fill="none" stroke="#d060ff" stroke-width="3.5"
                   stroke-linejoin="round" opacity="0.95"/>
             <polygon id="hold-arr-in"  fill="#d060ff"/>
@@ -476,8 +488,6 @@ function update() {
   if (S.holdMode) {
     $('g-hold').setAttribute('transform',
       `rotate(${norm360(S.holdCourse-magHeading)},150,150)`);
-    $('hold-entry').textContent = useTrack
-      ? holdEntry(magHeading, S.holdCourse, S.holdRight) : '—';
   }
 
   if (S.acLat === null) return;
@@ -572,6 +582,18 @@ function buildHoldGeometry() {
   const ym = CY + HOLD_L/2;
   $('hold-arr-in') .setAttribute('points', `${CX},${ym-10} ${CX-7},${ym+4} ${CX+7},${ym+4}`);
   $('hold-arr-out').setAttribute('points', `${xo},${ym+10} ${xo-7},${ym-4} ${xo+7},${ym-4}`);
+
+  // Línea de sector 2: 70° desde el inbound, del lado de la espera
+  // hold DER: bearing 110° desde el fijo; hold IZQ: bearing 70° (mirror)
+  const RL = 120;
+  const brg2 = S.holdRight ? 110 : 70;
+  const dx2  = RL * Math.sin(toRad(brg2));
+  const dy2  = -RL * Math.cos(toRad(brg2));  // SVG y invertido
+  const s2 = $('hold-sec2');
+  s2.setAttribute('x1', (CX - dx2).toFixed(1));
+  s2.setAttribute('y1', (CY - dy2).toFixed(1));
+  s2.setAttribute('x2', (CX + dx2).toFixed(1));
+  s2.setAttribute('y2', (CY + dy2).toFixed(1));
 }
 
 // Sector de entrada estándar (regla 70°/110°).
@@ -591,12 +613,14 @@ function toggleHoldMode() {
   const btn   = $('btn-varmode');
 
   if (S.holdMode) {
-    if (S.holdCourse === null) S.holdCourse = S.obs;
+    S.holdCourse = S.obs;  // siempre toma el OBS actual al entrar
     panel.classList.add('hdg-holdmode');
     btn.classList.add('hold');
     $('hdg-ctrl-tag').textContent = 'HOLD';
     $('hdg-display') .textContent = pad3(S.holdCourse)+'°';
     $('g-hold').style.display = '';
+    $('hold-entry').style.display = 'inline-block';
+    holdTimerReset();
     buildHoldGeometry();
     showHoldTurn();
   } else {
@@ -606,9 +630,66 @@ function toggleHoldMode() {
     $('hdg-ctrl-tag').textContent = 'HDG';
     $('hdg-display') .textContent = pad3(S.hdgBug)+'°';
     $('g-hold').style.display  = 'none';
-    $('hold-entry').textContent = '';
+    $('hold-entry').style.display = 'none';
+    holdTimerReset();
   }
   update();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  CRONÓMETRO HOLD (botón TIME — cuenta regresiva 60s)
+// ═══════════════════════════════════════════════════════════
+const HT = { active:false, flashing:false, secs:60, itvl:null, flashItvl:null };
+
+function holdTimerTap() {
+  if (!HT.active && !HT.flashing) {
+    // Iniciar cuenta regresiva
+    HT.secs = 60; HT.active = true; HT.flashing = false;
+    clearInterval(HT.itvl);
+    HT.itvl = setInterval(holdTimerTick, 1000);
+    holdTimerRender();
+  } else {
+    holdTimerReset();
+  }
+}
+
+function holdTimerTick() {
+  HT.secs--;
+  if (HT.secs <= 0) {
+    HT.secs = 0; HT.active = false;
+    clearInterval(HT.itvl);
+    HT.flashing = true;
+    let on = true;
+    HT.flashItvl = setInterval(() => {
+      const el = $('hold-entry');
+      if (!el) return;
+      el.style.color       = on ? '#28d858' : '#1a0a22';
+      el.style.borderColor = on ? '#28d858' : '#1a0a22';
+      on = !on;
+    }, 500);
+  }
+  holdTimerRender();
+}
+
+function holdTimerReset() {
+  clearInterval(HT.itvl);
+  clearInterval(HT.flashItvl);
+  HT.active = false; HT.flashing = false; HT.secs = 60;
+  holdTimerRender();
+}
+
+function holdTimerRender() {
+  const el = $('hold-entry');
+  if (!el) return;
+  if (HT.flashing) {
+    el.textContent = '0:00';
+    return;  // color manejado por flashItvl
+  }
+  el.textContent   = HT.active
+    ? (Math.floor(HT.secs/60) + ':' + String(HT.secs%60).padStart(2,'0'))
+    : 'TIME';
+  el.style.color       = '#d060ff';
+  el.style.borderColor = '#d060ff';
 }
 
 function showHoldTurn() {
