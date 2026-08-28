@@ -164,7 +164,22 @@
       flex:1; min-height:0;
       width:100%;
       display:flex; align-items:center; justify-content:center;
+      position:relative;
     }
+    /* ── Interceptación de radial ── */
+    #intercept-info {
+      position:absolute;
+      top:3px; right:4px;
+      text-align:right;
+      font-family:'Courier New',monospace;
+      font-weight:700;
+      font-size:30px;
+      color:#ffffff;
+      line-height:1.15;
+      pointer-events:none;
+      display:none;
+    }
+    #intercept-info span { display:block; }
     #hsi { display:block; width:100%; height:100%; max-width:100%; max-height:100%; }
 
     /* ── Info-bar ── */
@@ -351,6 +366,10 @@
         <text id="hdg-text" x="150" y="43" text-anchor="middle"
               font-size="12" font-family="'Courier New',monospace" fill="#777">N↑</text>
       </svg>
+      <div id="intercept-info">
+        <span id="icp-dist"></span>
+        <span id="icp-time"></span>
+      </div>
     </div>
 
     <div class="info-bar">
@@ -470,6 +489,19 @@ const clamp = v => Math.max(-1, Math.min(1, v));
 // ═══════════════════════════════════════════════════════════
 //  UPDATE
 // ═══════════════════════════════════════════════════════════
+
+// Distancia en NM al punto donde el track del avión intercepta la línea del OBS.
+// (dx,dy): posición del avión relativa al VOR en NM (Norte+, Este+).
+// (vx,vy): vector unitario del track del avión.
+// (rx,ry): vector unitario del radial OBS.
+// Devuelve null si los rumbos son paralelos o la intersección está atrás.
+function calcInterceptNm(dx, dy, vx, vy, rx, ry) {
+  const det = rx * vy - ry * vx;
+  if (Math.abs(det) < 0.01) return null;
+  const s = (ry * dx - rx * dy) / det;
+  return s > 0.1 ? s : null;
+}
+
 function update() {
   const vor    = NAVAIDS[S.selectedVOR];
   const magVar = S.magVar;
@@ -506,6 +538,28 @@ function update() {
   $('g-rmi').setAttribute('transform', `rotate(${norm360(brgToVOR-magHeading)},150,150)`);
   $('dme-val')   .textContent = dist.toFixed(1);
   $('radial-val').textContent = pad3(Math.round(magRadial));
+
+  const iInfo = $('intercept-info');
+  let showIcp = false;
+  if (useTrack && flag !== 'OFF') {
+    const latR = toRad(vor.lat);
+    const dx   = (S.acLon - vor.lon) * 60 * Math.cos(latR);
+    const dy   = (S.acLat - vor.lat) * 60;
+    const mhR  = toRad(magHeading);
+    const obsR = toRad(S.obs);
+    const s = calcInterceptNm(dx, dy, Math.sin(mhR), Math.cos(mhR),
+                                       Math.sin(obsR), Math.cos(obsR));
+    if (s !== null && s < 500) {
+      const kt = S.gpsSpeed * 3600 / 1852;
+      const tm = Math.round(s * 60 / kt);
+      if (tm <= 99) {
+        $('icp-dist').textContent = s.toFixed(1) + ' NM';
+        $('icp-time').textContent = String(tm).padStart(2, '0') + ' min';
+        showIcp = true;
+      }
+    }
+  }
+  iInfo.style.display = showIcp ? '' : 'none';
 }
 
 // ═══════════════════════════════════════════════════════════
