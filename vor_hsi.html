@@ -144,6 +144,62 @@
     .side-hdg.hdg-holdmode .ctrl-btn-180 { background:#d060ff; color:#000; border-color:#d060ff; }
     .btn-varmode.hold { border-color:#d060ff; color:#d060ff; background:#1a0a22; }
 
+    /* ── Modo FLP_HSI ── */
+    #flp-toggle {
+      font-size:14px; font-weight:700; color:#00e5ff;
+      font-family:'Courier New',monospace; letter-spacing:1px;
+      background:#0d1a1f; border:1px solid #00e5ff; border-radius:6px;
+      padding:2px 8px; cursor:pointer; display:none;
+      user-select:none; -webkit-user-select:none;
+    }
+    #flp-toggle.active { background:#00e5ff; color:#000; }
+    #hdg-controls {
+      display:flex; flex-direction:column; flex:1; min-height:0;
+      align-items:stretch; gap:5px;
+    }
+    #flp-panel {
+      display:none; flex-direction:column; flex:1; min-height:0;
+      align-items:stretch; gap:4px;
+    }
+    #flp-wp-label {
+      font-size:12px; color:#666; font-family:'Courier New',monospace;
+      text-align:center; letter-spacing:1px; flex-shrink:0;
+    }
+    #flp-wp-name {
+      font-size:26px; color:#00e5ff; font-weight:700;
+      font-family:'Courier New',monospace; text-align:center; line-height:1;
+      border:1px solid #2a2d38; border-radius:8px; padding:3px 0; flex-shrink:0;
+    }
+    #flp-et {
+      font-size:36px; color:#f0c040; font-weight:700;
+      font-family:'Courier New',monospace; line-height:1;
+    }
+    #flp-eta {
+      font-size:22px; color:#fff; font-weight:700;
+      font-family:'Courier New',monospace; line-height:1;
+    }
+    .flp-numrow { text-align:center; flex-shrink:0; }
+    .flp-unit { font-size:13px; color:#888; font-family:'Courier New',monospace; }
+    .flp-leg-btns {
+      display:flex; gap:4px; flex-shrink:0;
+    }
+    .flp-leg-btn {
+      flex:1; background:#111318; border:1px solid #2a2d38; border-radius:8px;
+      color:#aaa; font-size:28px; font-family:'Courier New',monospace;
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; user-select:none; -webkit-user-select:none; padding:4px 0;
+    }
+    .flp-leg-btn:active { background:#1e2028; }
+    #flp-leg-info {
+      font-size:11px; color:#555; font-family:'Courier New',monospace;
+      text-align:center; flex-shrink:0;
+    }
+    #flp-clear {
+      font-size:11px; color:#444; font-family:'Courier New',monospace;
+      text-align:center; cursor:pointer; flex-shrink:0;
+      user-select:none; -webkit-user-select:none;
+    }
+
     /* ── TOP BAR ── */
     .top-bar {
       width:100%; flex-shrink:0;
@@ -284,6 +340,7 @@
       <span id="hold-entry" onclick="holdTimerTap()">TIME</span>
       <span id="gps-top"></span>
       <span id="tofrom-text">---</span>
+      <span id="flp-toggle" onclick="toggleFlpMode()">FLP</span>
     </div>
 
     <div class="hsi-container">
@@ -386,25 +443,50 @@
         <span id="radial-val">–––</span>
       </div>
       <!-- Version indicator -->
-      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;">v9</div>
+      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;">v10</div>
     </div>
 
   </div><!-- /center-panel -->
 
   <!-- HDG — panel derecho -->
   <div class="side-panel side-hdg">
-    <div class="ctrl-header tap" onclick="toggleHoldMode()">
-      <span class="ctrl-tag" id="hdg-ctrl-tag">HDG</span>
-      <span id="hdg-display">000</span>
+
+    <!-- VOR_HSI: controles de rumbo -->
+    <div id="hdg-controls">
+      <div class="ctrl-header tap" onclick="toggleHoldMode()">
+        <span class="ctrl-tag" id="hdg-ctrl-tag">HDG</span>
+        <span id="hdg-display">000</span>
+      </div>
+      <button id="btn-varmode" class="btn-varmode" onclick="varBtnTap()">▶ VAR</button>
+      <div id="hdg-plus180" class="ctrl-btn-180" onclick="changeHDG(180)">+180</div>
+      <div class="ctrl-group">
+        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeHDG(+10)">▲▲</div>
+        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeHDG(+1)">▲</div>
+        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeHDG(-1)">▼</div>
+        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeHDG(-10)">▼▼</div>
+      </div>
     </div>
-    <button id="btn-varmode" class="btn-varmode" onclick="varBtnTap()">▶ VAR</button>
-    <div id="hdg-plus180" class="ctrl-btn-180" onclick="changeHDG(180)">+180</div>
-    <div class="ctrl-group">
-      <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeHDG(+10)">▲▲</div>
-      <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeHDG(+1)">▲</div>
-      <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeHDG(-1)">▼</div>
-      <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeHDG(-10)">▼▼</div>
+
+    <!-- FLP_HSI: ET / ETA al próximo waypoint -->
+    <div id="flp-panel">
+      <div id="flp-wp-label">PRÓXIMO</div>
+      <div id="flp-wp-name">---</div>
+      <div class="ctrl-group" style="justify-content:center;">
+        <div class="flp-numrow">
+          <span id="flp-et">--</span><span class="flp-unit"> min</span>
+        </div>
+        <div class="flp-numrow">
+          <span id="flp-eta">--:--Z</span>
+        </div>
+      </div>
+      <div class="flp-leg-btns">
+        <div class="flp-leg-btn" onclick="flpPrevLeg()">◀</div>
+        <div class="flp-leg-btn" onclick="flpNextLeg()">▶</div>
+      </div>
+      <div id="flp-leg-info"></div>
+      <div id="flp-clear" onclick="flpClearRoute()">✕ borrar ruta</div>
     </div>
+
   </div>
 
 </div><!-- /screen-main -->
@@ -451,7 +533,8 @@ const S = {
   selectedVOR:'PAR', obs:0, hdgBug:0,
   magVar: getMagVar('PAR'),
   editMagVar: false,
-  holdMode: false, holdCourse: null, holdRight: true
+  holdMode: false, holdCourse: null, holdRight: true,
+  route: [], activeLeg: 1, flpMode: false
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -506,7 +589,17 @@ function calcInterceptNm(dx, dy, vx, vy, rx, ry) {
 }
 
 function update() {
-  const vor    = NAVAIDS[S.selectedVOR];
+  // En modo FLP el "VOR" es el waypoint activo de la ruta
+  let vor = NAVAIDS[S.selectedVOR];
+  if (S.flpMode && S.route.length > 1 && S.activeLeg < S.route.length) {
+    const wp = S.route[S.activeLeg];
+    vor = { lat: wp.lat, lon: wp.lon, id: wp.ident };
+    // Auto-set OBS al rumbo magnético directo al WP
+    if (S.acLat !== null) {
+      const trk = norm360(bearing(S.acLat, S.acLon, wp.lat, wp.lon) - S.magVar);
+      S.obs = Math.round(trk);
+    }
+  }
   const magVar = S.magVar;
 
   const useTrack   = S.acLat !== null && S.gpsTrack !== null && S.gpsSpeed > 0.5;
@@ -582,6 +675,13 @@ function update() {
   } else {
     iInfo.style.display = 'none';
   }
+
+  // Badge del VOR / WP activo
+  $('vor-badge').textContent = S.flpMode
+    ? (S.route[S.activeLeg] ? S.route[S.activeLeg].ident : '---')
+    : (vor.id || S.selectedVOR);
+
+  if (S.flpMode) updateFlpPanel(dist);
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -924,6 +1024,70 @@ function renderNAVCards() {
 }
 
 // ═══════════════════════════════════════════════════════════
+//  MODO FLP_HSI — ruta cargada desde ?fp= o localStorage
+// ═══════════════════════════════════════════════════════════
+
+function loadRoute() {
+  const fp = new URLSearchParams(location.search).get('fp');
+  if (fp) localStorage.setItem('vor_route', fp);
+  const stored = localStorage.getItem('vor_route');
+  if (!stored) return;
+  S.route = stored.split('|').map(seg => {
+    const parts = seg.split(',');
+    return { ident: parts[0].trim(), lat: parseFloat(parts[1]), lon: parseFloat(parts[2]) };
+  }).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
+  S.activeLeg = Math.min(1, S.route.length - 1);
+  if (S.route.length > 1) $('flp-toggle').style.display = '';
+}
+
+function toggleFlpMode() {
+  S.flpMode = !S.flpMode;
+  $('hdg-controls').style.display = S.flpMode ? 'none' : 'flex';
+  $('flp-panel')   .style.display = S.flpMode ? 'flex' : 'none';
+  $('flp-toggle').classList.toggle('active', S.flpMode);
+  $('flp-toggle').textContent = S.flpMode ? 'VOR' : 'FLP';
+  update();
+}
+
+function updateFlpPanel(distToNext) {
+  const wp = S.route[S.activeLeg];
+  if (!wp) return;
+  $('flp-wp-name').textContent = wp.ident;
+  const idx = S.activeLeg;
+  $('flp-leg-info').textContent = (idx) + '/' + (S.route.length - 1);
+
+  const kt = S.gpsSpeed * 3600 / 1852;
+  if (kt >= 1 && S.acLat !== null) {
+    const etMin = distToNext / kt * 60;
+    $('flp-et').textContent = Math.round(etMin);
+    const eta = new Date(Date.now() + etMin * 60000);
+    const hh = String(eta.getUTCHours())  .padStart(2,'0');
+    const mm = String(eta.getUTCMinutes()).padStart(2,'0');
+    $('flp-eta').textContent = hh + ':' + mm + 'Z';
+  } else {
+    $('flp-et') .textContent = '--';
+    $('flp-eta').textContent = '--:--Z';
+  }
+}
+
+function flpNextLeg() {
+  if (S.activeLeg < S.route.length - 1) { S.activeLeg++; update(); }
+}
+function flpPrevLeg() {
+  if (S.activeLeg > 1) { S.activeLeg--; update(); }
+}
+function flpClearRoute() {
+  localStorage.removeItem('vor_route');
+  S.route = []; S.activeLeg = 1; S.flpMode = false;
+  $('flp-toggle').style.display = 'none';
+  $('flp-toggle').classList.remove('active');
+  $('flp-toggle').textContent = 'FLP';
+  $('hdg-controls').style.display = 'flex';
+  $('flp-panel')   .style.display = 'none';
+  update();
+}
+
+// ═══════════════════════════════════════════════════════════
 //  GPS — arranca automáticamente al abrir la app
 // ═══════════════════════════════════════════════════════════
 function startGPS() {
@@ -1000,6 +1164,7 @@ checkForUpdate();
 // ═══════════════════════════════════════════════════════════
 drawCompassRose();
 buildHoldGeometry();
+loadRoute();
 startGPS();
 requestWakeLock();
 
