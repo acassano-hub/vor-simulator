@@ -41,7 +41,7 @@
 
     /* ── Paneles laterales — columna vertical ── */
     .side-panel {
-      width:155px; flex-shrink:0;
+      width:125px; flex-shrink:0;
       display:flex; flex-direction:column;
       align-items:stretch;
       padding:6px; gap:5px;
@@ -266,7 +266,7 @@
   <div class="side-panel side-obs">
     <div class="ctrl-header tap" onclick="obsDirectTo()">
       <span class="ctrl-tag">OBS</span>
-      <span id="obs-display">000°</span>
+      <span id="obs-display">000</span>
     </div>
     <div class="ctrl-btn-180" onclick="changeOBS(180)">+180</div>
     <div class="ctrl-group ctrl-group-obs">
@@ -382,7 +382,7 @@
           <span class="dme-nm">nm</span>
         </div>
       </div>
-      <div style="font-size:11px;color:#888;font-family:monospace;align-self:flex-end;padding-bottom:2px">v7</div>
+      <div style="font-size:11px;color:#888;font-family:monospace;align-self:flex-end;padding-bottom:2px">v8</div>
       <div class="info-col info-col-r">
         <span class="info-r-label">R</span>
         <span id="radial-val">–––</span>
@@ -395,7 +395,7 @@
   <div class="side-panel side-hdg">
     <div class="ctrl-header tap" onclick="toggleHoldMode()">
       <span class="ctrl-tag" id="hdg-ctrl-tag">HDG</span>
-      <span id="hdg-display">000°</span>
+      <span id="hdg-display">000</span>
     </div>
     <button id="btn-varmode" class="btn-varmode" onclick="varBtnTap()">▶ VAR</button>
     <div id="hdg-plus180" class="ctrl-btn-180" onclick="changeHDG(180)">+180</div>
@@ -690,7 +690,7 @@ function toggleHoldMode() {
     panel.classList.add('hdg-holdmode');
     btn.classList.add('hold');
     $('hdg-ctrl-tag').textContent = 'HOLD';
-    $('hdg-display') .textContent = pad3(S.holdCourse)+'°';
+    $('hdg-display') .textContent = pad3(S.holdCourse);
     $('g-hold').style.display = '';
     $('hold-entry').style.display = 'inline-block';
     holdTimerReset();
@@ -701,7 +701,7 @@ function toggleHoldMode() {
     btn.classList.remove('hold');
     btn.textContent = '▶ VAR';
     $('hdg-ctrl-tag').textContent = 'HDG';
-    $('hdg-display') .textContent = pad3(S.hdgBug)+'°';
+    $('hdg-display') .textContent = pad3(S.hdgBug);
     $('g-hold').style.display  = 'none';
     $('hold-entry').style.display = 'none';
     holdTimerReset();
@@ -799,20 +799,20 @@ function obsDirectTo() {
   const trueRadial = bearing(vor.lat, vor.lon, S.acLat, S.acLon);
   const magRadial  = norm360(trueRadial - S.magVar);
   S.obs = Math.round(norm360(magRadial + 180));
-  $('obs-display').textContent = pad3(S.obs) + '°';
+  $('obs-display').textContent = pad3(S.obs);
   update();
 }
 
 function changeOBS(delta) {
   S.obs = norm360(S.obs + delta);
-  $('obs-display').textContent = pad3(S.obs)+'°';
+  $('obs-display').textContent = pad3(S.obs);
   update();
 }
 
 function changeHDG(delta) {
   if (S.holdMode) {
     S.holdCourse = norm360(S.holdCourse + delta);
-    $('hdg-display').textContent = pad3(S.holdCourse)+'°';
+    $('hdg-display').textContent = pad3(S.holdCourse);
     update();
     return;
   }
@@ -822,7 +822,7 @@ function changeHDG(delta) {
     return;
   }
   S.hdgBug = norm360(S.hdgBug + delta);
-  $('hdg-display').textContent = pad3(S.hdgBug)+'°';
+  $('hdg-display').textContent = pad3(S.hdgBug);
   update();
 }
 
@@ -845,7 +845,7 @@ function toggleMagVarEdit() {
     btn.classList.remove('active');
     btn.textContent = '▶ VAR';
     btn180.textContent = '+180';
-    disp.textContent = pad3(S.hdgBug) + '°';
+    disp.textContent = pad3(S.hdgBug);
   }
 }
 
