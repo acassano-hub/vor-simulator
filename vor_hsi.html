@@ -443,7 +443,7 @@
         <span id="radial-val">–––</span>
       </div>
       <!-- Version indicator -->
-      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;">v10</div>
+      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;">v11</div>
     </div>
 
   </div><!-- /center-panel -->
@@ -1029,7 +1029,13 @@ function renderNAVCards() {
 
 function loadRoute() {
   const fp = new URLSearchParams(location.search).get('fp');
-  if (fp) localStorage.setItem('vor_route', fp);
+  if (fp) {
+    localStorage.setItem('vor_route', fp);
+    // Limpiar el ?fp= de la URL sin recargar
+    history.replaceState(null, '', location.pathname);
+    // Banner de confirmación — guía al usuario a abrir la PWA
+    showRouteBanner(fp);
+  }
   const stored = localStorage.getItem('vor_route');
   if (!stored) return;
   S.route = stored.split('|').map(seg => {
@@ -1038,6 +1044,30 @@ function loadRoute() {
   }).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
   S.activeLeg = Math.min(1, S.route.length - 1);
   if (S.route.length > 1) $('flp-toggle').style.display = '';
+}
+
+function showRouteBanner(fp) {
+  const nombres = fp.split('|').map(s => s.split(',')[0]).join(' → ');
+  const banner = document.createElement('div');
+  banner.style.cssText = [
+    'position:fixed;inset:0;z-index:9999',
+    'background:#0c0d11;color:#cdd0d8',
+    'display:flex;flex-direction:column;align-items:center;justify-content:center',
+    'font-family:"Courier New",monospace;padding:24px;gap:16px;text-align:center'
+  ].join(';');
+  banner.innerHTML = `
+    <div style="font-size:48px">✓</div>
+    <div style="font-size:20px;color:#f0c040;font-weight:700">Ruta guardada</div>
+    <div style="font-size:15px;color:#aaa;line-height:1.5">${nombres}</div>
+    <div style="font-size:13px;color:#666;margin-top:8px">
+      Cerrá Safari y abrí la app<br>desde el ícono en tu pantalla de inicio
+    </div>
+    <div onclick="this.parentElement.remove()"
+         style="margin-top:16px;background:#1f4e79;color:#fff;font-size:15px;
+                font-weight:700;padding:10px 28px;border-radius:8px;cursor:pointer">
+      Abrir aquí igual
+    </div>`;
+  document.body.appendChild(banner);
 }
 
 function toggleFlpMode() {
