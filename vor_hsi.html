@@ -543,10 +543,10 @@ function update() {
   const hasGPS = S.acLat !== null;
   let icpMode = 'hide'; // 'hide' | 'data' | 'diverging'
 
-  if (hasGPS && flag !== 'OFF') {
+  if (hasGPS) {
     if (!useTrack) {
-      icpMode = 'diverging';
-    } else {
+      icpMode = 'diverging'; // quieto o < 1 kt: siempre <>
+    } else if (flag !== 'OFF') {
       const latR = toRad(vor.lat);
       const dx   = (S.acLon - vor.lon) * 60 * Math.cos(latR);
       const dy   = (S.acLat - vor.lat) * 60;
