@@ -13,7 +13,9 @@
       background:#0c0d11;
       color:#cdd0d8;
       font-family:-apple-system,'Helvetica Neue',sans-serif;
-      width:100vw; height:100vh;
+      width:100vw;
+      height:100vh;           /* fallback */
+      height:100dvh;          /* iOS Safari: excluye barra URL y tabs */
       overflow:hidden;
     }
 
@@ -380,7 +382,7 @@
           <span class="dme-nm">nm</span>
         </div>
       </div>
-      <div style="font-size:11px;color:#444;font-family:monospace;align-self:flex-end;padding-bottom:2px">v5</div>
+      <div style="font-size:11px;color:#888;font-family:monospace;align-self:flex-end;padding-bottom:2px">v6</div>
       <div class="info-col info-col-r">
         <span class="info-r-label">R</span>
         <span id="radial-val">–––</span>
