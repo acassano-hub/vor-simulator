@@ -540,26 +540,45 @@ function update() {
   $('radial-val').textContent = pad3(Math.round(magRadial));
 
   const iInfo = $('intercept-info');
-  let showIcp = false;
-  if (useTrack && flag !== 'OFF') {
-    const latR = toRad(vor.lat);
-    const dx   = (S.acLon - vor.lon) * 60 * Math.cos(latR);
-    const dy   = (S.acLat - vor.lat) * 60;
-    const mhR  = toRad(magHeading);
-    const obsR = toRad(S.obs);
-    const s = calcInterceptNm(dx, dy, Math.sin(mhR), Math.cos(mhR),
-                                       Math.sin(obsR), Math.cos(obsR));
-    if (s !== null && s < 500) {
-      const kt = S.gpsSpeed * 3600 / 1852;
-      const tm = Math.round(s * 60 / kt);
-      if (tm <= 99) {
-        $('icp-dist').textContent = s.toFixed(1) + ' NM';
-        $('icp-time').textContent = String(tm).padStart(2, '0') + ' min';
-        showIcp = true;
+  const hasGPS = S.acLat !== null;
+  let icpMode = 'hide'; // 'hide' | 'data' | 'diverging'
+
+  if (hasGPS && flag !== 'OFF') {
+    if (!useTrack) {
+      icpMode = 'diverging';
+    } else {
+      const latR = toRad(vor.lat);
+      const dx   = (S.acLon - vor.lon) * 60 * Math.cos(latR);
+      const dy   = (S.acLat - vor.lat) * 60;
+      const mhR  = toRad(magHeading);
+      const obsR = toRad(S.obs);
+      const s = calcInterceptNm(dx, dy, Math.sin(mhR), Math.cos(mhR),
+                                         Math.sin(obsR), Math.cos(obsR));
+      if (s !== null && s < 500) {
+        const kt = S.gpsSpeed * 3600 / 1852;
+        const tm = Math.round(s * 60 / kt);
+        if (tm <= 99) {
+          $('icp-dist').textContent = s.toFixed(1) + ' NM';
+          $('icp-time').textContent = String(tm).padStart(2, '0') + ' min';
+          icpMode = 'data';
+        } else {
+          icpMode = 'diverging';
+        }
+      } else {
+        icpMode = 'diverging';
       }
     }
   }
-  iInfo.style.display = showIcp ? '' : 'none';
+
+  if (icpMode === 'data') {
+    iInfo.style.display = '';
+  } else if (icpMode === 'diverging') {
+    $('icp-dist').textContent = '<>';
+    $('icp-time').textContent = '';
+    iInfo.style.display = '';
+  } else {
+    iInfo.style.display = 'none';
+  }
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -980,6 +999,10 @@ drawCompassRose();
 buildHoldGeometry();
 startGPS();
 requestWakeLock();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
 </script>
 </body>
 </html>
