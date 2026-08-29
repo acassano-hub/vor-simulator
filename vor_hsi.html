@@ -1001,6 +1001,7 @@ startGPS();
 requestWakeLock();
 
 if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('controllerchange', () => location.reload());
   navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
 </script>
