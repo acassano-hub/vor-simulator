@@ -382,7 +382,7 @@
           <span class="dme-nm">nm</span>
         </div>
       </div>
-      <div style="font-size:11px;color:#888;font-family:monospace;align-self:flex-end;padding-bottom:2px">v6</div>
+      <div style="font-size:11px;color:#888;font-family:monospace;align-self:flex-end;padding-bottom:2px">v7</div>
       <div class="info-col info-col-r">
         <span class="info-r-label">R</span>
         <span id="radial-val">–––</span>
@@ -574,11 +574,11 @@ function update() {
   }
 
   if (icpMode === 'data') {
-    iInfo.style.display = '';
+    iInfo.style.display = 'block';
   } else if (icpMode === 'diverging') {
     $('icp-dist').textContent = '<>';
     $('icp-time').textContent = '';
-    iInfo.style.display = '';
+    iInfo.style.display = 'block';
   } else {
     iInfo.style.display = 'none';
   }
