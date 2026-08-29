@@ -195,21 +195,21 @@
     .info-col-r { align-items:flex-end; }
     .info-numrow { display:flex; align-items:baseline; gap:4px; }
     #vor-badge {
-      font-size:30px; color:#f0c040; font-weight:700;
+      font-size:20px; color:#f0c040; font-weight:700;
       font-family:'Courier New',monospace; letter-spacing:1px; line-height:1;
       display:inline-block;
-      border:1px solid #4a5568; border-radius:8px;
-      padding:3px 9px 4px; cursor:pointer;
+      border:1px solid #4a5568; border-radius:6px;
+      padding:2px 6px 3px; cursor:pointer;
       user-select:none; -webkit-user-select:none;
     }
     #vor-badge:active { background:#1a1d24; }
     .info-r-label {
-      font-size:30px; color:#ffffff; font-weight:700;
+      font-size:20px; color:#ffffff; font-weight:700;
       font-family:'Courier New',monospace; letter-spacing:1px; line-height:1;
     }
-    #dme-val    { font-size:56px; font-family:'Courier New',monospace; color:#ff5555; font-weight:700; line-height:1; }
-    .dme-nm     { font-size:16px; color:#fff; font-family:'Courier New',monospace; }
-    #radial-val { font-size:56px; font-family:'Courier New',monospace; color:#fff; font-weight:700; line-height:1; }
+    #dme-val    { font-size:36px; font-family:'Courier New',monospace; color:#ff5555; font-weight:700; line-height:1; }
+    .dme-nm     { font-size:12px; color:#fff; font-family:'Courier New',monospace; }
+    #radial-val { font-size:36px; font-family:'Courier New',monospace; color:#fff; font-weight:700; line-height:1; }
     #tofrom-text {
       font-size:30px; font-weight:700; line-height:1;
       font-family:'Courier New',monospace;
@@ -372,21 +372,21 @@
         <span id="icp-dist"></span>
         <span id="icp-time"></span>
       </div>
-    </div>
-
-    <div class="info-bar">
-      <div class="info-col">
+      <!-- DME overlay — esquina inferior izquierda -->
+      <div style="position:absolute;bottom:4px;left:4px;pointer-events:auto;">
         <span id="vor-badge" onclick="showSettings()">PAR</span>
         <div class="info-numrow">
           <span id="dme-val">–––</span>
           <span class="dme-nm">nm</span>
         </div>
       </div>
-      <div style="font-size:11px;color:#888;font-family:monospace;align-self:flex-end;padding-bottom:2px">v8</div>
-      <div class="info-col info-col-r">
+      <!-- Radial overlay — esquina inferior derecha -->
+      <div style="position:absolute;bottom:4px;right:4px;text-align:right;pointer-events:none;">
         <span class="info-r-label">R</span>
         <span id="radial-val">–––</span>
       </div>
+      <!-- Version indicator -->
+      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;">v9</div>
     </div>
 
   </div><!-- /center-panel -->
