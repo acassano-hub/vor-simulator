@@ -1043,7 +1043,7 @@ function loadRoute() {
     return { ident: parts[0].trim(), lat: parseFloat(parts[1]), lon: parseFloat(parts[2]) };
   }).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
   S.activeLeg = Math.min(1, S.route.length - 1);
-  if (S.route.length > 1) $('flp-toggle').style.display = '';
+  if (S.route.length > 1) $('flp-toggle').style.display = 'inline-block';
 }
 
 function showRouteBanner(fp) {
