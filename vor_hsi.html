@@ -472,7 +472,7 @@
         <span id="radial-val">–––</span>
       </div>
       <!-- Version indicator -->
-      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;">v1.05</div>
+      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;">v1.06</div>
     </div>
 
   </div><!-- /center-panel -->
@@ -1107,6 +1107,7 @@ function _cargarRutaGH(r) {
   }).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
   S.activeLeg = Math.min(1, S.route.length - 1);
   if (S.route.length > 1) {
+    try { localStorage.setItem('vor_route', r.fp); } catch(e) {}
     $('flp-toggle').style.display = 'inline-block';
     if (!S.flpMode) toggleFlpMode();
   }
