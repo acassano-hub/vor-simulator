@@ -443,7 +443,7 @@
         <span id="radial-val">–––</span>
       </div>
       <!-- Version indicator -->
-      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;">v1.01</div>
+      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;">v1.02</div>
     </div>
 
   </div><!-- /center-panel -->
@@ -1031,18 +1031,29 @@ function loadRoute() {
   const fp = new URLSearchParams(location.search).get('fp');
   if (fp) {
     localStorage.setItem('vor_route', fp);
-    // Limpiar el ?fp= de la URL sin recargar
+    // Cookie compartida entre Safari y PWA instalada (iOS 15+)
+    document.cookie = 'vor_route=' + encodeURIComponent(fp)
+      + ';path=/;max-age=86400;SameSite=Lax';
     history.replaceState(null, '', location.pathname);
     showRouteBanner(fp); // banner activa FLP al cerrarse
   }
-  const stored = localStorage.getItem('vor_route');
+  // localStorage (mismo contexto) o cookie (cross-contexto Safari↔PWA en iOS)
+  let stored = localStorage.getItem('vor_route');
+  if (!stored) {
+    const m = document.cookie.match(/(?:^|;)\s*vor_route=([^;]*)/);
+    if (m) stored = decodeURIComponent(m[1]);
+  }
   if (!stored) return;
   S.route = stored.split('|').map(seg => {
     const parts = seg.split(',');
     return { ident: parts[0].trim(), lat: parseFloat(parts[1]), lon: parseFloat(parts[2]) };
   }).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
   S.activeLeg = Math.min(1, S.route.length - 1);
-  if (S.route.length > 1) $('flp-toggle').style.display = 'inline-block';
+  if (S.route.length > 1) {
+    $('flp-toggle').style.display = 'inline-block';
+    // PWA abierta tras QR escaneado en Safari: activar FLP automáticamente
+    if (!fp) setTimeout(() => { if (!S.flpMode) toggleFlpMode(); }, 150);
+  }
 }
 
 function showRouteBanner(fp) {
@@ -1109,6 +1120,7 @@ function flpPrevLeg() {
 }
 function flpClearRoute() {
   localStorage.removeItem('vor_route');
+  document.cookie = 'vor_route=;path=/;max-age=0';
   S.route = []; S.activeLeg = 1; S.flpMode = false;
   $('flp-toggle').style.display = 'none';
   $('flp-toggle').classList.remove('active');
