@@ -472,7 +472,7 @@
         <span id="radial-val">–––</span>
       </div>
       <!-- Version indicator -->
-      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;">v1.03</div>
+      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;">v1.04</div>
     </div>
 
   </div><!-- /center-panel -->
@@ -500,7 +500,7 @@
     <div id="flp-panel">
       <div id="flp-wp-label">PRÓXIMO</div>
       <div id="flp-wp-name">---</div>
-      <div class="ctrl-group" style="justify-content:center;">
+      <div class="ctrl-header">
         <div class="flp-numrow">
           <span id="flp-et">--</span><span class="flp-unit"> min</span>
         </div>
@@ -508,9 +508,9 @@
           <span id="flp-eta">--:--Z</span>
         </div>
       </div>
-      <div class="flp-leg-btns">
-        <div class="flp-leg-btn" onclick="flpPrevLeg()">◀</div>
-        <div class="flp-leg-btn" onclick="flpNextLeg()">▶</div>
+      <div class="ctrl-group" style="flex-direction:row;">
+        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1" onclick="flpPrevLeg()">◀</div>
+        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1" onclick="flpNextLeg()">▶</div>
       </div>
       <div id="flp-leg-info"></div>
       <div id="flp-clear" onclick="flpClearRoute()">✕ borrar ruta</div>
