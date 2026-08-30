@@ -443,7 +443,7 @@
         <span id="radial-val">–––</span>
       </div>
       <!-- Version indicator -->
-      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;">v1.00</div>
+      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;">v1.01</div>
     </div>
 
   </div><!-- /center-panel -->
@@ -1033,8 +1033,7 @@ function loadRoute() {
     localStorage.setItem('vor_route', fp);
     // Limpiar el ?fp= de la URL sin recargar
     history.replaceState(null, '', location.pathname);
-    // Banner de confirmación — guía al usuario a abrir la PWA
-    showRouteBanner(fp);
+    showRouteBanner(fp); // banner activa FLP al cerrarse
   }
   const stored = localStorage.getItem('vor_route');
   if (!stored) return;
@@ -1049,25 +1048,27 @@ function loadRoute() {
 function showRouteBanner(fp) {
   const nombres = fp.split('|').map(s => s.split(',')[0]).join(' → ');
   const banner = document.createElement('div');
+  banner.id = 'ruta-banner';
   banner.style.cssText = [
     'position:fixed;inset:0;z-index:9999',
     'background:#0c0d11;color:#cdd0d8',
     'display:flex;flex-direction:column;align-items:center;justify-content:center',
-    'font-family:"Courier New",monospace;padding:24px;gap:16px;text-align:center'
+    'font-family:"Courier New",monospace;padding:24px;gap:20px;text-align:center'
   ].join(';');
   banner.innerHTML = `
-    <div style="font-size:48px">✓</div>
-    <div style="font-size:20px;color:#f0c040;font-weight:700">Ruta guardada</div>
-    <div style="font-size:15px;color:#aaa;line-height:1.5">${nombres}</div>
-    <div style="font-size:13px;color:#666;margin-top:8px">
-      Cerrá Safari y abrí la app<br>desde el ícono en tu pantalla de inicio
-    </div>
-    <div onclick="this.parentElement.remove()"
-         style="margin-top:16px;background:#1f4e79;color:#fff;font-size:15px;
-                font-weight:700;padding:10px 28px;border-radius:8px;cursor:pointer">
-      Abrir aquí igual
+    <div style="font-size:44px">✓</div>
+    <div style="font-size:17px;color:#f0c040;font-weight:700;letter-spacing:1px">${nombres}</div>
+    <div id="banner-btn"
+         style="background:#1f4e79;color:#fff;font-size:20px;
+                font-weight:700;padding:16px 40px;border-radius:10px;cursor:pointer;
+                margin-top:12px">
+      Navegar →
     </div>`;
   document.body.appendChild(banner);
+  document.getElementById('banner-btn').onclick = function() {
+    banner.remove();
+    if (!S.flpMode) toggleFlpMode();
+  };
 }
 
 function toggleFlpMode() {
