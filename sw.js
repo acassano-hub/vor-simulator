@@ -1,4 +1,4 @@
-const CACHE = 'vor-hsi-v3';
+const CACHE = 'vor-hsi-v4';
 
 self.addEventListener('install', e => {
   e.waitUntil(
