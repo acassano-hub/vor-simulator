@@ -153,6 +153,34 @@
       user-select:none; -webkit-user-select:none;
     }
     #flp-toggle.active { background:#00e5ff; color:#000; }
+    #rte-btn {
+      font-size:14px; font-weight:700; color:#f0c040;
+      font-family:'Courier New',monospace; letter-spacing:1px;
+      background:#1a1500; border:1px solid #f0c040; border-radius:6px;
+      padding:2px 8px; cursor:pointer;
+      user-select:none; -webkit-user-select:none;
+    }
+    /* ── Route picker overlay ── */
+    #rte-overlay {
+      position:fixed; inset:0; z-index:8000;
+      background:#0c0d11ee;
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:flex-start;
+      padding:16px; gap:10px; overflow-y:auto;
+    }
+    .rte-card {
+      width:100%; max-width:420px;
+      background:#141620; border:1px solid #2a2f40; border-radius:10px;
+      padding:12px 16px; cursor:pointer;
+      display:flex; flex-direction:column; gap:4px;
+    }
+    .rte-card:active { background:#1f2535; }
+    .rte-card-nombre { font-size:17px; font-weight:700; color:#f0c040; font-family:'Courier New',monospace; }
+    .rte-card-fecha  { font-size:12px; color:#666; font-family:'Courier New',monospace; }
+    .rte-close {
+      font-size:15px; color:#888; cursor:pointer; margin-top:8px;
+      padding:6px 20px; border:1px solid #333; border-radius:6px;
+    }
     #hdg-controls {
       display:flex; flex-direction:column; flex:1; min-height:0;
       align-items:stretch; gap:5px;
@@ -340,6 +368,7 @@
       <span id="hold-entry" onclick="holdTimerTap()">TIME</span>
       <span id="gps-top"></span>
       <span id="tofrom-text">---</span>
+      <span id="rte-btn" onclick="showRtePicker()" style="display:none">RTE</span>
       <span id="flp-toggle" onclick="toggleFlpMode()">FLP</span>
     </div>
 
@@ -443,7 +472,7 @@
         <span id="radial-val">–––</span>
       </div>
       <!-- Version indicator -->
-      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;">v1.02</div>
+      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;">v1.03</div>
     </div>
 
   </div><!-- /center-panel -->
@@ -1024,6 +1053,66 @@ function renderNAVCards() {
 }
 
 // ═══════════════════════════════════════════════════════════
+//  RUTAS GUARDADAS — fetch desde GitHub Pages (flp/index.json)
+// ═══════════════════════════════════════════════════════════
+
+let _rutasGH = [];
+
+function fetchRoutes() {
+  fetch('./flp/index.json?_=' + Date.now())
+    .then(r => r.ok ? r.json() : [])
+    .then(rutas => {
+      _rutasGH = rutas || [];
+      if (_rutasGH.length > 0) $('rte-btn').style.display = 'inline-block';
+    })
+    .catch(() => {});
+}
+
+function showRtePicker() {
+  if (!_rutasGH.length) return;
+  const ov = document.createElement('div');
+  ov.id = 'rte-overlay';
+
+  const title = document.createElement('div');
+  title.style.cssText = 'font-size:16px;font-weight:700;color:#cdd0d8;font-family:"Courier New",monospace;margin-bottom:4px;';
+  title.textContent = 'Rutas guardadas';
+  ov.appendChild(title);
+
+  _rutasGH.forEach(r => {
+    const card = document.createElement('div');
+    card.className = 'rte-card';
+    card.innerHTML =
+      '<div class="rte-card-nombre">' + (r.nombre || r.id) + '</div>' +
+      '<div class="rte-card-fecha">' + (r.fecha || '') + '  ' + (r.hora || '') + '</div>';
+    card.onclick = () => {
+      ov.remove();
+      _cargarRutaGH(r);
+    };
+    ov.appendChild(card);
+  });
+
+  const close = document.createElement('div');
+  close.className = 'rte-close';
+  close.textContent = '✕  Cerrar';
+  close.onclick = () => ov.remove();
+  ov.appendChild(close);
+
+  document.body.appendChild(ov);
+}
+
+function _cargarRutaGH(r) {
+  S.route = r.fp.split('|').map(seg => {
+    const parts = seg.split(',');
+    return { ident: parts[0].trim(), lat: parseFloat(parts[1]), lon: parseFloat(parts[2]) };
+  }).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
+  S.activeLeg = Math.min(1, S.route.length - 1);
+  if (S.route.length > 1) {
+    $('flp-toggle').style.display = 'inline-block';
+    if (!S.flpMode) toggleFlpMode();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
 //  MODO FLP_HSI — ruta cargada desde ?fp= o localStorage
 // ═══════════════════════════════════════════════════════════
 
@@ -1208,6 +1297,7 @@ checkForUpdate();
 drawCompassRose();
 buildHoldGeometry();
 loadRoute();
+fetchRoutes();
 startGPS();
 requestWakeLock();
 
