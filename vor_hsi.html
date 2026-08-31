@@ -218,10 +218,17 @@
       cursor:pointer; user-select:none; -webkit-user-select:none; padding:4px 0;
     }
     .flp-leg-btn:active { background:#1e2028; }
-    #flp-leg-info {
-      font-size:11px; color:#555; font-family:'Courier New',monospace;
-      text-align:center; flex-shrink:0;
+    #flp-preview-info {
+      font-size:10px; color:#f0c040; font-family:'Courier New',monospace;
+      text-align:center; letter-spacing:0.5px; min-height:0;
     }
+    #flp-next-wp {
+      font-size:11px; color:#888; font-family:'Courier New',monospace;
+      text-align:center; flex-shrink:0; cursor:pointer;
+      border:1px solid #2a2d38; border-radius:6px; padding:3px 2px;
+      user-select:none; -webkit-user-select:none;
+    }
+    #flp-next-wp:active { background:#1a1d24; }
     #flp-clear {
       font-size:11px; color:#444; font-family:'Courier New',monospace;
       text-align:center; cursor:pointer; flex-shrink:0;
@@ -472,7 +479,7 @@
         <span id="radial-val">–––</span>
       </div>
       <!-- Version indicator -->
-      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;">v1.06</div>
+      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;">v1.07</div>
     </div>
 
   </div><!-- /center-panel -->
@@ -496,11 +503,12 @@
       </div>
     </div>
 
-    <!-- FLP_HSI: ET / ETA al próximo waypoint -->
+    <!-- FLP_HSI: WP activo + vista previa con ▲/▼ -->
     <div id="flp-panel">
       <div id="flp-wp-label">PRÓXIMO</div>
       <div id="flp-wp-name">---</div>
       <div class="ctrl-header">
+        <div id="flp-preview-info" class="flp-numrow"></div>
         <div class="flp-numrow">
           <span id="flp-et">--</span><span class="flp-unit"> min</span>
         </div>
@@ -512,7 +520,7 @@
         <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1" onclick="flpNextLeg()">▲</div>
         <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1" onclick="flpPrevLeg()">▼</div>
       </div>
-      <div id="flp-leg-info"></div>
+      <div id="flp-next-wp" onclick="showWpPicker()"></div>
       <div id="flp-clear" onclick="flpClearRoute()">✕ borrar ruta</div>
     </div>
 
@@ -563,7 +571,9 @@ const S = {
   magVar: getMagVar('PAR'),
   editMagVar: false,
   holdMode: false, holdCourse: null, holdRight: true,
-  route: [], activeLeg: 1, flpMode: false
+  route: [], activeLeg: 1, previewLeg: 1, flpMode: false,
+  prevDistToActive: null, minDistToActive: Infinity,
+  distIncreasingCount: 0, routeAlert: false
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -710,7 +720,32 @@ function update() {
     ? (S.route[S.activeLeg] ? S.route[S.activeLeg].ident : '---')
     : (vor.id || S.selectedVOR);
 
-  if (S.flpMode) updateFlpPanel(dist);
+  // Auto-avance / alerta cuando se aleja del WP activo
+  if (S.flpMode && S.acLat !== null && S.activeLeg < S.route.length) {
+    S.minDistToActive = Math.min(S.minDistToActive, dist);
+    if (S.prevDistToActive !== null && dist > S.prevDistToActive + 0.01) {
+      S.distIncreasingCount++;
+      if (S.distIncreasingCount >= 3) {
+        if (S.minDistToActive < 1.0 && S.activeLeg < S.route.length - 1) {
+          // Pasó el WP dentro del radio de 1 NM → avance automático
+          S.activeLeg++;
+          S.previewLeg = S.activeLeg;
+          S.prevDistToActive = null;
+          S.minDistToActive = Infinity;
+          S.distIncreasingCount = 0;
+        } else if (S.minDistToActive >= 1.0 && !S.routeAlert) {
+          // Se alejó sin pasar el WP → advertencia
+          S.routeAlert = true;
+          showRouteAlert(S.route[S.activeLeg].ident);
+        }
+      }
+    } else {
+      S.distIncreasingCount = 0;
+    }
+    S.prevDistToActive = dist;
+  }
+
+  if (S.flpMode) updateFlpPanel();
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1106,6 +1141,9 @@ function _cargarRutaGH(r) {
     return { ident: parts[0].trim(), lat: parseFloat(parts[1]), lon: parseFloat(parts[2]) };
   }).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
   S.activeLeg = Math.min(1, S.route.length - 1);
+  S.previewLeg = S.activeLeg;
+  S.prevDistToActive = null; S.minDistToActive = Infinity;
+  S.distIncreasingCount = 0; S.routeAlert = false;
   if (S.route.length > 1) {
     try { localStorage.setItem('vor_route', r.fp); } catch(e) {}
     $('flp-toggle').style.display = 'inline-block';
@@ -1139,6 +1177,9 @@ function loadRoute() {
     return { ident: parts[0].trim(), lat: parseFloat(parts[1]), lon: parseFloat(parts[2]) };
   }).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
   S.activeLeg = Math.min(1, S.route.length - 1);
+  S.previewLeg = S.activeLeg;
+  S.prevDistToActive = null; S.minDistToActive = Infinity;
+  S.distIncreasingCount = 0; S.routeAlert = false;
   if (S.route.length > 1) {
     $('flp-toggle').style.display = 'inline-block';
     // PWA abierta tras QR escaneado en Safari: activar FLP automáticamente
@@ -1181,37 +1222,162 @@ function toggleFlpMode() {
   update();
 }
 
-function updateFlpPanel(distToNext) {
+// Distancia acumulada desde posición actual → activeLeg → ... → idx
+function cumulativeDistToLeg(idx) {
+  if (S.acLat === null || !S.route[S.activeLeg]) return 0;
+  let d = distNm(S.acLat, S.acLon, S.route[S.activeLeg].lat, S.route[S.activeLeg].lon);
+  for (let i = S.activeLeg; i < idx; i++)
+    d += distNm(S.route[i].lat, S.route[i].lon, S.route[i+1].lat, S.route[i+1].lon);
+  return d;
+}
+
+function updateFlpPanel() {
   const wp = S.route[S.activeLeg];
   if (!wp) return;
-  $('flp-wp-name').textContent = wp.ident;
-  const idx = S.activeLeg;
-  $('flp-leg-info').textContent = (idx) + '/' + (S.route.length - 1);
 
+  // WP activo (HSI apunta aquí)
+  $('flp-wp-name').textContent = wp.ident;
+
+  // Vista previa (▲/▼ cambian previewLeg)
+  const n = S.route.length - 1;
+  const isPreviewing = S.previewLeg !== S.activeLeg;
+  $('flp-wp-label').textContent = isPreviewing ? 'ACTIVO: ' + wp.ident : 'PRÓXIMO';
+  $('flp-preview-info').textContent = isPreviewing
+    ? S.previewLeg + '/' + n + '  ' + (S.route[S.previewLeg] ? S.route[S.previewLeg].ident : '')
+    : '';
+
+  // ETE/ETA acumulado al leg en vista previa
   const kt = S.gpsSpeed * 3600 / 1852;
   if (kt >= 1 && S.acLat !== null) {
-    const etMin = distToNext / kt * 60;
+    const d = cumulativeDistToLeg(S.previewLeg);
+    const etMin = d / kt * 60;
     $('flp-et').textContent = Math.round(etMin);
     const eta = new Date(Date.now() + etMin * 60000);
-    const hh = String(eta.getUTCHours())  .padStart(2,'0');
-    const mm = String(eta.getUTCMinutes()).padStart(2,'0');
-    $('flp-eta').textContent = hh + ':' + mm + 'Z';
+    $('flp-eta').textContent =
+      String(eta.getUTCHours()).padStart(2,'0') + ':' +
+      String(eta.getUTCMinutes()).padStart(2,'0') + 'Z';
   } else {
-    $('flp-et') .textContent = '--';
+    $('flp-et').textContent = '--';
     $('flp-eta').textContent = '--:--Z';
   }
+
+  // Área inferior: leg activo + siguiente WP (tap para elegir)
+  const nextIdx = S.activeLeg + 1;
+  $('flp-next-wp').textContent = S.activeLeg + '/' + n +
+    (nextIdx < S.route.length ? '  ▶ ' + S.route[nextIdx].ident : '  DEST');
 }
 
+// ▲/▼ cambian SOLO la vista previa, no el WP activo
 function flpNextLeg() {
-  if (S.activeLeg < S.route.length - 1) { S.activeLeg++; update(); }
+  if (S.previewLeg < S.route.length - 1) { S.previewLeg++; updateFlpPanel(); }
 }
 function flpPrevLeg() {
-  if (S.activeLeg > 1) { S.activeLeg--; update(); }
+  if (S.previewLeg > 1) { S.previewLeg--; updateFlpPanel(); }
 }
+
+// Alerta: ruta no respetada
+function showRouteAlert(ident) {
+  if (document.getElementById('route-alert')) return;
+  const al = document.createElement('div');
+  al.id = 'route-alert';
+  al.style.cssText = [
+    'position:fixed;bottom:70px;left:50%;transform:translateX(-50%)',
+    'background:#1a0000;border:2px solid #ff4444;border-radius:10px',
+    'color:#ff8888;font-family:"Courier New",monospace;font-size:13px',
+    'padding:12px 16px;z-index:5000;max-width:320px;text-align:center;width:90%'
+  ].join(';');
+  al.innerHTML =
+    '<div style="color:#ff4444;font-weight:700;margin-bottom:6px">⚠ RUTA NO RESPETADA</div>' +
+    '<div style="margin-bottom:10px">Alejando del WP: <b>' + ident + '</b><br>¿Continúa al siguiente?</div>' +
+    '<div style="display:flex;gap:8px;justify-content:center">' +
+    '<button onclick="routeAlertSi()" style="background:#c00;color:#fff;border:none;' +
+      'border-radius:6px;padding:7px 18px;font-size:14px;cursor:pointer">SÍ</button>' +
+    '<button onclick="routeAlertNo()" style="background:#333;color:#fff;border:none;' +
+      'border-radius:6px;padding:7px 18px;font-size:14px;cursor:pointer">NO</button>' +
+    '</div>';
+  document.body.appendChild(al);
+}
+function routeAlertSi() {
+  document.getElementById('route-alert')?.remove();
+  S.routeAlert = false;
+  if (S.activeLeg < S.route.length - 1) {
+    S.activeLeg++;
+    S.previewLeg = S.activeLeg;
+  }
+  S.prevDistToActive = null; S.minDistToActive = Infinity; S.distIncreasingCount = 0;
+  update();
+}
+function routeAlertNo() {
+  document.getElementById('route-alert')?.remove();
+  S.routeAlert = false;
+  S.prevDistToActive = null; S.minDistToActive = Infinity; S.distIncreasingCount = 0;
+}
+
+// Selector de WP (tap en el área inferior del panel)
+function showWpPicker() {
+  if (!S.route || S.route.length <= 1) return;
+  if (document.getElementById('wp-overlay')) return;
+  const ov = document.createElement('div');
+  ov.id = 'wp-overlay';
+  ov.style.cssText = document.getElementById('rte-overlay')
+    ? '' : [
+      'position:fixed;inset:0;z-index:8000',
+      'background:#0c0d11ee',
+      'display:flex;flex-direction:column;align-items:center;justify-content:flex-start',
+      'padding:16px;gap:10px;overflow-y:auto'
+    ].join(';');
+  // reusar estilos del rte-overlay si existe, sino inline
+  ov.className = 'rte-overlay-clone';
+  ov.style.cssText = [
+    'position:fixed;inset:0;z-index:8000',
+    'background:#0c0d11ee',
+    'display:flex;flex-direction:column;align-items:center;justify-content:flex-start',
+    'padding:16px;gap:10px;overflow-y:auto'
+  ].join(';');
+
+  const title = document.createElement('div');
+  title.style.cssText = 'font-size:15px;font-weight:700;color:#cdd0d8;font-family:"Courier New",monospace;margin-bottom:2px;';
+  title.textContent = 'WP activo — recalcula desde posición actual';
+  ov.appendChild(title);
+
+  S.route.forEach((wp, idx) => {
+    if (idx === 0) return; // saltear origen
+    const card = document.createElement('div');
+    card.className = 'rte-card';
+    const isActive = idx === S.activeLeg;
+    if (isActive) card.style.borderColor = '#00e5ff';
+    card.innerHTML =
+      '<div class="rte-card-nombre" style="color:' + (isActive ? '#00e5ff' : '#f0c040') + '">' +
+        idx + '/' + (S.route.length-1) + '  ' + wp.ident +
+        (isActive ? '  ◀ activo' : '') + '</div>' +
+      '<div class="rte-card-fecha">' +
+        wp.lat.toFixed(3) + '°  ' + wp.lon.toFixed(3) + '°</div>';
+    card.onclick = () => {
+      ov.remove();
+      S.activeLeg = idx; S.previewLeg = idx;
+      S.prevDistToActive = null; S.minDistToActive = Infinity;
+      S.distIncreasingCount = 0; S.routeAlert = false;
+      document.getElementById('route-alert')?.remove();
+      update();
+    };
+    ov.appendChild(card);
+  });
+
+  const close = document.createElement('div');
+  close.className = 'rte-close';
+  close.textContent = '✕  Cerrar';
+  close.onclick = () => ov.remove();
+  ov.appendChild(close);
+  document.body.appendChild(ov);
+}
+
 function flpClearRoute() {
   localStorage.removeItem('vor_route');
   document.cookie = 'vor_route=;path=/;max-age=0';
-  S.route = []; S.activeLeg = 1; S.flpMode = false;
+  S.route = []; S.activeLeg = 1; S.previewLeg = 1; S.flpMode = false;
+  S.prevDistToActive = null; S.minDistToActive = Infinity;
+  S.distIncreasingCount = 0; S.routeAlert = false;
+  document.getElementById('route-alert')?.remove();
   $('flp-toggle').style.display = 'none';
   $('flp-toggle').classList.remove('active');
   $('flp-toggle').textContent = 'FLP';
