@@ -191,8 +191,8 @@
     }
     #flp-panel .ctrl-btn-arrow { font-size:34px; }
     #flp-wp-label {
-      font-size:13px; color:#bbb; font-family:'Courier New',monospace;
-      text-align:center; letter-spacing:1px; flex-shrink:0;
+      font-size:15px; font-weight:700; color:#cdd0d8; font-family:'Courier New',monospace;
+      text-align:center; letter-spacing:2px; flex-shrink:0;
     }
     #flp-wp-name {
       font-size:26px; color:#00e5ff; font-weight:700;
@@ -220,9 +220,12 @@
     }
     .flp-leg-btn:active { background:#1e2028; }
     #flp-preview-info {
-      font-size:13px; color:#f0c040; font-family:'Courier New',monospace;
-      text-align:center; letter-spacing:0.5px; min-height:0;
+      font-size:15px; font-weight:700; color:#fff; font-family:'Courier New',monospace;
+      text-align:center; letter-spacing:0.5px; flex-shrink:0;
+      cursor:pointer; border:1px solid #3a3d4a; border-radius:6px; padding:4px 2px;
+      user-select:none; -webkit-user-select:none;
     }
+    #flp-preview-info:active { background:#1a1d24; }
     #flp-next-wp {
       font-size:14px; color:#ddd; font-family:'Courier New',monospace;
       text-align:center; flex-shrink:0; cursor:pointer;
@@ -480,7 +483,7 @@
         <span id="radial-val">–––</span>
       </div>
       <!-- Version indicator -->
-      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;">v1.08</div>
+      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;">v1.09</div>
     </div>
 
   </div><!-- /center-panel -->
@@ -506,10 +509,10 @@
 
     <!-- FLP_HSI: WP activo + vista previa con ▲/▼ -->
     <div id="flp-panel">
-      <div id="flp-wp-label">PRÓXIMO</div>
+      <div id="flp-wp-label">NEXT</div>
       <div id="flp-wp-name">---</div>
       <div class="ctrl-header">
-        <div id="flp-preview-info" class="flp-numrow"></div>
+        <div id="flp-preview-info" onclick="showWpPicker()"></div>
         <div class="flp-numrow">
           <span id="flp-et">--</span><span class="flp-unit"> min</span>
         </div>
@@ -521,8 +524,6 @@
         <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1" onclick="flpNextLeg()">▲</div>
         <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1" onclick="flpPrevLeg()">▼</div>
       </div>
-      <div id="flp-next-wp" onclick="showWpPicker()"></div>
-      <div id="flp-clear" onclick="flpClearRoute()">✕ borrar ruta</div>
     </div>
 
   </div>
@@ -1133,6 +1134,15 @@ function showRtePicker() {
   close.onclick = () => ov.remove();
   ov.appendChild(close);
 
+  if (S.flpMode || S.route.length > 1) {
+    const delBtn = document.createElement('div');
+    delBtn.className = 'rte-close';
+    delBtn.textContent = '🗑  Borrar ruta activa';
+    delBtn.style.cssText = 'color:#ff6060;border-color:#ff6060;margin-top:4px;';
+    delBtn.onclick = () => { ov.remove(); flpClearRoute(); };
+    ov.appendChild(delBtn);
+  }
+
   document.body.appendChild(ov);
 }
 
@@ -1239,13 +1249,12 @@ function updateFlpPanel() {
   // WP activo (HSI apunta aquí)
   $('flp-wp-name').textContent = wp.ident;
 
-  // Vista previa (▲/▼ cambian previewLeg)
+  // Leg indicator — siempre visible; amarillo cuando se está viendo un leg distinto al activo
   const n = S.route.length - 1;
   const isPreviewing = S.previewLeg !== S.activeLeg;
-  $('flp-wp-label').textContent = isPreviewing ? 'ACTIVO: ' + wp.ident : 'PRÓXIMO';
-  $('flp-preview-info').textContent = isPreviewing
-    ? S.previewLeg + '/' + n + '  ' + (S.route[S.previewLeg] ? S.route[S.previewLeg].ident : '')
-    : '';
+  const pvWp = S.route[S.previewLeg];
+  $('flp-preview-info').textContent = S.previewLeg + '/' + n + '  ' + (pvWp ? pvWp.ident : '');
+  $('flp-preview-info').style.color = isPreviewing ? '#f0c040' : '#fff';
 
   // ETE/ETA acumulado al leg en vista previa
   const kt = S.gpsSpeed * 3600 / 1852;
@@ -1261,11 +1270,6 @@ function updateFlpPanel() {
     $('flp-et').textContent = '--';
     $('flp-eta').textContent = '--:--Z';
   }
-
-  // Área inferior: leg activo + siguiente WP (tap para elegir)
-  const nextIdx = S.activeLeg + 1;
-  $('flp-next-wp').textContent = S.activeLeg + '/' + n +
-    (nextIdx < S.route.length ? '  ▶ ' + S.route[nextIdx].ident : '  DEST');
 }
 
 // ▲/▼ cambian SOLO la vista previa, no el WP activo
