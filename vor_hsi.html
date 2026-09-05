@@ -153,11 +153,17 @@
       user-select:none; -webkit-user-select:none;
     }
     #flp-toggle.active { background:#00e5ff; color:#000; }
+    /* ── Bottom bar — botón RTE ── */
+    .bottom-bar {
+      width:100%; flex-shrink:0;
+      display:flex; align-items:center; justify-content:center;
+      padding:2px 6px 4px;
+    }
     #rte-btn {
-      font-size:14px; font-weight:700; color:#f0c040;
-      font-family:'Courier New',monospace; letter-spacing:1px;
-      background:#1a1500; border:1px solid #f0c040; border-radius:6px;
-      padding:2px 8px; cursor:pointer;
+      font-size:24px; font-weight:700; color:#f0c040;
+      font-family:'Courier New',monospace; letter-spacing:2px;
+      background:#1a1500; border:2px solid #f0c040; border-radius:10px;
+      padding:6px 0; cursor:pointer; width:100%; text-align:center;
       user-select:none; -webkit-user-select:none;
     }
     /* ── Route picker overlay ── */
@@ -191,24 +197,24 @@
     }
     #flp-panel .ctrl-btn-arrow { font-size:34px; }
     #flp-wp-label {
-      font-size:15px; font-weight:700; color:#cdd0d8; font-family:'Courier New',monospace;
+      font-size:18px; font-weight:700; color:#cdd0d8; font-family:'Courier New',monospace;
       text-align:center; letter-spacing:2px; flex-shrink:0;
     }
     #flp-wp-name {
-      font-size:26px; color:#00e5ff; font-weight:700;
+      font-size:38px; color:#00e5ff; font-weight:700;
       font-family:'Courier New',monospace; text-align:center; line-height:1;
-      border:1px solid #2a2d38; border-radius:8px; padding:3px 0; flex-shrink:0;
+      border:1px solid #2a2d38; border-radius:8px; padding:4px 0; flex-shrink:0;
     }
     #flp-et {
-      font-size:36px; color:#f0c040; font-weight:700;
+      font-size:54px; color:#f0c040; font-weight:700;
       font-family:'Courier New',monospace; line-height:1;
     }
     #flp-eta {
-      font-size:22px; color:#fff; font-weight:700;
+      font-size:30px; color:#fff; font-weight:700;
       font-family:'Courier New',monospace; line-height:1;
     }
     .flp-numrow { text-align:center; flex-shrink:0; }
-    .flp-unit { font-size:17px; color:#fff; font-family:'Courier New',monospace; font-weight:700; }
+    .flp-unit { font-size:22px; color:#fff; font-family:'Courier New',monospace; font-weight:700; }
     .flp-leg-btns {
       display:flex; gap:4px; flex-shrink:0;
     }
@@ -379,7 +385,6 @@
       <span id="hold-entry" onclick="holdTimerTap()">TIME</span>
       <span id="gps-top"></span>
       <span id="tofrom-text">---</span>
-      <span id="rte-btn" onclick="showRtePicker()" style="display:none">RTE</span>
       <span id="flp-toggle" onclick="toggleFlpMode()">FLP</span>
     </div>
 
@@ -483,7 +488,12 @@
         <span id="radial-val">–––</span>
       </div>
       <!-- Version indicator -->
-      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;">v1.09</div>
+      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;">v1.10</div>
+    </div>
+
+    <!-- Bottom bar — botón RTE -->
+    <div class="bottom-bar">
+      <span id="rte-btn" onclick="rteAction()" style="display:none">RTE</span>
     </div>
 
   </div><!-- /center-panel -->
@@ -507,12 +517,11 @@
       </div>
     </div>
 
-    <!-- FLP_HSI: WP activo + vista previa con ▲/▼ -->
+    <!-- FLP_HSI: WP activo -->
     <div id="flp-panel">
       <div id="flp-wp-label">NEXT</div>
       <div id="flp-wp-name">---</div>
       <div class="ctrl-header">
-        <div id="flp-preview-info" onclick="showWpPicker()"></div>
         <div class="flp-numrow">
           <span id="flp-et">--</span><span class="flp-unit"> min</span>
         </div>
@@ -520,15 +529,27 @@
           <span id="flp-eta">--:--Z</span>
         </div>
       </div>
-      <div class="ctrl-group">
-        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1" onclick="flpNextLeg()">▲</div>
-        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1" onclick="flpPrevLeg()">▼</div>
-      </div>
     </div>
 
   </div>
 
 </div><!-- /screen-main -->
+
+
+<!-- ══════════════════ ESTIMA A WPS ══════════════════ -->
+<div id="screen-wp-est" class="screen" style="display:none; flex-direction:column;">
+
+  <div class="settings-header">
+    <button class="btn-back" onclick="showMain()">← Volver</button>
+    <span class="settings-title">WPS</span>
+    <button onclick="showMain();showRtePicker();" style="background:none;border:1px solid #555;color:#888;font-family:'Courier New',monospace;font-size:18px;border-radius:6px;padding:4px 12px;cursor:pointer;">RUTAS</button>
+  </div>
+
+  <div class="settings-body">
+    <div id="wp-est-list"></div>
+  </div>
+
+</div>
 
 
 <!-- ══════════════════ SELECCIÓN NAV AID ══════════════════ -->
@@ -677,44 +698,48 @@ function update() {
   $('radial-val').textContent = pad3(Math.round(magRadial));
 
   const iInfo = $('intercept-info');
-  const hasGPS = S.acLat !== null;
-  let icpMode = 'hide'; // 'hide' | 'data' | 'diverging'
+  if (S.flpMode) {
+    iInfo.style.display = 'none';
+  } else {
+    const hasGPS = S.acLat !== null;
+    let icpMode = 'hide'; // 'hide' | 'data' | 'diverging'
 
-  if (hasGPS) {
-    if (!useTrack) {
-      icpMode = 'diverging'; // quieto o < 1 kt: siempre <>
-    } else if (flag !== 'OFF') {
-      const latR = toRad(vor.lat);
-      const dx   = (S.acLon - vor.lon) * 60 * Math.cos(latR);
-      const dy   = (S.acLat - vor.lat) * 60;
-      const mhR  = toRad(magHeading);
-      const obsR = toRad(S.obs);
-      const s = calcInterceptNm(dx, dy, Math.sin(mhR), Math.cos(mhR),
-                                         Math.sin(obsR), Math.cos(obsR));
-      if (s !== null && s < 500) {
-        const kt = S.gpsSpeed * 3600 / 1852;
-        const tm = Math.round(s * 60 / kt);
-        if (tm <= 99) {
-          $('icp-dist').textContent = s.toFixed(1) + ' NM';
-          $('icp-time').textContent = String(tm).padStart(2, '0') + ' min';
-          icpMode = 'data';
+    if (hasGPS) {
+      if (!useTrack) {
+        icpMode = 'diverging'; // quieto o < 1 kt: siempre <>
+      } else if (flag !== 'OFF') {
+        const latR = toRad(vor.lat);
+        const dx   = (S.acLon - vor.lon) * 60 * Math.cos(latR);
+        const dy   = (S.acLat - vor.lat) * 60;
+        const mhR  = toRad(magHeading);
+        const obsR = toRad(S.obs);
+        const s = calcInterceptNm(dx, dy, Math.sin(mhR), Math.cos(mhR),
+                                           Math.sin(obsR), Math.cos(obsR));
+        if (s !== null && s < 500) {
+          const kt = S.gpsSpeed * 3600 / 1852;
+          const tm = Math.round(s * 60 / kt);
+          if (tm <= 99) {
+            $('icp-dist').textContent = s.toFixed(1) + ' NM';
+            $('icp-time').textContent = String(tm).padStart(2, '0') + ' min';
+            icpMode = 'data';
+          } else {
+            icpMode = 'diverging';
+          }
         } else {
           icpMode = 'diverging';
         }
-      } else {
-        icpMode = 'diverging';
       }
     }
-  }
 
-  if (icpMode === 'data') {
-    iInfo.style.display = 'block';
-  } else if (icpMode === 'diverging') {
-    $('icp-dist').textContent = '<>';
-    $('icp-time').textContent = '';
-    iInfo.style.display = 'block';
-  } else {
-    iInfo.style.display = 'none';
+    if (icpMode === 'data') {
+      iInfo.style.display = 'block';
+    } else if (icpMode === 'diverging') {
+      $('icp-dist').textContent = '<>';
+      $('icp-time').textContent = '';
+      iInfo.style.display = 'block';
+    } else {
+      iInfo.style.display = 'none';
+    }
   }
 
   // Badge del VOR / WP activo
@@ -1036,6 +1061,7 @@ function showSettings() {
 
 function showMain() {
   $('screen-settings').style.display = 'none';
+  $('screen-wp-est').style.display   = 'none';
   $('screen-main').style.display = 'flex';
   update();
 }
@@ -1246,20 +1272,11 @@ function updateFlpPanel() {
   const wp = S.route[S.activeLeg];
   if (!wp) return;
 
-  // WP activo (HSI apunta aquí)
   $('flp-wp-name').textContent = wp.ident;
 
-  // Leg indicator — siempre visible; amarillo cuando se está viendo un leg distinto al activo
-  const n = S.route.length - 1;
-  const isPreviewing = S.previewLeg !== S.activeLeg;
-  const pvWp = S.route[S.previewLeg];
-  $('flp-preview-info').textContent = S.previewLeg + '/' + n + '  ' + (pvWp ? pvWp.ident : '');
-  $('flp-preview-info').style.color = isPreviewing ? '#f0c040' : '#fff';
-
-  // ETE/ETA acumulado al leg en vista previa
   const kt = S.gpsSpeed * 3600 / 1852;
   if (kt >= 1 && S.acLat !== null) {
-    const d = cumulativeDistToLeg(S.previewLeg);
+    const d = cumulativeDistToLeg(S.activeLeg);
     const etMin = d / kt * 60;
     $('flp-et').textContent = Math.round(etMin);
     const eta = new Date(Date.now() + etMin * 60000);
@@ -1286,19 +1303,24 @@ function showRouteAlert(ident) {
   const al = document.createElement('div');
   al.id = 'route-alert';
   al.style.cssText = [
-    'position:fixed;bottom:70px;left:50%;transform:translateX(-50%)',
-    'background:#1a0000;border:2px solid #ff4444;border-radius:10px',
-    'color:#ff8888;font-family:"Courier New",monospace;font-size:13px',
-    'padding:12px 16px;z-index:5000;max-width:320px;text-align:center;width:90%'
+    'position:fixed;inset:0;z-index:9000',
+    'background:#1a0000',
+    'display:flex;flex-direction:column;align-items:center;justify-content:center',
+    'font-family:"Courier New",monospace;text-align:center;padding:30px;gap:20px'
   ].join(';');
   al.innerHTML =
-    '<div style="color:#ff4444;font-weight:700;margin-bottom:6px">⚠ RUTA NO RESPETADA</div>' +
-    '<div style="margin-bottom:10px">Alejando del WP: <b>' + ident + '</b><br>¿Continúa al siguiente?</div>' +
-    '<div style="display:flex;gap:8px;justify-content:center">' +
+    '<div style="color:#ff4444;font-size:72px;line-height:1">⚠</div>' +
+    '<div style="color:#ff4444;font-weight:700;font-size:48px;letter-spacing:2px;line-height:1.2">RUTA NO<br>RESPETADA</div>' +
+    '<div style="color:#ff8888;font-size:30px">Alejando del WP:</div>' +
+    '<div style="color:#fff;font-size:56px;font-weight:700;letter-spacing:3px">' + ident + '</div>' +
+    '<div style="color:#ddd;font-size:26px;margin-bottom:8px">¿Continúa al siguiente?</div>' +
+    '<div style="display:flex;gap:24px;justify-content:center">' +
     '<button onclick="routeAlertSi()" style="background:#c00;color:#fff;border:none;' +
-      'border-radius:6px;padding:7px 18px;font-size:14px;cursor:pointer">SÍ</button>' +
+      'border-radius:14px;padding:20px 56px;font-size:42px;font-weight:700;cursor:pointer;' +
+      'font-family:\'Courier New\',monospace">SÍ</button>' +
     '<button onclick="routeAlertNo()" style="background:#333;color:#fff;border:none;' +
-      'border-radius:6px;padding:7px 18px;font-size:14px;cursor:pointer">NO</button>' +
+      'border-radius:14px;padding:20px 56px;font-size:42px;font-weight:700;cursor:pointer;' +
+      'font-family:\'Courier New\',monospace">NO</button>' +
     '</div>';
   document.body.appendChild(al);
 }
@@ -1374,6 +1396,58 @@ function showWpPicker() {
   close.onclick = () => ov.remove();
   ov.appendChild(close);
   document.body.appendChild(ov);
+}
+
+function rteAction() {
+  if (S.flpMode && S.route.length > 1) {
+    showWpEst();
+  } else {
+    showRtePicker();
+  }
+}
+
+function showWpEst() {
+  $('screen-main').style.display     = 'none';
+  $('screen-settings').style.display = 'none';
+  $('screen-wp-est').style.display   = 'flex';
+  renderWpEst();
+}
+
+function renderWpEst() {
+  const list = $('wp-est-list');
+  list.innerHTML = '';
+  const kt = S.gpsSpeed * 3600 / 1852;
+  S.route.forEach((wp, idx) => {
+    if (idx === 0) return;
+    const isActive = idx === S.activeLeg;
+    let etStr = '-- min', etaStr = '--:--Z';
+    if (kt >= 1 && S.acLat !== null) {
+      const d = cumulativeDistToLeg(idx);
+      const etMin = d / kt * 60;
+      etStr = Math.round(etMin) + ' min';
+      const eta = new Date(Date.now() + etMin * 60000);
+      etaStr = String(eta.getUTCHours()).padStart(2,'0') + ':' +
+               String(eta.getUTCMinutes()).padStart(2,'0') + 'Z';
+    }
+    const card = document.createElement('div');
+    card.className = 'rte-card';
+    if (isActive) card.style.borderColor = '#00e5ff';
+    card.innerHTML =
+      '<div class="rte-card-nombre" style="color:' + (isActive ? '#00e5ff' : '#f0c040') + ';font-size:22px">' +
+        idx + '/' + (S.route.length-1) + '  ' + wp.ident + (isActive ? '  ◀' : '') +
+      '</div>' +
+      '<div style="font-size:26px;font-family:\'Courier New\',monospace;color:#fff;font-weight:700;margin-top:4px">' +
+        etStr + ' / ' + etaStr +
+      '</div>';
+    card.onclick = () => {
+      S.activeLeg = idx; S.previewLeg = idx;
+      S.prevDistToActive = null; S.minDistToActive = Infinity;
+      S.distIncreasingCount = 0; S.routeAlert = false;
+      document.getElementById('route-alert')?.remove();
+      showMain();
+    };
+    list.appendChild(card);
+  });
 }
 
 function flpClearRoute() {
