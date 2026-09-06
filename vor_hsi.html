@@ -150,12 +150,13 @@
       font-family:'Courier New',monospace; letter-spacing:2px;
       background:#0d1a1f; border:2px solid #00e5ff; border-radius:8px;
       padding:4px 14px; cursor:pointer; display:none;
+      margin-left:auto;
       user-select:none; -webkit-user-select:none;
     }
     #flp-toggle.active { background:#00e5ff; color:#000; }
     /* ── Botón DAT (overlay sobre la rosa) ── */
     #rte-btn {
-      position:absolute; top:6px; right:6px; z-index:200;
+      position:absolute; top:6px; left:6px; z-index:200;
       font-size:28px; font-weight:700; color:#f0c040;
       font-family:'Courier New',monospace; letter-spacing:2px;
       background:#1a1500cc; border:2px solid #f0c040; border-radius:10px;
@@ -500,7 +501,7 @@
         <span id="radial-val">–––</span>
       </div>
       <!-- Version indicator -->
-      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;">v1.17</div>
+      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;">v1.18</div>
       <!-- Botón RTE — overlay esquina inferior izquierda -->
       <span id="rte-btn" onclick="rteAction()" style="display:none">DAT</span>
     </div>
