@@ -361,16 +361,32 @@
 
   <!-- OBS — panel izquierdo -->
   <div class="side-panel side-obs">
-    <div class="ctrl-header tap" onclick="obsDirectTo()">
-      <span class="ctrl-tag">OBS</span>
-      <span id="obs-display">000</span>
+    <!-- VOR mode: controles OBS -->
+    <div id="obs-panel" style="display:flex; flex-direction:column; gap:5px; flex:1;">
+      <div class="ctrl-header tap" onclick="obsDirectTo()">
+        <span class="ctrl-tag">OBS</span>
+        <span id="obs-display">000</span>
+      </div>
+      <div class="ctrl-btn-180" onclick="changeOBS(180)">+180</div>
+      <div class="ctrl-group ctrl-group-obs">
+        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeOBS(+10)">▲▲</div>
+        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeOBS(+1)">▲</div>
+        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeOBS(-1)">▼</div>
+        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeOBS(-10)">▼▼</div>
+      </div>
     </div>
-    <div class="ctrl-btn-180" onclick="changeOBS(180)">+180</div>
-    <div class="ctrl-group ctrl-group-obs">
-      <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeOBS(+10)">▲▲</div>
-      <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeOBS(+1)">▲</div>
-      <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeOBS(-1)">▼</div>
-      <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeOBS(-10)">▼▼</div>
+    <!-- RTE mode: WP activo -->
+    <div id="flp-panel" style="display:none;">
+      <div id="flp-wp-label">NEXT</div>
+      <div id="flp-wp-name">---</div>
+      <div class="ctrl-header">
+        <div class="flp-numrow">
+          <span id="flp-et">--</span><span class="flp-unit"> min</span>
+        </div>
+        <div class="flp-numrow">
+          <span id="flp-eta">--:--Z</span>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -484,9 +500,9 @@
         <span id="radial-val">–––</span>
       </div>
       <!-- Version indicator -->
-      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;">v1.13</div>
+      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;">v1.14</div>
       <!-- Botón RTE — overlay esquina inferior izquierda -->
-      <span id="rte-btn" onclick="rteAction()" style="display:none">RTE</span>
+      <span id="rte-btn" onclick="rteAction()" style="display:none">DAT</span>
     </div>
 
   </div><!-- /center-panel -->
@@ -510,19 +526,6 @@
       </div>
     </div>
 
-    <!-- FLP_HSI: WP activo -->
-    <div id="flp-panel">
-      <div id="flp-wp-label">NEXT</div>
-      <div id="flp-wp-name">---</div>
-      <div class="ctrl-header">
-        <div class="flp-numrow">
-          <span id="flp-et">--</span><span class="flp-unit"> min</span>
-        </div>
-        <div class="flp-numrow">
-          <span id="flp-eta">--:--Z</span>
-        </div>
-      </div>
-    </div>
 
   </div>
 
@@ -1246,8 +1249,9 @@ function showRouteBanner(fp) {
 function toggleFlpMode() {
   S.flpMode = !S.flpMode;
   if (S.flpMode && S.holdMode) toggleHoldMode(); // apagar hold al entrar en RTE
-  $('hdg-controls').style.display = S.flpMode ? 'none' : 'flex';
-  $('flp-panel')   .style.display = S.flpMode ? 'flex' : 'none';
+  $('obs-panel').style.display = S.flpMode ? 'none' : 'flex';
+  $('flp-panel').style.display = S.flpMode ? 'flex' : 'none';
+  // hdg-controls siempre visible en ambos modos
   $('flp-toggle').classList.toggle('active', S.flpMode);
   $('flp-toggle').textContent = S.flpMode ? 'RTE' : 'VOR'; // muestra el modo activo
   update();
@@ -1453,9 +1457,9 @@ function flpClearRoute() {
   document.getElementById('route-alert')?.remove();
   $('flp-toggle').style.display = 'none';
   $('flp-toggle').classList.remove('active');
-  $('flp-toggle').textContent = 'FLP';
-  $('hdg-controls').style.display = 'flex';
-  $('flp-panel')   .style.display = 'none';
+  $('flp-toggle').textContent = 'VOR';
+  $('obs-panel').style.display = 'flex';
+  $('flp-panel').style.display = 'none';
   update();
 }
 
