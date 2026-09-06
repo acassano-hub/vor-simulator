@@ -153,13 +153,13 @@
       user-select:none; -webkit-user-select:none;
     }
     #flp-toggle.active { background:#00e5ff; color:#000; }
-    /* ── Botón RTE (overlay sobre la rosa) ── */
+    /* ── Botón DAT (overlay sobre la rosa) ── */
     #rte-btn {
       position:absolute; top:6px; left:6px; z-index:200;
-      font-size:20px; font-weight:700; color:#f0c040;
+      font-size:28px; font-weight:700; color:#f0c040;
       font-family:'Courier New',monospace; letter-spacing:2px;
       background:#1a1500cc; border:2px solid #f0c040; border-radius:10px;
-      padding:5px 14px; cursor:pointer;
+      padding:8px 18px; cursor:pointer;
       user-select:none; -webkit-user-select:none;
     }
     /* ── Route picker overlay ── */
@@ -369,10 +369,10 @@
       </div>
       <div class="ctrl-btn-180" onclick="changeOBS(180)">+180</div>
       <div class="ctrl-group ctrl-group-obs">
-        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeOBS(+10)">▲▲</div>
-        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeOBS(+1)">▲</div>
-        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeOBS(-1)">▼</div>
-        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeOBS(-10)">▼▼</div>
+        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeOBS(+10)"><svg viewBox="0 0 32 30" width="30" height="28" style="display:block;pointer-events:none"><path d="M 5,14 A 11,11 0 1,1 16,25" stroke="white" stroke-width="4.5" fill="none" stroke-linecap="round"/><polygon points="16,21 23,25 16,29" fill="white"/></svg></div>
+        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeOBS(+1)"><svg viewBox="0 0 32 30" width="30" height="28" style="display:block;pointer-events:none"><path d="M 5,14 A 11,11 0 1,1 16,25" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/><polygon points="16,23 21,25 16,27" fill="white"/></svg></div>
+        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeOBS(-1)"><svg viewBox="0 0 32 30" width="30" height="28" style="display:block;pointer-events:none"><path d="M 27,14 A 11,11 0 1,0 16,25" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/><polygon points="16,23 11,25 16,27" fill="white"/></svg></div>
+        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeOBS(-10)"><svg viewBox="0 0 32 30" width="30" height="28" style="display:block;pointer-events:none"><path d="M 27,14 A 11,11 0 1,0 16,25" stroke="white" stroke-width="4.5" fill="none" stroke-linecap="round"/><polygon points="16,21 9,25 16,29" fill="white"/></svg></div>
       </div>
     </div>
     <!-- RTE mode: WP activo -->
@@ -495,12 +495,12 @@
         </div>
       </div>
       <!-- Radial overlay — esquina inferior derecha -->
-      <div style="position:absolute;bottom:4px;right:4px;text-align:right;pointer-events:none;">
+      <div id="radial-overlay" style="position:absolute;bottom:4px;right:4px;text-align:right;pointer-events:none;">
         <span class="info-r-label">R</span>
         <span id="radial-val">–––</span>
       </div>
       <!-- Version indicator -->
-      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;">v1.14</div>
+      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;">v1.15</div>
       <!-- Botón RTE — overlay esquina inferior izquierda -->
       <span id="rte-btn" onclick="rteAction()" style="display:none">DAT</span>
     </div>
@@ -519,10 +519,10 @@
       <button id="btn-varmode" class="btn-varmode" onclick="varBtnTap()">▶ VAR</button>
       <div id="hdg-plus180" class="ctrl-btn-180" onclick="changeHDG(180)">+180</div>
       <div class="ctrl-group">
-        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeHDG(+10)">▲▲</div>
-        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeHDG(+1)">▲</div>
-        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeHDG(-1)">▼</div>
-        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeHDG(-10)">▼▼</div>
+        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeHDG(+10)"><svg viewBox="0 0 32 30" width="30" height="28" style="display:block;pointer-events:none"><path d="M 5,14 A 11,11 0 1,1 16,25" stroke="white" stroke-width="4.5" fill="none" stroke-linecap="round"/><polygon points="16,21 23,25 16,29" fill="white"/></svg></div>
+        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeHDG(+1)"><svg viewBox="0 0 32 30" width="30" height="28" style="display:block;pointer-events:none"><path d="M 5,14 A 11,11 0 1,1 16,25" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/><polygon points="16,23 21,25 16,27" fill="white"/></svg></div>
+        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-1"  onclick="changeHDG(-1)"><svg viewBox="0 0 32 30" width="30" height="28" style="display:block;pointer-events:none"><path d="M 27,14 A 11,11 0 1,0 16,25" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/><polygon points="16,23 11,25 16,27" fill="white"/></svg></div>
+        <div class="ctrl-btn ctrl-btn-arrow ctrl-btn-arrow-10" onclick="changeHDG(-10)"><svg viewBox="0 0 32 30" width="30" height="28" style="display:block;pointer-events:none"><path d="M 27,14 A 11,11 0 1,0 16,25" stroke="white" stroke-width="4.5" fill="none" stroke-linecap="round"/><polygon points="16,21 9,25 16,29" fill="white"/></svg></div>
       </div>
     </div>
 
@@ -681,7 +681,20 @@ function update() {
   const dist       = distNm(S.acLat, S.acLon, vor.lat, vor.lon);
 
   const { flag, frac } = calcCDI(Math.round(magRadial), S.obs);
-  const nx = 150 + frac * 55;
+  let cdiFrac = frac;
+  if (S.flpMode && S.activeLeg > 0 && S.activeLeg < S.route.length) {
+    const prev = S.route[S.activeLeg - 1];
+    const cur  = S.route[S.activeLeg];
+    if (prev) {
+      const d_pd = distNm(prev.lat, prev.lon, S.acLat, S.acLon);
+      const θ_pc = toRad(bearing(prev.lat, prev.lon, cur.lat,  cur.lon));
+      const θ_pa = toRad(bearing(prev.lat, prev.lon, S.acLat, S.acLon));
+      const xte  = Math.asin(Math.max(-1, Math.min(1,
+        Math.sin(d_pd / 3440.07) * Math.sin(θ_pa - θ_pc)))) * 3440.07;
+      cdiFrac = clamp(-xte / 0.5); // full-scale ±0.5 NM; aguja apunta hacia la ruta
+    }
+  }
+  const nx = 150 + cdiFrac * 55;
   $('cdi-needle').setAttribute('x1', nx);
   $('cdi-needle').setAttribute('x2', nx);
 
@@ -780,9 +793,9 @@ function drawCompassRose() {
   const g = $('g-compass');
   const CX=150, CY=150, R=140;
   const LABELS = {
-    0:'N', 30:'03', 60:'06', 90:'E',
-    120:'12', 150:'15', 180:'S',
-    210:'21', 240:'24', 270:'W', 300:'30', 330:'33'
+    0:'36', 30:'03', 60:'06', 90:'09',
+    120:'12', 150:'15', 180:'18',
+    210:'21', 240:'24', 270:'27', 300:'30', 330:'33'
   };
   const CARD = new Set([0,90,180,270]);
 
@@ -818,6 +831,17 @@ function drawCompassRose() {
       t.setAttribute('transform', `rotate(${deg},${tx},${ty})`);
       t.textContent = LABELS[deg];
       g.appendChild(t);
+      // N pequeño debajo del "36"
+      if (deg === 0) {
+        const n = svgEl('text');
+        n.setAttribute('x', tx); n.setAttribute('y', String(ty + 20));
+        n.setAttribute('text-anchor','middle'); n.setAttribute('dominant-baseline','middle');
+        n.setAttribute('font-size','16'); n.setAttribute('font-weight','700');
+        n.setAttribute('fill','#e8ecf4'); n.setAttribute('font-family',"'Courier New',monospace");
+        n.setAttribute('transform',`rotate(0,${tx},${ty+20})`);
+        n.textContent = 'N';
+        g.appendChild(n);
+      }
     }
   }
 }
@@ -1249,11 +1273,13 @@ function showRouteBanner(fp) {
 function toggleFlpMode() {
   S.flpMode = !S.flpMode;
   if (S.flpMode && S.holdMode) toggleHoldMode(); // apagar hold al entrar en RTE
-  $('obs-panel').style.display = S.flpMode ? 'none' : 'flex';
-  $('flp-panel').style.display = S.flpMode ? 'flex' : 'none';
+  $('obs-panel').style.display      = S.flpMode ? 'none' : 'flex';
+  $('flp-panel').style.display      = S.flpMode ? 'flex' : 'none';
+  $('radial-overlay').style.display = S.flpMode ? 'none' : '';
+  $('tofrom-text').style.display    = S.flpMode ? 'none' : '';
   // hdg-controls siempre visible en ambos modos
   $('flp-toggle').classList.toggle('active', S.flpMode);
-  $('flp-toggle').textContent = S.flpMode ? 'RTE' : 'VOR'; // muestra el modo activo
+  $('flp-toggle').textContent = S.flpMode ? 'RTE' : 'VOR';
   update();
 }
 
