@@ -154,9 +154,9 @@
       user-select:none; -webkit-user-select:none;
     }
     #flp-toggle.active { background:#00e5ff; color:#000; }
-    /* ── Botón DAT (overlay sobre la rosa) ── */
+    /* ── Botón DAT (overlay sobre la rosa) — solo visible en modo RTE ── */
     #rte-btn {
-      position:absolute; top:6px; left:6px; z-index:200;
+      position:absolute; bottom:26px; right:4px; z-index:200;
       font-size:28px; font-weight:700; color:#f0c040;
       font-family:'Courier New',monospace; letter-spacing:2px;
       background:#1a1500cc; border:2px solid #f0c040; border-radius:10px;
@@ -168,8 +168,7 @@
       position:fixed; inset:0; z-index:8000;
       background:#0c0d11ee;
       display:flex; flex-direction:column;
-      align-items:center; justify-content:flex-start;
-      padding:16px; gap:10px; overflow-y:auto;
+      padding:16px; gap:8px;
     }
     .rte-card {
       width:100%; max-width:420px;
@@ -501,7 +500,7 @@
         <span id="radial-val">–––</span>
       </div>
       <!-- Version indicator -->
-      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;">v1.19</div>
+      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;">v1.20</div>
       <!-- Botón RTE — overlay esquina inferior izquierda -->
       <span id="rte-btn" onclick="rteAction()" style="display:none">DAT</span>
     </div>
@@ -1147,7 +1146,7 @@ function fetchRoutes() {
     .then(r => r.ok ? r.json() : [])
     .then(rutas => {
       _rutasGH = rutas || [];
-      if (_rutasGH.length > 0) $('rte-btn').style.display = 'inline-block';
+      if (_rutasGH.length > 0 && S.flpMode) $('rte-btn').style.display = 'inline-block';
     })
     .catch(() => {});
 }
@@ -1158,36 +1157,44 @@ function showRtePicker() {
   ov.id = 'rte-overlay';
 
   const title = document.createElement('div');
-  title.style.cssText = 'font-size:16px;font-weight:700;color:#cdd0d8;font-family:"Courier New",monospace;margin-bottom:4px;';
+  title.style.cssText = 'font-size:16px;font-weight:700;color:#cdd0d8;font-family:"Courier New",monospace;flex-shrink:0;';
   title.textContent = 'Rutas guardadas';
   ov.appendChild(title);
 
+  // Sección scrollable con las tarjetas
+  const cardsSection = document.createElement('div');
+  cardsSection.style.cssText = 'flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;align-items:center;gap:10px;';
   _rutasGH.forEach(r => {
     const card = document.createElement('div');
     card.className = 'rte-card';
     card.innerHTML =
       '<div class="rte-card-nombre">' + (r.nombre || r.id) + '</div>' +
       '<div class="rte-card-fecha">' + (r.fecha || '') + '  ' + (r.hora || '') + '</div>';
-    card.onclick = () => {
-      ov.remove();
-      _cargarRutaGH(r);
-    };
-    ov.appendChild(card);
+    card.onclick = () => { ov.remove(); _cargarRutaGH(r); };
+    cardsSection.appendChild(card);
   });
+  ov.appendChild(cardsSection);
 
+  // Botón Cerrar — grande, alineado a la derecha
+  const footerClose = document.createElement('div');
+  footerClose.style.cssText = 'flex-shrink:0;display:flex;justify-content:flex-end;padding-top:6px;';
   const close = document.createElement('div');
-  close.className = 'rte-close';
+  close.style.cssText = 'font-size:22px;font-weight:700;color:#cdd0d8;cursor:pointer;padding:12px 30px;border:2px solid #555;border-radius:10px;background:#111318;font-family:"Courier New",monospace;user-select:none;-webkit-user-select:none;';
   close.textContent = '✕  Cerrar';
   close.onclick = () => ov.remove();
-  ov.appendChild(close);
+  footerClose.appendChild(close);
+  ov.appendChild(footerClose);
 
+  // Botón Borrar — rojo, más abajo a la derecha, lejos del Cerrar
   if (S.flpMode || S.route.length > 1) {
+    const footerDel = document.createElement('div');
+    footerDel.style.cssText = 'flex-shrink:0;display:flex;justify-content:flex-end;padding-top:10px;';
     const delBtn = document.createElement('div');
-    delBtn.className = 'rte-close';
+    delBtn.style.cssText = 'font-size:15px;color:#ff6060;cursor:pointer;padding:9px 18px;border:1px solid #ff6060;border-radius:8px;background:#1a0808;font-family:"Courier New",monospace;user-select:none;-webkit-user-select:none;';
     delBtn.textContent = '🗑  Borrar ruta activa';
-    delBtn.style.cssText = 'color:#ff6060;border-color:#ff6060;margin-top:4px;';
     delBtn.onclick = () => { ov.remove(); flpClearRoute(); };
-    ov.appendChild(delBtn);
+    footerDel.appendChild(delBtn);
+    ov.appendChild(footerDel);
   }
 
   document.body.appendChild(ov);
@@ -1281,6 +1288,7 @@ function toggleFlpMode() {
   // hdg-controls siempre visible en ambos modos
   $('flp-toggle').classList.toggle('active', S.flpMode);
   $('flp-toggle').textContent = S.flpMode ? 'RTE' : 'VOR';
+  $('rte-btn').style.display = (S.flpMode && _rutasGH.length > 0) ? 'inline-block' : 'none';
   update();
 }
 
