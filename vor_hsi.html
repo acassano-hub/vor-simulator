@@ -500,7 +500,7 @@
         <span id="radial-val">–––</span>
       </div>
       <!-- Version indicator -->
-      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;" id="app-ver">v1.21</div>
+      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;" id="app-ver">v1.22</div>
       <!-- Botón RTE — overlay esquina inferior izquierda -->
       <span id="rte-btn" onclick="rteAction()" style="display:none">DAT</span>
     </div>
@@ -586,7 +586,7 @@ const S = {
   acLat:null, acLon:null,
   gpsTrack:null, gpsSpeed:0, gpsAcc:null,
   gpsActive:false, watchId:null,
-  selectedVOR:'PAR', obs:0, obsVor:0, hdgBug:0, predOK:false, routeStr:'',
+  selectedVOR:'PAR', obs:0, obsVor:0, hdgBug:0, predOK:false, routeStr:'', compassHdg:null,
   magVar: getMagVar('PAR'),
   editMagVar: false,
   holdMode: false, holdCourse: null, holdRight: true,
@@ -655,13 +655,46 @@ function updatePredOK() {
 }
 
 // Estado de la UI persistido: iOS descarta la PWA en segundo plano y la auto-actualización recarga.
+let _uiLast = '';
 function saveUi() {
-  try {
-    localStorage.setItem('vor_ui', JSON.stringify({
-      flp: S.flpMode, vor: S.selectedVOR, obs: S.flpMode ? S.obsVor : S.obs,
-      hdg: S.hdgBug, leg: S.activeLeg, route: S.routeStr
-    }));
-  } catch(e) {}
+  const s = JSON.stringify({
+    flp: S.flpMode, vor: S.selectedVOR, obs: S.flpMode ? S.obsVor : S.obs,
+    hdg: S.hdgBug, leg: S.activeLeg, route: S.routeStr
+  });
+  if (s === _uiLast) return;
+  try { localStorage.setItem('vor_ui', s); _uiLast = s; } catch(e) {}
+}
+
+// Brújula del teléfono. webkitCompassHeading (iOS) es magnético y referido al borde
+// superior del equipo en vertical; + window.orientation lo lleva al borde superior de la pantalla.
+let _cmpT = 0, _cmpOn = false;
+function onCompass(e) {
+  const h = e.webkitCompassHeading;
+  if (typeof h !== 'number' || h < 0) return;
+  const o = typeof window.orientation === 'number' ? window.orientation : 0;
+  const hdg = norm360(Math.round(h + o));
+  const was = S.compassHdg;
+  S.compassHdg = hdg;
+  if (S.predOK || hdg === was) return;
+  const now = Date.now();
+  if (now - _cmpT < 100) return;
+  _cmpT = now;
+  update();
+}
+function enableCompass() {
+  if (_cmpOn) return;
+  const DOE = window.DeviceOrientationEvent;
+  if (!DOE) return;
+  const start = () => {
+    if (_cmpOn) return;
+    _cmpOn = true;
+    window.addEventListener('deviceorientation', onCompass);
+  };
+  if (typeof DOE.requestPermission === 'function') {
+    DOE.requestPermission().then(r => { if (r === 'granted') start(); }).catch(() => {});
+  } else {
+    start();
+  }
 }
 
 function restoreUi() {
@@ -692,13 +725,19 @@ function update() {
   }
   const magVar = S.magVar;
 
-  const useTrack   = S.acLat !== null && S.gpsTrack !== null && S.gpsSpeed > 0.5;
-  const magHeading = useTrack ? norm360(S.gpsTrack - magVar) : 0;
+  // < 10 kt: rumbo de la brújula del teléfono (pínula); si no hay, track GPS o Norte arriba
+  const useCompass = !S.predOK && S.compassHdg !== null;
+  const useTrack   = !useCompass && S.acLat !== null && S.gpsTrack !== null && S.gpsSpeed > 0.5;
+  const magHeading = useCompass ? S.compassHdg
+                   : useTrack   ? norm360(S.gpsTrack - magVar) : 0;
 
   $('g-compass').setAttribute('transform', `rotate(${-magHeading},150,150)`);
   $('g-course') .setAttribute('transform', `rotate(${norm360(S.obs-magHeading)},150,150)`);
   $('g-hdg-bug').setAttribute('transform', `rotate(${norm360(S.hdgBug-magHeading)},150,150)`);
-  $('hdg-text').textContent = useTrack ? pad3(Math.round(magHeading))+'°' : 'N↑';
+  const ht = $('hdg-text');
+  ht.textContent = useCompass ? 'BRÚJ ' + pad3(Math.round(magHeading)) + '°'
+                 : useTrack   ? pad3(Math.round(magHeading)) + '°' : 'N↑';
+  ht.setAttribute('fill', useCompass ? '#ff9900' : '#777');
 
   if (S.holdMode) {
     $('g-hold').setAttribute('transform',
@@ -1596,6 +1635,9 @@ async function requestWakeLock() {
   } catch(e) {}
 }
 document.addEventListener('touchstart', requestWakeLock, { once:true });
+// iOS exige pedir permiso de orientación dentro de un toque (touchend/click, no touchstart)
+document.addEventListener('touchend', enableCompass);
+document.addEventListener('click',    enableCompass);
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') requestWakeLock();
 });
