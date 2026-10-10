@@ -500,7 +500,7 @@
         <span id="radial-val">–––</span>
       </div>
       <!-- Version indicator -->
-      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;">v1.20</div>
+      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;" id="app-ver">v1.21</div>
       <!-- Botón RTE — overlay esquina inferior izquierda -->
       <span id="rte-btn" onclick="rteAction()" style="display:none">DAT</span>
     </div>
@@ -586,7 +586,7 @@ const S = {
   acLat:null, acLon:null,
   gpsTrack:null, gpsSpeed:0, gpsAcc:null,
   gpsActive:false, watchId:null,
-  selectedVOR:'PAR', obs:0, hdgBug:0,
+  selectedVOR:'PAR', obs:0, obsVor:0, hdgBug:0, predOK:false, routeStr:'',
   magVar: getMagVar('PAR'),
   editMagVar: false,
   holdMode: false, holdCourse: null, holdRight: true,
@@ -646,7 +646,39 @@ function calcInterceptNm(dx, dy, vx, vy, rx, ry) {
   return s > 0.1 ? s : null;
 }
 
+// Predicciones (intercepción, ET/ETA, auto-avance de WP) sólo con velocidad suficiente.
+// Histéresis 10/12 kt para que no parpadeen al rondar el umbral.
+const PRED_KT_OFF = 10, PRED_KT_ON = 12;
+function updatePredOK() {
+  const kt = S.gpsSpeed * 3600 / 1852;
+  S.predOK = S.predOK ? kt >= PRED_KT_OFF : kt >= PRED_KT_ON;
+}
+
+// Estado de la UI persistido: iOS descarta la PWA en segundo plano y la auto-actualización recarga.
+function saveUi() {
+  try {
+    localStorage.setItem('vor_ui', JSON.stringify({
+      flp: S.flpMode, vor: S.selectedVOR, obs: S.flpMode ? S.obsVor : S.obs,
+      hdg: S.hdgBug, leg: S.activeLeg, route: S.routeStr
+    }));
+  } catch(e) {}
+}
+
+function restoreUi() {
+  let u = null;
+  try { u = JSON.parse(localStorage.getItem('vor_ui')); } catch(e) {}
+  if (!u) return null;
+  if (u.vor && NAVAIDS[u.vor]) { S.selectedVOR = u.vor; S.magVar = getMagVar(u.vor); }
+  if (Number.isFinite(u.obs)) S.obs = S.obsVor = norm360(u.obs);
+  if (Number.isFinite(u.hdg)) S.hdgBug = norm360(u.hdg);
+  $('obs-display').textContent = pad3(S.obs);
+  $('hdg-display').textContent = pad3(S.hdgBug);
+  $('vor-badge').textContent   = S.selectedVOR;
+  return u;
+}
+
 function update() {
+  saveUi();
   // En modo FLP el "VOR" es el waypoint activo de la ruta
   let vor = NAVAIDS[S.selectedVOR];
   if (S.flpMode && S.route.length > 1 && S.activeLeg < S.route.length) {
@@ -714,8 +746,8 @@ function update() {
     let icpMode = 'hide'; // 'hide' | 'data' | 'diverging'
 
     if (hasGPS) {
-      if (!useTrack) {
-        icpMode = 'diverging'; // quieto o < 1 kt: siempre <>
+      if (!useTrack || !S.predOK) {
+        icpMode = 'diverging'; // < 10 kt: no se predice, siempre <>
       } else if (flag !== 'OFF') {
         const latR = toRad(vor.lat);
         const dx   = (S.acLon - vor.lon) * 60 * Math.cos(latR);
@@ -757,7 +789,11 @@ function update() {
     : (vor.id || S.selectedVOR);
 
   // Auto-avance / alerta cuando se aleja del WP activo
-  if (S.flpMode && S.acLat !== null && S.activeLeg < S.route.length) {
+  // Con < 10 kt el ruido del GPS simula alejamientos: no se evalúa.
+  if (S.flpMode && S.acLat !== null && S.activeLeg < S.route.length && !S.predOK) {
+    S.prevDistToActive = null;
+    S.distIncreasingCount = 0;
+  } else if (S.flpMode && S.acLat !== null && S.activeLeg < S.route.length) {
     S.minDistToActive = Math.min(S.minDistToActive, dist);
     if (S.prevDistToActive !== null && dist > S.prevDistToActive + 0.01) {
       S.distIncreasingCount++;
@@ -781,6 +817,7 @@ function update() {
     S.prevDistToActive = dist;
   }
 
+  saveUi();
   if (S.flpMode) updateFlpPanel();
 }
 
@@ -1210,6 +1247,7 @@ function _cargarRutaGH(r) {
   S.prevDistToActive = null; S.minDistToActive = Infinity;
   S.distIncreasingCount = 0; S.routeAlert = false;
   if (S.route.length > 1) {
+    S.routeStr = r.fp;
     try { localStorage.setItem('vor_route', r.fp); } catch(e) {}
     $('flp-toggle').style.display = 'inline-block';
     if (!S.flpMode) toggleFlpMode();
@@ -1220,7 +1258,7 @@ function _cargarRutaGH(r) {
 //  MODO FLP_HSI — ruta cargada desde ?fp= o localStorage
 // ═══════════════════════════════════════════════════════════
 
-function loadRoute() {
+function loadRoute(ui) {
   const fp = new URLSearchParams(location.search).get('fp');
   if (fp) {
     localStorage.setItem('vor_route', fp);
@@ -1241,14 +1279,18 @@ function loadRoute() {
     const parts = seg.split(',');
     return { ident: parts[0].trim(), lat: parseFloat(parts[1]), lon: parseFloat(parts[2]) };
   }).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
-  S.activeLeg = Math.min(1, S.route.length - 1);
+  S.routeStr = stored;
+  // Misma ruta que antes de recargar → se restauran modo y WP activo
+  const same = !fp && ui && ui.route === stored;
+  S.activeLeg = (same && Number.isInteger(ui.leg) && ui.leg >= 1 && ui.leg < S.route.length)
+    ? ui.leg : Math.min(1, S.route.length - 1);
   S.previewLeg = S.activeLeg;
   S.prevDistToActive = null; S.minDistToActive = Infinity;
   S.distIncreasingCount = 0; S.routeAlert = false;
   if (S.route.length > 1) {
     $('flp-toggle').style.display = 'inline-block';
-    // PWA abierta tras QR escaneado en Safari: activar FLP automáticamente
-    if (!fp) setTimeout(() => { if (!S.flpMode) toggleFlpMode(); }, 150);
+    // Ruta nueva (QR escaneado en Safari) o estaba en RTE: activar FLP
+    if (!fp && (!same || ui.flp)) setTimeout(() => { if (!S.flpMode) toggleFlpMode(); }, 150);
   }
 }
 
@@ -1280,6 +1322,13 @@ function showRouteBanner(fp) {
 
 function toggleFlpMode() {
   S.flpMode = !S.flpMode;
+  // RTE pisa S.obs con el rumbo al WP: el OBS de VOR se guarda aparte
+  if (S.flpMode) {
+    S.obsVor = S.obs;
+  } else {
+    S.obs = S.obsVor;
+    $('obs-display').textContent = pad3(S.obs);
+  }
   if (S.flpMode && S.holdMode) toggleHoldMode(); // apagar hold al entrar en RTE
   $('obs-panel').style.display      = S.flpMode ? 'none' : 'flex';
   $('flp-panel').style.display      = S.flpMode ? 'flex' : 'none';
@@ -1308,7 +1357,7 @@ function updateFlpPanel() {
   $('flp-wp-name').textContent = wp.ident;
 
   const kt = S.gpsSpeed * 3600 / 1852;
-  if (kt >= 1 && S.acLat !== null) {
+  if (S.predOK && S.acLat !== null) {
     const d = cumulativeDistToLeg(S.activeLeg);
     const etMin = d / kt * 60;
     $('flp-et').textContent = Math.round(etMin);
@@ -1454,7 +1503,7 @@ function renderWpEst() {
     if (idx === 0) return;
     const isActive = idx === S.activeLeg;
     let etStr = '-- min', etaStr = '--:--Z';
-    if (kt >= 1 && S.acLat !== null) {
+    if (S.predOK && S.acLat !== null) {
       const d = cumulativeDistToLeg(idx);
       const etMin = d / kt * 60;
       etStr = Math.round(etMin) + ' min';
@@ -1486,7 +1535,8 @@ function renderWpEst() {
 function flpClearRoute() {
   localStorage.removeItem('vor_route');
   document.cookie = 'vor_route=;path=/;max-age=0';
-  S.route = []; S.activeLeg = 1; S.previewLeg = 1; S.flpMode = false;
+  if (S.flpMode) { S.obs = S.obsVor; $('obs-display').textContent = pad3(S.obs); }
+  S.route = []; S.routeStr = ''; S.activeLeg = 1; S.previewLeg = 1; S.flpMode = false;
   S.prevDistToActive = null; S.minDistToActive = Infinity;
   S.distIncreasingCount = 0; S.routeAlert = false;
   document.getElementById('route-alert')?.remove();
@@ -1513,6 +1563,7 @@ function startGPS() {
       S.gpsTrack = pos.coords.heading;
       S.gpsAcc   = pos.coords.accuracy;
       S.gpsActive = true;
+      updatePredOK();
       $('gps-top').style.display = 'none';
       update();
     },
@@ -1553,14 +1604,21 @@ setInterval(() => { if (!wakeLock || wakeLock.released) requestWakeLock(); }, 30
 // ═══════════════════════════════════════════════════════════
 //  AUTO-UPDATE
 // ═══════════════════════════════════════════════════════════
+// El ETag de GitHub Pages cambia con CUALQUIER commit al repo (p. ej. subir una ruta
+// a flp/index.json), aunque el HTML sea el mismo: se recarga sólo si cambió la versión.
 let _lastEtag = null;
 async function checkForUpdate() {
   if (!navigator.onLine) return;
   try {
-    const r = await fetch(location.href, { method:'HEAD', cache:'no-store' });
+    const url = location.origin + location.pathname;
+    const r = await fetch(url, { method:'HEAD', cache:'no-store' });
     const tag = r.headers.get('etag') || r.headers.get('last-modified');
     if (!tag) return;
-    if (_lastEtag && tag !== _lastEtag) { location.reload(true); return; }
+    if (tag !== _lastEtag) {
+      const html = await (await fetch(url, { cache:'no-store' })).text();
+      const m = html.match(/id="app-ver">([^<]+)</);
+      if (m && m[1] !== $('app-ver').textContent) { location.reload(); return; }
+    }
     _lastEtag = tag;
   } catch(e) {}
 }
@@ -1575,7 +1633,7 @@ checkForUpdate();
 // ═══════════════════════════════════════════════════════════
 drawCompassRose();
 buildHoldGeometry();
-loadRoute();
+loadRoute(restoreUi());
 fetchRoutes();
 startGPS();
 requestWakeLock();
