@@ -397,7 +397,7 @@
       <span id="hold-entry" onclick="holdTimerTap()">TIME</span>
       <span id="gps-top"></span>
       <span id="tofrom-text">---</span>
-      <span id="flp-toggle" onclick="toggleFlpMode()">FLP</span>
+      <span id="flp-toggle" onclick="flpToggleTap()">VOR</span>
     </div>
 
     <div class="hsi-container">
@@ -500,7 +500,7 @@
         <span id="radial-val">–––</span>
       </div>
       <!-- Version indicator -->
-      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;" id="app-ver">v1.22</div>
+      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;" id="app-ver">v2.01</div>
       <!-- Botón RTE — overlay esquina inferior izquierda -->
       <span id="rte-btn" onclick="rteAction()" style="display:none">DAT</span>
     </div>
@@ -1222,6 +1222,7 @@ function fetchRoutes() {
     .then(r => r.ok ? r.json() : [])
     .then(rutas => {
       _rutasGH = rutas || [];
+      if (_rutasGH.length > 0) $('flp-toggle').style.display = 'inline-block';
       if (_rutasGH.length > 0 && S.flpMode) $('rte-btn').style.display = 'inline-block';
     })
     .catch(() => {});
@@ -1357,6 +1358,12 @@ function showRouteBanner(fp) {
     banner.remove();
     if (!S.flpMode) toggleFlpMode();
   };
+}
+
+// Sin ruta cargada no hay RTE posible: el botón abre la lista de rutas de GitHub
+function flpToggleTap() {
+  if (!S.flpMode && S.route.length < 2) showRtePicker();
+  else toggleFlpMode();
 }
 
 function toggleFlpMode() {
@@ -1579,11 +1586,14 @@ function flpClearRoute() {
   S.prevDistToActive = null; S.minDistToActive = Infinity;
   S.distIncreasingCount = 0; S.routeAlert = false;
   document.getElementById('route-alert')?.remove();
-  $('flp-toggle').style.display = 'none';
+  $('flp-toggle').style.display = _rutasGH.length > 0 ? 'inline-block' : 'none';
   $('flp-toggle').classList.remove('active');
   $('flp-toggle').textContent = 'VOR';
+  $('rte-btn').style.display = 'none';
   $('obs-panel').style.display = 'flex';
   $('flp-panel').style.display = 'none';
+  $('radial-overlay').style.display = '';
+  $('tofrom-text').style.display = '';
   update();
 }
 
