@@ -530,7 +530,7 @@
         <span id="radial-val">–––</span>
       </div>
       <!-- Version indicator -->
-      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;" id="app-ver">v3.00</div>
+      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;" id="app-ver">v3.01</div>
       <!-- Botón RTE — overlay esquina inferior izquierda -->
       <span id="rte-btn" onclick="rteAction()" style="display:none">DAT</span>
     </div>
@@ -1252,7 +1252,6 @@ function fetchRoutes() {
     .then(r => r.ok ? r.json() : [])
     .then(rutas => {
       _rutasGH = rutas || [];
-      if (_rutasGH.length > 0 && S.flpMode) $('rte-btn').style.display = 'inline-block';
     })
     .catch(() => {});
 }
@@ -1511,7 +1510,8 @@ function toggleFlpMode() {
   // hdg-controls siempre visible en ambos modos
   $('flp-toggle').classList.toggle('active', S.flpMode);
   $('flp-toggle').textContent = S.flpMode ? 'RTE' : 'VOR';
-  $('rte-btn').style.display = (S.flpMode && _rutasGH.length > 0) ? 'inline-block' : 'none';
+  // DAT no depende de la lista de GitHub: es la única puerta a WPS, al selector y a borrar la ruta activa
+  $('rte-btn').style.display = S.flpMode ? 'inline-block' : 'none';
   update();
 }
 
