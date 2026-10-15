@@ -178,7 +178,7 @@
     }
     .rte-card:active { background:#1f2535; }
     .rte-card-nombre { font-size:17px; font-weight:700; color:#f0c040; font-family:'Courier New',monospace; }
-    .rte-card-fecha  { font-size:12px; color:#666; font-family:'Courier New',monospace; }
+    .rte-card-fecha  { font-size:12px; color:#8a8f9a; font-family:'Courier New',monospace; }
     .rte-close {
       font-size:15px; color:#888; cursor:pointer; margin-top:8px;
       padding:6px 20px; border:1px solid #333; border-radius:6px;
@@ -530,7 +530,7 @@
         <span id="radial-val">–––</span>
       </div>
       <!-- Version indicator -->
-      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;" id="app-ver">v3.01</div>
+      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;" id="app-ver">v4.00</div>
       <!-- Botón RTE — overlay esquina inferior izquierda -->
       <span id="rte-btn" onclick="rteAction()" style="display:none">DAT</span>
     </div>
@@ -1242,25 +1242,82 @@ function renderNAVCards() {
 }
 
 // ═══════════════════════════════════════════════════════════
-//  RUTAS GUARDADAS — fetch desde GitHub Pages (flp/index.json)
+//  RUTAS GUARDADAS — lista propia del teléfono, alimentada por GitHub y por el QR
 // ═══════════════════════════════════════════════════════════
+// vor_rutas:     [{fp, nombre, fecha, hora, via}] — clave = fp (mismos puntos = misma ruta)
+// vor_rutas_bor: fp borrados en el teléfono que siguen en GitHub; sin esto la próxima
+//                bajada los traería de vuelta. Se olvidan cuando GitHub ya no los tiene.
 
-let _rutasGH = [];
+function _lsLeer(k) { try { return JSON.parse(localStorage.getItem(k)) || []; } catch(e) { return []; } }
+function _lsGuardar(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} }
 
-function fetchRoutes() {
-  fetch('./flp/index.json?_=' + Date.now())
-    .then(r => r.ok ? r.json() : [])
-    .then(rutas => {
-      _rutasGH = rutas || [];
-    })
-    .catch(() => {});
+function rutasLocales() {
+  return _lsLeer('vor_rutas').sort((a, b) =>
+    ((b.fecha || '') + (b.hora || '')).localeCompare((a.fecha || '') + (a.hora || '')));
 }
 
+function _ahoraUTC() {
+  const d = new Date().toISOString();
+  return { fecha: d.slice(0, 10), hora: d.slice(11, 13) + d.slice(14, 16) };
+}
+
+// Ruta cargada a mano (QR, ?fp=, activa previa): entra a la lista aunque se haya borrado antes
+function guardarRutaLocal(fp, via) {
+  const pts = parsearFp(fp);
+  if (pts.length < 2) return;
+  _lsGuardar('vor_rutas_bor', _lsLeer('vor_rutas_bor').filter(x => x !== fp));
+  const rutas = _lsLeer('vor_rutas');
+  if (rutas.some(r => r.fp === fp)) return;
+  const t = _ahoraUTC();
+  rutas.push({ fp, nombre: pts[0].ident + ' → ' + pts[pts.length - 1].ident,
+               fecha: t.fecha, hora: t.hora, via });
+  _lsGuardar('vor_rutas', rutas);
+}
+
+let _ghFps = null;   // fp de la última lista de GitHub bajada; null = todavía no se sabe
+
+function _fusionarGH(listaGH) {
+  const enGH = new Set(listaGH.map(r => r.fp));
+  _ghFps = enGH;
+  const borradas = _lsLeer('vor_rutas_bor').filter(fp => enGH.has(fp));
+  _lsGuardar('vor_rutas_bor', borradas);
+  const rutas = _lsLeer('vor_rutas');
+  listaGH.forEach(g => {
+    if (!g.fp || parsearFp(g.fp).length < 2 || borradas.includes(g.fp)) return;
+    const loc = rutas.find(r => r.fp === g.fp);
+    const datos = { fp: g.fp, nombre: g.nombre || g.id, fecha: g.fecha || '', hora: g.hora || '', via: 'GitHub' };
+    if (loc) Object.assign(loc, datos); else rutas.push(datos);
+  });
+  _lsGuardar('vor_rutas', rutas);
+}
+
+let _ghEstado = 'pendiente';   // pendiente | ok | sin conexión
+
+function fetchRoutes() {
+  return fetch('./flp/index.json?_=' + Date.now())
+    .then(r => r.ok ? r.json() : [])
+    .then(rutas => { _fusionarGH(Array.isArray(rutas) ? rutas : []); _ghEstado = 'ok'; })
+    .catch(() => { _ghEstado = 'sin conexión'; });
+}
+
+function borrarRutasLocales(fps) {
+  const set = new Set(fps);
+  _lsGuardar('vor_rutas', _lsLeer('vor_rutas').filter(r => !set.has(r.fp)));
+  const pend = fps.filter(fp => !_ghFps || _ghFps.has(fp));
+  _lsGuardar('vor_rutas_bor', [...new Set([..._lsLeer('vor_rutas_bor'), ...pend])]);
+  if (set.has(S.routeStr)) flpClearRoute();
+}
+
+const _BTN_PIE = 'cursor:pointer;font-family:"Courier New",monospace;user-select:none;-webkit-user-select:none;border-radius:10px;';
+
 function showRtePicker() {
+  document.getElementById('rte-overlay')?.remove();
   const ov = document.createElement('div');
   ov.id = 'rte-overlay';
+  let modoBorrar = false;
+  const marcadas = new Set();
 
-  // El QR trae las coordenadas completas: anda sin señal, a diferencia de la lista de GitHub
+  // El QR trae las coordenadas completas: anda sin señal
   const scan = document.createElement('div');
   scan.className = 'rte-scan';
   scan.style.flexShrink = '0';
@@ -1271,49 +1328,78 @@ function showRtePicker() {
 
   const title = document.createElement('div');
   title.style.cssText = 'font-size:16px;font-weight:700;color:#cdd0d8;font-family:"Courier New",monospace;flex-shrink:0;margin-top:8px;';
-  title.textContent = _rutasGH.length ? 'Rutas guardadas' : 'Sin rutas guardadas (¿sin conexión?)';
   ov.appendChild(title);
 
-  // Sección scrollable con las tarjetas
-  const cardsSection = document.createElement('div');
-  cardsSection.style.cssText = 'flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;align-items:center;gap:10px;';
-  _rutasGH.forEach(r => {
-    const card = document.createElement('div');
-    card.className = 'rte-card';
-    card.innerHTML =
-      '<div class="rte-card-nombre">' + (r.nombre || r.id) + '</div>' +
-      '<div class="rte-card-fecha">' + (r.fecha || '') + '  ' + (r.hora || '') + '</div>';
-    card.onclick = () => { ov.remove(); _cargarRutaGH(r); };
-    cardsSection.appendChild(card);
-  });
-  ov.appendChild(cardsSection);
+  const cards = document.createElement('div');
+  cards.style.cssText = 'flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;align-items:center;gap:10px;';
+  ov.appendChild(cards);
 
-  // Botón Cerrar — grande, alineado a la derecha
-  const footerClose = document.createElement('div');
-  footerClose.style.cssText = 'flex-shrink:0;display:flex;justify-content:flex-end;padding-top:6px;';
-  const close = document.createElement('div');
-  close.style.cssText = 'font-size:22px;font-weight:700;color:#cdd0d8;cursor:pointer;padding:12px 30px;border:2px solid #555;border-radius:10px;background:#111318;font-family:"Courier New",monospace;user-select:none;-webkit-user-select:none;';
-  close.textContent = '✕  Cerrar';
-  close.onclick = () => ov.remove();
-  footerClose.appendChild(close);
-  ov.appendChild(footerClose);
+  const pie = document.createElement('div');
+  pie.style.cssText = 'flex-shrink:0;display:flex;justify-content:space-between;align-items:center;gap:10px;padding-top:6px;';
+  ov.appendChild(pie);
 
-  // Botón Borrar — rojo, más abajo a la derecha, lejos del Cerrar
-  if (S.flpMode || S.route.length > 1) {
-    const footerDel = document.createElement('div');
-    footerDel.style.cssText = 'flex-shrink:0;display:flex;justify-content:flex-end;padding-top:10px;';
-    const delBtn = document.createElement('div');
-    delBtn.style.cssText = 'font-size:15px;color:#ff6060;cursor:pointer;padding:9px 18px;border:1px solid #ff6060;border-radius:8px;background:#1a0808;font-family:"Courier New",monospace;user-select:none;-webkit-user-select:none;';
-    delBtn.textContent = '🗑  Borrar ruta activa';
-    delBtn.onclick = () => { ov.remove(); flpClearRoute(); };
-    footerDel.appendChild(delBtn);
-    ov.appendChild(footerDel);
+  function render() {
+    const rutas = rutasLocales();
+    const nota = _ghEstado === 'pendiente' ? ' · actualizando…'
+               : _ghEstado === 'sin conexión' ? ' · sin conexión' : '';
+    title.textContent = modoBorrar ? 'Tocá las rutas a borrar'
+                      : (rutas.length ? 'Rutas guardadas (' + rutas.length + ')' : 'Sin rutas guardadas') + nota;
+    cards.innerHTML = '';
+    rutas.forEach(r => {
+      const activa = r.fp === S.routeStr && S.route.length > 1;
+      const marcada = marcadas.has(r.fp);
+      const card = document.createElement('div');
+      card.className = 'rte-card';
+      if (activa) card.style.borderColor = '#00e5ff';
+      if (marcada) { card.style.borderColor = '#ff6060'; card.style.background = '#2a0f0f'; }
+      const n = document.createElement('div');
+      n.className = 'rte-card-nombre';
+      n.textContent = (modoBorrar ? (marcada ? '☑ ' : '☐ ') : '') + r.nombre + (activa ? '   ● ACTIVA' : '');
+      const f = document.createElement('div');
+      f.className = 'rte-card-fecha';
+      f.textContent = parsearFp(r.fp).map(p => p.ident).join(' ') + '   ·   ' +
+                      r.fecha + ' ' + r.hora + 'Z' + (r.via === 'QR' ? '  (QR)' : '');
+      card.append(n, f);
+      card.onclick = () => {
+        if (modoBorrar) { marcada ? marcadas.delete(r.fp) : marcadas.add(r.fp); render(); }
+        else { ov.remove(); aplicarRuta(r.fp); }
+      };
+      cards.appendChild(card);
+    });
+
+    pie.innerHTML = '';
+    const izq = document.createElement('div');
+    if (modoBorrar) {
+      izq.style.cssText = _BTN_PIE + 'font-size:18px;font-weight:700;padding:12px 18px;' +
+        (marcadas.size ? 'color:#fff;background:#a01010;border:2px solid #ff6060;'
+                       : 'color:#664040;background:#1a0808;border:2px solid #402020;');
+      izq.textContent = '🗑  Borrar (' + marcadas.size + ')';
+      izq.onclick = () => {
+        if (!marcadas.size) return;
+        if (!confirm('¿Borrar ' + marcadas.size + ' ruta(s) del teléfono?')) return;
+        borrarRutasLocales([...marcadas]);
+        marcadas.clear(); modoBorrar = false; render();
+      };
+    } else if (rutas.length) {
+      izq.style.cssText = _BTN_PIE + 'font-size:15px;color:#ff6060;padding:9px 16px;border:1px solid #ff6060;background:#1a0808;';
+      izq.textContent = '🗑  Borrar rutas…';
+      izq.onclick = () => { modoBorrar = true; render(); };
+    }
+    const der = document.createElement('div');
+    der.style.cssText = _BTN_PIE + 'font-size:22px;font-weight:700;color:#cdd0d8;padding:12px 26px;border:2px solid #555;background:#111318;';
+    der.textContent = modoBorrar ? 'Cancelar' : '✕  Cerrar';
+    der.onclick = () => {
+      if (modoBorrar) { modoBorrar = false; marcadas.clear(); render(); } else ov.remove();
+    };
+    pie.append(izq, der);
   }
 
+  // Re-bajar la lista de GitHub cada vez que se abre: una ruta nueva se ve sin reiniciar la app
+  _ghEstado = 'pendiente';
+  render();
   document.body.appendChild(ov);
+  fetchRoutes().then(() => { if (document.body.contains(ov)) render(); });
 }
-
-function _cargarRutaGH(r) { aplicarRuta(r.fp); }
 
 // Formato de FPL_MAKER: IDENT,lat,lon|IDENT,lat,lon|...
 function parsearFp(fp) {
@@ -1335,6 +1421,11 @@ function aplicarRuta(fp) {
   try { localStorage.setItem('vor_route', fp); } catch(e) {}
   if (!S.flpMode) toggleFlpMode(); else update();
   return true;
+}
+
+function aplicarRutaQR(fp) {
+  guardarRutaLocal(fp, 'QR');
+  return aplicarRuta(fp);
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1403,7 +1494,7 @@ function _qrLeer(video, canvas) {
       if (fp) {
         cerrarEscaner();
         if (navigator.vibrate) navigator.vibrate(80);
-        aplicarRuta(fp);
+        aplicarRutaQR(fp);
         showRouteBanner(fp);
         return;
       }
@@ -1446,6 +1537,7 @@ function loadRoute(ui) {
     if (m) stored = decodeURIComponent(m[1]);
   }
   if (!stored) return;
+  guardarRutaLocal(stored, fp ? 'QR' : 'previa');
   S.route = parsearFp(stored);
   S.routeStr = stored;
   // Misma ruta que antes de recargar → se restauran modo y WP activo
