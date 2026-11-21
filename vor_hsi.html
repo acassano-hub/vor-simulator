@@ -118,10 +118,11 @@
     }
     .slot {
       flex:1; min-height:0; overflow:hidden;
-      border:1px solid #3a3d4a; border-radius:10px;
-      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+      border:1px solid #a8adb8; border-radius:10px;
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
       font-family:'Courier New',monospace;
     }
+    #slot-r3, #slot-r4 { border-color:#ff5555; }
 
     /* ════ TECLADO NUMÉRICO ════ */
     #screen-kbd {
@@ -256,9 +257,9 @@
     }
 
     /* Contenido de los espacios L1–L4 / R1–R4 */
-    .slot-tag { font-size:13px; font-weight:700; color:#8a8f9a; letter-spacing:1px; line-height:1; }
+    .slot-tag { font-size:15px; font-weight:700; color:#fff; letter-spacing:1px; line-height:1; white-space:nowrap; }
     .slot-val { font-size:28px; font-weight:700; color:#fff; line-height:1; white-space:nowrap; }
-    .slot-sub { font-size:15px; font-weight:700; color:#cdd0d8; line-height:1; white-space:nowrap; }
+    .slot-sub { font-size:18px; font-weight:700; color:#fff; line-height:1; white-space:nowrap; }
     .slot-sub:empty { display:none; }
     #slot-r2 { cursor:pointer; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; }
 
@@ -315,6 +316,13 @@
     #dme-val    { font-size:36px; font-family:'Courier New',monospace; color:#ff5555; font-weight:700; line-height:1; }
     .dme-nm     { font-size:12px; color:#fff; font-family:'Courier New',monospace; }
     #radial-val { font-size:36px; font-family:'Courier New',monospace; color:#fff; font-weight:700; line-height:1; }
+    /* Rumbo (brújula, H) o track GPS (T) — encima de R xxx (en RTE, encima de DAT) */
+    #hdg-overlay {
+      position:absolute; bottom:44px; right:4px; text-align:right; pointer-events:none;
+      color:#ff5555; white-space:nowrap;
+    }
+    #hdg-overlay .info-r-label { color:#ff5555; }
+    #hdg-val { font-size:36px; font-family:'Courier New',monospace; color:#ff5555; font-weight:700; line-height:1; }
     #tofrom-text {
       font-size:30px; font-weight:700; line-height:1;
       font-family:'Courier New',monospace;
@@ -469,8 +477,6 @@
 
         </g>
 
-        <text id="hdg-text" x="150" y="43" text-anchor="middle"
-              font-size="12" font-family="'Courier New',monospace" fill="#777">N↑</text>
       </svg>
       <!-- DME overlay — esquina inferior izquierda -->
       <div style="position:absolute;bottom:4px;left:4px;pointer-events:auto;">
@@ -480,13 +486,18 @@
           <span class="dme-nm">nm</span>
         </div>
       </div>
+      <!-- Rumbo / track — encima del radial -->
+      <div id="hdg-overlay">
+        <span class="info-r-label" id="hdg-lbl"></span>
+        <span id="hdg-val">N↑</span>
+      </div>
       <!-- Radial overlay — esquina inferior derecha -->
       <div id="radial-overlay" style="position:absolute;bottom:4px;right:4px;text-align:right;pointer-events:none;">
         <span class="info-r-label">R</span>
         <span id="radial-val">–––</span>
       </div>
       <!-- Version indicator -->
-      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;" id="app-ver">v5.01</div>
+      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;" id="app-ver">v5.02</div>
       <!-- Botón RTE — overlay esquina inferior izquierda -->
       <span id="rte-btn" onclick="rteAction()" style="display:none">DAT</span>
     </div>
@@ -748,10 +759,12 @@ function update() {
 
   $('g-compass').setAttribute('transform', `rotate(${-magHeading},150,150)`);
   $('g-course') .setAttribute('transform', `rotate(${norm360(S.obs-magHeading)},150,150)`);
-  const ht = $('hdg-text');
-  ht.textContent = useCompass ? 'BRÚJ ' + pad3(Math.round(magHeading)) + '°'
-                 : useTrack   ? pad3(Math.round(magHeading)) + '°' : 'N↑';
-  ht.setAttribute('fill', useCompass ? '#ff9900' : '#777');
+  // H = rumbo de la brújula (< 10 kt); T = track GPS magnético (en vuelo); N↑ sin datos
+  $('hdg-lbl').textContent = useCompass ? 'H' : useTrack ? 'T' : '';
+  $('hdg-val').textContent = (useCompass || useTrack) ? pad3(Math.round(magHeading) % 360) : 'N↑';
+  const dat = $('rte-btn');
+  $('hdg-overlay').style.bottom = (S.flpMode && dat.offsetHeight)
+    ? (dat.offsetTop > 0 ? (dat.parentNode.clientHeight - dat.offsetTop + 6) + 'px' : '84px') : '44px';
 
   if (S.holdMode) {
     $('g-hold').setAttribute('transform',
@@ -860,14 +873,41 @@ function update() {
 // ═══════════════════════════════════════════════════════════
 const p2 = n => String(n).padStart(2, '0');
 const fmtHM = min => { const m = Math.round(min); return Math.floor(m / 60) + ':' + p2(m % 60); };
-const fmtZ  = d => p2(d.getUTCHours()) + ':' + p2(d.getUTCMinutes()) + 'Z';
+const fmtZ  = d => p2(d.getUTCHours()) + ':' + p2(d.getUTCMinutes());   // UTC, sin Z
 
-// Valores largos (p. ej. «123.4 NM») achican la letra para entrar en el rectángulo
 function setSlot(id, val, sub) {
-  const v = $(id + '-val');
-  v.textContent = val;
-  v.style.fontSize = val.length > 7 ? '20px' : val.length > 6 ? '24px' : '';
+  $(id + '-val').textContent = val;
   $(id + '-sub').textContent = sub || '';
+  fitSlot(id);
+}
+
+// La letra del valor (y de la segunda línea) crece hasta ocupar el rectángulo:
+// limitada por el ancho (se mide a 100 px) y por el alto libre debajo del rótulo.
+const FIT_MAX = 64;
+function fitSlot(id) {
+  const box = $('slot-' + id);
+  const W = box.clientWidth - 8, H = box.clientHeight - 6;
+  if (W <= 0 || H <= 0) return;                 // pantalla oculta: se ajusta al volver
+  const tag = $(id + '-tag'), v = $(id + '-val'), sb = $(id + '-sub');
+  const hTag = tag.textContent ? tag.offsetHeight + 2 : 0;
+  const libre = H - hTag;
+  const tieneSub = sb.textContent !== '';
+  const ajustar = (el, hMax) => {
+    if (!el.textContent) return;
+    el.style.fontSize = '100px';
+    const w = el.scrollWidth;
+    el.style.fontSize = Math.floor(Math.min(FIT_MAX, hMax, w > 0 ? 100 * W / w : hMax)) + 'px';
+  };
+  ajustar(v,  tieneSub ? libre * 0.58 : libre);
+  if (tieneSub) ajustar(sb, libre * 0.42 - 2);
+}
+function fitSlots() { ['l1','l2','l3','l4','r1','r2','r3','r4'].forEach(fitSlot); }
+// Cada rectángulo se reajusta solo cuando cambia de tamaño (rotación, barra de Safari,
+// volver de otra pantalla). El tamaño del rectángulo no depende de su texto: no hay bucle.
+function initFitObserver() {
+  if (typeof ResizeObserver !== 'function') { window.addEventListener('resize', () => setTimeout(fitSlots, 50)); return; }
+  const ro = new ResizeObserver(entries => entries.forEach(e => fitSlot(e.target.id.slice(5))));
+  ['l1','l2','l3','l4','r1','r2','r3','r4'].forEach(id => ro.observe($('slot-' + id)));
 }
 
 function renderSlots() {
@@ -888,7 +928,7 @@ function renderSlots() {
     setSlot('l3', fmtZ(new Date(Date.now() + ete * 60000)));
   } else {
     setSlot('l2', '-:--');
-    setSlot('l3', '--:--Z');
+    setSlot('l3', '--:--');
   }
 
   // L4: ETA a fin de ruta, sólo en RTE
@@ -897,7 +937,7 @@ function renderSlots() {
     if (pred) {
       const ete = cumulativeDistToLeg(S.route.length - 1) / kt * 60;
       setSlot('l4', fmtZ(new Date(Date.now() + ete * 60000)));
-    } else setSlot('l4', '--:--Z');
+    } else setSlot('l4', '--:--');
   } else {
     $('l4-tag').textContent = '';
     setSlot('l4', '');
@@ -1474,7 +1514,7 @@ function showRtePicker() {
       const f = document.createElement('div');
       f.className = 'rte-card-fecha';
       f.textContent = parsearFp(r.fp).map(p => p.ident).join(' ') + '   ·   ' +
-                      r.fecha + ' ' + r.hora + 'Z' + (r.via === 'QR' ? '  (QR)' : '');
+                      r.fecha + ' ' + r.hora + (r.via === 'QR' ? '  (QR)' : '');
       card.append(n, f);
       card.onclick = () => {
         if (modoBorrar) { marcada ? marcadas.delete(r.fp) : marcadas.add(r.fp); render(); }
@@ -1877,14 +1917,14 @@ function renderWpEst() {
   S.route.forEach((wp, idx) => {
     if (idx === 0) return;
     const isActive = idx === S.activeLeg;
-    let etStr = '-- min', etaStr = '--:--Z';
+    let etStr = '-- min', etaStr = '--:--';
     if (S.predOK && S.acLat !== null) {
       const d = cumulativeDistToLeg(idx);
       const etMin = d / kt * 60;
       etStr = Math.round(etMin) + ' min';
       const eta = new Date(Date.now() + etMin * 60000);
       etaStr = String(eta.getUTCHours()).padStart(2,'0') + ':' +
-               String(eta.getUTCMinutes()).padStart(2,'0') + 'Z';
+               String(eta.getUTCMinutes()).padStart(2,'0');
     }
     const card = document.createElement('div');
     card.className = 'rte-card';
@@ -2019,6 +2059,7 @@ update();   // pinta el botón VAR con la declinación aunque todavía no haya G
 renderReloj();
 setInterval(renderReloj, 1000);
 initLogPress();
+initFitObserver();
 fetchRoutes();
 startGPS();
 requestWakeLock();
