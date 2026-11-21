@@ -32,6 +32,7 @@
 
     /* ── Panel central ── */
     .center-panel {
+      position:relative;
       flex:1; min-width:0;
       display:flex; flex-direction:column;
       align-items:center;
@@ -116,10 +117,10 @@
       display:flex; flex-direction:column; gap:5px;
     }
     .slot {
-      flex:1; min-height:0;
+      flex:1; min-height:0; overflow:hidden;
       border:1px solid #3a3d4a; border-radius:10px;
-      display:flex; align-items:center; justify-content:center;
-      font-size:12px; color:#3a3d4a; font-family:'Courier New',monospace;
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+      font-family:'Courier New',monospace;
     }
 
     /* ════ TECLADO NUMÉRICO ════ */
@@ -164,7 +165,7 @@
     #kbd-msg { font-size:15px; color:#ff4444; min-height:17px; }
 
     /* ── Modo FLP_HSI ── */
-    #flp-toggle {
+    .tb-spacer, #flp-toggle {
       font-size:22px; font-weight:700; color:#00e5ff;
       font-family:'Courier New',monospace; letter-spacing:2px;
       background:#0d1a1f; border:2px solid #00e5ff; border-radius:8px;
@@ -172,6 +173,18 @@
       margin-left:auto;
       user-select:none; -webkit-user-select:none;
     }
+    /* Espaciador invisible con la forma del botón viejo: conserva el alto de
+       la top-bar, y con él el tamaño del compás */
+    .tb-spacer { visibility:hidden; pointer-events:none; }
+    /* Botón VOR/RTE agrandado: capa sobre la esquina superior derecha,
+       donde antes estaba el dato de intercepción */
+    #flp-toggle {
+      position:absolute; top:2px; right:4px; z-index:150;
+      width:88px; height:64px; margin:0; padding:0;
+      display:flex; align-items:center; justify-content:center;
+      font-size:30px; letter-spacing:1px; border-radius:10px;
+    }
+    #flp-toggle:active { background:#163038; }
     #flp-toggle.active { background:#00e5ff; color:#000; }
     /* ── Botón DAT (overlay sobre la rosa) — solo visible en modo RTE ── */
     #rte-btn {
@@ -236,58 +249,18 @@
       display:flex; flex-direction:column; flex:1; min-height:0;
       align-items:stretch; gap:5px;
     }
-    #flp-panel {
-      display:none; flex-direction:column; flex:1; min-height:0;
-      align-items:stretch; gap:4px;
-    }
-    #flp-wp-label {
-      font-size:18px; font-weight:700; color:#cdd0d8; font-family:'Courier New',monospace;
-      text-align:center; letter-spacing:2px; flex-shrink:0;
-    }
+    /* Encabezado izquierdo en RTE: nombre del WP activo */
     #flp-wp-name {
-      font-size:38px; color:#00e5ff; font-weight:700;
-      font-family:'Courier New',monospace; text-align:center; line-height:1;
-      border:1px solid #2a2d38; border-radius:8px; padding:4px 0; flex-shrink:0;
+      font-size:34px; color:#00e5ff; font-weight:700;
+      font-family:'Courier New',monospace; line-height:52px;
     }
-    #flp-et {
-      font-size:54px; color:#f0c040; font-weight:700;
-      font-family:'Courier New',monospace; line-height:1;
-    }
-    #flp-eta {
-      font-size:30px; color:#fff; font-weight:700;
-      font-family:'Courier New',monospace; line-height:1;
-    }
-    .flp-numrow { text-align:center; flex-shrink:0; }
-    .flp-unit { font-size:22px; color:#fff; font-family:'Courier New',monospace; font-weight:700; }
-    .flp-leg-btns {
-      display:flex; gap:4px; flex-shrink:0;
-    }
-    .flp-leg-btn {
-      flex:1; background:#111318; border:1px solid #2a2d38; border-radius:8px;
-      color:#aaa; font-size:28px; font-family:'Courier New',monospace;
-      display:flex; align-items:center; justify-content:center;
-      cursor:pointer; user-select:none; -webkit-user-select:none; padding:4px 0;
-    }
-    .flp-leg-btn:active { background:#1e2028; }
-    #flp-preview-info {
-      font-size:15px; font-weight:700; color:#fff; font-family:'Courier New',monospace;
-      text-align:center; letter-spacing:0.5px; flex-shrink:0;
-      cursor:pointer; border:1px solid #3a3d4a; border-radius:6px; padding:4px 2px;
-      user-select:none; -webkit-user-select:none;
-    }
-    #flp-preview-info:active { background:#1a1d24; }
-    #flp-next-wp {
-      font-size:14px; color:#ddd; font-family:'Courier New',monospace;
-      text-align:center; flex-shrink:0; cursor:pointer;
-      border:1px solid #3a3d4a; border-radius:6px; padding:4px 2px;
-      user-select:none; -webkit-user-select:none;
-    }
-    #flp-next-wp:active { background:#1a1d24; }
-    #flp-clear {
-      font-size:13px; color:#888; font-family:'Courier New',monospace;
-      text-align:center; cursor:pointer; flex-shrink:0;
-      user-select:none; -webkit-user-select:none;
-    }
+
+    /* Contenido de los espacios L1–L4 / R1–R4 */
+    .slot-tag { font-size:13px; font-weight:700; color:#8a8f9a; letter-spacing:1px; line-height:1; }
+    .slot-val { font-size:28px; font-weight:700; color:#fff; line-height:1; white-space:nowrap; }
+    .slot-sub { font-size:15px; font-weight:700; color:#cdd0d8; line-height:1; white-space:nowrap; }
+    .slot-sub:empty { display:none; }
+    #slot-r2 { cursor:pointer; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; }
 
     /* ── TOP BAR ── */
     .top-bar {
@@ -314,20 +287,6 @@
       display:flex; align-items:center; justify-content:center;
       position:relative;
     }
-    /* ── Interceptación de radial ── */
-    #intercept-info {
-      position:absolute;
-      top:3px; right:4px;
-      text-align:right;
-      font-family:'Courier New',monospace;
-      font-weight:700;
-      font-size:30px;
-      color:#ffffff;
-      line-height:1.15;
-      pointer-events:none;
-      display:none;
-    }
-    #intercept-info span { display:block; }
     #hsi { display:block; width:100%; height:100%; max-width:100%; max-height:100%; }
 
     /* ── Info-bar ── */
@@ -410,27 +369,18 @@
 
   <!-- OBS — panel izquierdo -->
   <div class="side-panel side-obs">
-    <!-- VOR mode: controles OBS -->
+    <!-- Encabezado: OBS (VOR, toca → teclado) o NEXT + WP activo (RTE) -->
     <div id="obs-panel" style="display:flex; flex-direction:column; gap:5px; flex:1;">
-      <div class="ctrl-header tap" onclick="openKbd('OBS')">
-        <span class="ctrl-tag">OBS</span>
+      <div id="left-head" class="ctrl-header tap" onclick="leftHeadTap()">
+        <span class="ctrl-tag" id="left-tag">OBS</span>
         <span id="obs-display">000</span>
+        <span id="flp-wp-name" style="display:none">---</span>
       </div>
       <div class="slots">
-        <div class="slot">I1</div><div class="slot">I2</div><div class="slot">I3</div><div class="slot">I4</div>
-      </div>
-    </div>
-    <!-- RTE mode: WP activo -->
-    <div id="flp-panel" style="display:none;">
-      <div id="flp-wp-label">NEXT</div>
-      <div id="flp-wp-name">---</div>
-      <div class="ctrl-header">
-        <div class="flp-numrow">
-          <span id="flp-et">--</span><span class="flp-unit"> min</span>
-        </div>
-        <div class="flp-numrow">
-          <span id="flp-eta">--:--Z</span>
-        </div>
+        <div class="slot" id="slot-l1"><span class="slot-tag" id="l1-tag">ICP</span><span class="slot-val" id="l1-val">--</span><span class="slot-sub" id="l1-sub"></span></div>
+        <div class="slot" id="slot-l2"><span class="slot-tag" id="l2-tag">ETE</span><span class="slot-val" id="l2-val">--</span><span class="slot-sub" id="l2-sub"></span></div>
+        <div class="slot" id="slot-l3"><span class="slot-tag" id="l3-tag">ETA</span><span class="slot-val" id="l3-val">--</span><span class="slot-sub" id="l3-sub"></span></div>
+        <div class="slot" id="slot-l4"><span class="slot-tag" id="l4-tag"></span><span class="slot-val" id="l4-val">--</span><span class="slot-sub" id="l4-sub"></span></div>
       </div>
     </div>
   </div>
@@ -442,8 +392,9 @@
       <span id="hold-entry" onclick="holdTimerTap()">TIME</span>
       <span id="gps-top"></span>
       <span id="tofrom-text">---</span>
-      <span id="flp-toggle" onclick="flpToggleTap()">VOR</span>
+      <span class="tb-spacer">VOR</span>
     </div>
+    <span id="flp-toggle" onclick="flpToggleTap()">VOR</span>
 
     <div class="hsi-container">
       <svg id="hsi" viewBox="14 14 272 272">
@@ -521,10 +472,6 @@
         <text id="hdg-text" x="150" y="43" text-anchor="middle"
               font-size="12" font-family="'Courier New',monospace" fill="#777">N↑</text>
       </svg>
-      <div id="intercept-info">
-        <span id="icp-dist"></span>
-        <span id="icp-time"></span>
-      </div>
       <!-- DME overlay — esquina inferior izquierda -->
       <div style="position:absolute;bottom:4px;left:4px;pointer-events:auto;">
         <span id="vor-badge" onclick="showSettings()">PAR</span>
@@ -539,7 +486,7 @@
         <span id="radial-val">–––</span>
       </div>
       <!-- Version indicator -->
-      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;" id="app-ver">v5.00</div>
+      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;" id="app-ver">v5.01</div>
       <!-- Botón RTE — overlay esquina inferior izquierda -->
       <span id="rte-btn" onclick="rteAction()" style="display:none">DAT</span>
     </div>
@@ -555,7 +502,10 @@
       </div>
       <button id="btn-varmode" class="btn-varmode" onclick="varBtnTap()">VAR</button>
       <div class="slots">
-        <div class="slot">D1</div><div class="slot">D2</div><div class="slot">D3</div><div class="slot">D4</div>
+        <div class="slot" id="slot-r1"><span class="slot-tag" id="r1-tag">UTC</span><span class="slot-val" id="r1-val">--</span><span class="slot-sub" id="r1-sub"></span></div>
+        <div class="slot" id="slot-r2"><span class="slot-tag" id="r2-tag">LOG</span><span class="slot-val" id="r2-val">--</span><span class="slot-sub" id="r2-sub"></span></div>
+        <div class="slot" id="slot-r3"><span class="slot-tag" id="r3-tag">SOG kt</span><span class="slot-val" id="r3-val">--</span><span class="slot-sub" id="r3-sub"></span></div>
+        <div class="slot" id="slot-r4"><span class="slot-tag" id="r4-tag">ALT GPS ft</span><span class="slot-val" id="r4-val">--</span><span class="slot-sub" id="r4-sub"></span></div>
       </div>
     </div>
   </div>
@@ -650,7 +600,8 @@ function getMagVar(id) {
 // ═══════════════════════════════════════════════════════════
 const S = {
   acLat:null, acLon:null,
-  gpsTrack:null, gpsSpeed:0, gpsAcc:null,
+  gpsTrack:null, gpsSpeed:0, gpsAcc:null, gpsAlt:null,
+  l1v:'--', l1s:'', logMs:0,
   gpsActive:false, watchId:null,
   selectedVOR:'PAR', obs:0, obsVor:0, predOK:false, routeStr:'', compassHdg:null,
   magVar: getMagVar('PAR'),
@@ -807,7 +758,7 @@ function update() {
       `rotate(${norm360(S.holdCourse-magHeading)},150,150)`);
   }
 
-  if (S.acLat === null) return;
+  if (S.acLat === null) { S.l1v = '--'; S.l1s = ''; renderSlots(); return; }
 
   const trueRadial = bearing(vor.lat, vor.lon, S.acLat, S.acLon);
   const magRadial  = norm360(trueRadial - magVar);
@@ -826,6 +777,9 @@ function update() {
       const xte  = Math.asin(Math.max(-1, Math.min(1,
         Math.sin(d_pd / 3440.07) * Math.sin(θ_pa - θ_pc)))) * 3440.07;
       cdiFrac = clamp(-xte / 0.5); // full-scale ±0.5 NM; aguja apunta hacia la ruta
+      // L1 en RTE: desviación lateral respecto del tramo (+ = a la derecha del curso)
+      S.l1v = Math.abs(xte).toFixed(1) + (Math.abs(xte) < 0.05 ? '' : xte > 0 ? ' R' : ' L');
+      S.l1s = 'NM';
     }
   }
   const nx = 150 + cdiFrac * 55;
@@ -840,48 +794,25 @@ function update() {
   $('dme-val')   .textContent = dist.toFixed(1);
   $('radial-val').textContent = pad3(Math.round(magRadial));
 
-  const iInfo = $('intercept-info');
-  if (S.flpMode) {
-    iInfo.style.display = 'none';
-  } else {
-    const hasGPS = S.acLat !== null;
-    let icpMode = 'hide'; // 'hide' | 'data' | 'diverging'
-
-    if (hasGPS) {
-      if (!useTrack || !S.predOK) {
-        icpMode = 'diverging'; // < 10 kt: no se predice, siempre <>
-      } else if (flag !== 'OFF') {
-        const latR = toRad(vor.lat);
-        const dx   = (S.acLon - vor.lon) * 60 * Math.cos(latR);
-        const dy   = (S.acLat - vor.lat) * 60;
-        const mhR  = toRad(magHeading);
-        const obsR = toRad(S.obs);
-        const s = calcInterceptNm(dx, dy, Math.sin(mhR), Math.cos(mhR),
-                                           Math.sin(obsR), Math.cos(obsR));
-        if (s !== null && s < 500) {
-          const kt = S.gpsSpeed * 3600 / 1852;
-          const tm = Math.round(s * 60 / kt);
-          if (tm <= 99) {
-            $('icp-dist').textContent = s.toFixed(1) + ' NM';
-            $('icp-time').textContent = String(tm).padStart(2, '0') + ' min';
-            icpMode = 'data';
-          } else {
-            icpMode = 'diverging';
-          }
-        } else {
-          icpMode = 'diverging';
+  // L1 en VOR: distancia y tiempo hasta interceptar el radial del OBS con el track actual
+  if (!S.flpMode) {
+    S.l1v = '<>'; S.l1s = '';          // < 10 kt, sin TO/FROM o divergiendo
+    if (useTrack && S.predOK && flag !== 'OFF') {
+      const latR = toRad(vor.lat);
+      const dx   = (S.acLon - vor.lon) * 60 * Math.cos(latR);
+      const dy   = (S.acLat - vor.lat) * 60;
+      const mhR  = toRad(magHeading);
+      const obsR = toRad(S.obs);
+      const s = calcInterceptNm(dx, dy, Math.sin(mhR), Math.cos(mhR),
+                                         Math.sin(obsR), Math.cos(obsR));
+      if (s !== null && s < 500) {
+        const kt = S.gpsSpeed * 3600 / 1852;
+        const tm = Math.round(s * 60 / kt);
+        if (tm <= 99) {
+          S.l1v = s.toFixed(1) + ' NM';
+          S.l1s = String(tm).padStart(2, '0') + ' min';
         }
       }
-    }
-
-    if (icpMode === 'data') {
-      iInfo.style.display = 'block';
-    } else if (icpMode === 'diverging') {
-      $('icp-dist').textContent = '<>';
-      $('icp-time').textContent = '';
-      iInfo.style.display = 'block';
-    } else {
-      iInfo.style.display = 'none';
     }
   }
 
@@ -921,6 +852,101 @@ function update() {
 
   saveUi();
   if (S.flpMode) updateFlpPanel();
+  renderSlots();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  ESPACIOS L1–L4 / R1–R4
+// ═══════════════════════════════════════════════════════════
+const p2 = n => String(n).padStart(2, '0');
+const fmtHM = min => { const m = Math.round(min); return Math.floor(m / 60) + ':' + p2(m % 60); };
+const fmtZ  = d => p2(d.getUTCHours()) + ':' + p2(d.getUTCMinutes()) + 'Z';
+
+// Valores largos (p. ej. «123.4 NM») achican la letra para entrar en el rectángulo
+function setSlot(id, val, sub) {
+  const v = $(id + '-val');
+  v.textContent = val;
+  v.style.fontSize = val.length > 7 ? '20px' : val.length > 6 ? '24px' : '';
+  $(id + '-sub').textContent = sub || '';
+}
+
+function renderSlots() {
+  const kt = S.gpsSpeed * 3600 / 1852;
+  const pred = S.predOK && S.acLat !== null;
+
+  // L1: ICP (VOR) / XTK (RTE)
+  $('l1-tag').textContent = S.flpMode ? 'XTK' : 'ICP';
+  setSlot('l1', S.l1v, S.l1s);
+
+  // L2/L3: ETE y ETA al VOR o al WP activo
+  const tgt = S.flpMode ? S.route[S.activeLeg] : NAVAIDS[S.selectedVOR];
+  if (pred && tgt) {
+    const d = S.flpMode ? cumulativeDistToLeg(S.activeLeg)
+                        : distNm(S.acLat, S.acLon, tgt.lat, tgt.lon);
+    const ete = d / kt * 60;
+    setSlot('l2', fmtHM(ete));
+    setSlot('l3', fmtZ(new Date(Date.now() + ete * 60000)));
+  } else {
+    setSlot('l2', '-:--');
+    setSlot('l3', '--:--Z');
+  }
+
+  // L4: ETA a fin de ruta, sólo en RTE
+  if (S.flpMode && S.route.length > 1) {
+    $('l4-tag').textContent = 'ETA FIN';
+    if (pred) {
+      const ete = cumulativeDistToLeg(S.route.length - 1) / kt * 60;
+      setSlot('l4', fmtZ(new Date(Date.now() + ete * 60000)));
+    } else setSlot('l4', '--:--Z');
+  } else {
+    $('l4-tag').textContent = '';
+    setSlot('l4', '');
+  }
+
+  // R3 SOG, R4 altitud GPS
+  setSlot('r3', S.acLat !== null ? String(Math.round(kt)) : '--');
+  setSlot('r4', Number.isFinite(S.gpsAlt) ? String(Math.round(S.gpsAlt * 3.28084)) : '----');
+}
+
+// R1 hora UTC y R2 LOG: se refrescan cada segundo
+function renderReloj() {
+  setSlot('r1', fmtZ(new Date()));
+  setSlot('r2', fmtHM(Math.floor(S.logMs / 60000)));
+}
+
+// LOG de vuelo acumulado: suma el tiempo entre fixes consecutivos con SOG > 50 kt.
+// Un hueco entre fixes (app suspendida) se cuenta hasta 10 min. Toque largo → a cero.
+const LOG_KT = 50, LOG_GAP_MAX = 10 * 60000;
+let _logT = null;
+try { S.logMs = parseFloat(localStorage.getItem('vor_log_ms')) || 0; } catch(e) {}
+
+function logFix(now) {
+  const kt = S.gpsSpeed * 3600 / 1852;
+  if (kt > LOG_KT) {
+    if (_logT !== null) {
+      S.logMs += Math.min(now - _logT, LOG_GAP_MAX);
+      try { localStorage.setItem('vor_log_ms', String(S.logMs)); } catch(e) {}
+    }
+    _logT = now;
+  } else {
+    _logT = null;
+  }
+}
+
+function logReset() {
+  if (!confirm('¿Poner el LOG de vuelo en cero?')) return;
+  S.logMs = 0; _logT = null;
+  try { localStorage.setItem('vor_log_ms', '0'); } catch(e) {}
+  renderReloj();
+}
+
+function initLogPress() {
+  const el = $('slot-r2');
+  let t = null;
+  const fin = () => { clearTimeout(t); t = null; };
+  el.addEventListener('pointerdown', () => { fin(); t = setTimeout(() => { t = null; logReset(); }, 1500); });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => el.addEventListener(ev, fin));
+  el.addEventListener('contextmenu', e => e.preventDefault());
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1685,8 +1711,7 @@ function toggleFlpMode() {
     $('obs-display').textContent = pad3(S.obs);
   }
   if (S.flpMode && S.holdMode) toggleHoldMode(); // apagar hold al entrar en RTE
-  $('obs-panel').style.display      = S.flpMode ? 'none' : 'flex';
-  $('flp-panel').style.display      = S.flpMode ? 'flex' : 'none';
+  setLeftMode();
   $('radial-overlay').style.display = S.flpMode ? 'none' : '';
   $('tofrom-text').style.display    = S.flpMode ? 'none' : '';
   // HOLD/VAR siempre visibles en ambos modos
@@ -1708,24 +1733,18 @@ function cumulativeDistToLeg(idx) {
 
 function updateFlpPanel() {
   const wp = S.route[S.activeLeg];
-  if (!wp) return;
-
-  $('flp-wp-name').textContent = wp.ident;
-
-  const kt = S.gpsSpeed * 3600 / 1852;
-  if (S.predOK && S.acLat !== null) {
-    const d = cumulativeDistToLeg(S.activeLeg);
-    const etMin = d / kt * 60;
-    $('flp-et').textContent = Math.round(etMin);
-    const eta = new Date(Date.now() + etMin * 60000);
-    $('flp-eta').textContent =
-      String(eta.getUTCHours()).padStart(2,'0') + ':' +
-      String(eta.getUTCMinutes()).padStart(2,'0') + 'Z';
-  } else {
-    $('flp-et').textContent = '--';
-    $('flp-eta').textContent = '--:--Z';
-  }
+  $('flp-wp-name').textContent = wp ? wp.ident : '---';
 }
+
+// Encabezado izquierdo: OBS en VOR, NEXT + WP activo en RTE
+function setLeftMode() {
+  $('left-tag').textContent = S.flpMode ? 'NEXT' : 'OBS';
+  $('left-tag').style.color = S.flpMode ? '#cdd0d8' : '';
+  $('obs-display').style.display = S.flpMode ? 'none' : '';
+  $('flp-wp-name').style.display = S.flpMode ? '' : 'none';
+}
+
+function leftHeadTap() { if (!S.flpMode) openKbd('OBS'); }
 
 // ▲/▼ cambian SOLO la vista previa, no el WP activo
 function flpNextLeg() {
@@ -1899,8 +1918,7 @@ function flpClearRoute() {
   $('flp-toggle').classList.remove('active');
   $('flp-toggle').textContent = 'VOR';
   $('rte-btn').style.display = 'none';
-  $('obs-panel').style.display = 'flex';
-  $('flp-panel').style.display = 'none';
+  setLeftMode();
   $('radial-overlay').style.display = '';
   $('tofrom-text').style.display = '';
   update();
@@ -1920,8 +1938,10 @@ function startGPS() {
       S.gpsSpeed = pos.coords.speed   || 0;
       S.gpsTrack = pos.coords.heading;
       S.gpsAcc   = pos.coords.accuracy;
+      S.gpsAlt   = pos.coords.altitude;      // m, null si el equipo no la da
       S.gpsActive = true;
       updatePredOK();
+      logFix(Date.now());
       $('gps-top').style.display = 'none';
       update();
     },
@@ -1996,6 +2016,9 @@ drawCompassRose();
 buildHoldGeometry();
 loadRoute(restoreUi());
 update();   // pinta el botón VAR con la declinación aunque todavía no haya GPS
+renderReloj();
+setInterval(renderReloj, 1000);
+initLogPress();
 fetchRoutes();
 startGPS();
 requestWakeLock();
