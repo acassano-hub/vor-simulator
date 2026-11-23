@@ -366,7 +366,7 @@
     <span class="ov" id="trk-overlay"><span class="ov-lbl" id="trk-lbl"></span> <span class="ov-val" id="trk-val">N↑</span></span>
     <!-- Radial (sólo modo VOR) -->
     <span class="ov" id="radial-overlay"><span class="ov-lbl">R</span> <span class="ov-val" id="radial-val">–––</span></span>
-    <span class="ov" id="app-ver">v6.00</span>
+    <span class="ov" id="app-ver">v6.01</span>
   </div>
 
   <!-- 55 % inferior: I1–I5 / D1–D5; el contenido de cada uno depende del modo (renderSlots) -->
@@ -844,7 +844,10 @@ function renderSlots() {
 // Toques en los rectángulos
 function slotTap(id) {
   if (id === 'i4') { cronoTap(); return; }
-  if (id === 'i5') { flpToggleTap(); return; }
+  if (id === 'i5') {                              // con HOLD activo, VOR sólo sale del HOLD
+    if (!S.flpMode && S.holdMode) toggleHoldMode(); else flpToggleTap();
+    return;
+  }
   if (S.flpMode) { if (id === 'd5') rteAction(); return; }
   if (id === 'i1') openKbd('OBS');
   else if (id === 'd3' && S.holdMode) holdTimerTap();
