@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>VOR / HSI</title>
@@ -20,125 +20,96 @@
     }
 
     /* ══════════════════════════════
-       LAYOUT LANDSCAPE (siempre)
+       LAYOUT VERTICAL (v6.00)
+       Rosa en el 45 % superior; abajo dos columnas de 5 rectángulos
+       (I1–I5 a la izquierda, D1–D5 a la derecha)
     ══════════════════════════════ */
     .screen {
       width:100%; height:100%;
-      display:flex;
-      flex-direction:row;
-      align-items:stretch;
+      display:flex; flex-direction:column;
       overflow:hidden;
     }
-
-    /* ── Panel central ── */
-    .center-panel {
-      position:relative;
-      flex:1; min-width:0;
-      display:flex; flex-direction:column;
-      align-items:center;
-      overflow:hidden;
-      padding:0 2px;
+    #screen-main {
+      padding:env(safe-area-inset-top) env(safe-area-inset-right)
+              env(safe-area-inset-bottom) env(safe-area-inset-left);
+    }
+    .rosa-zona { position:relative; flex:0 0 45%; min-height:0; }
+    .hsi-container {
+      position:absolute; inset:0;
+      display:flex; align-items:center; justify-content:center;
+    }
+    #hsi { display:block; width:100%; height:100%; }
+    .ov {
+      position:absolute; z-index:5; pointer-events:none;
+      font-family:'Courier New',monospace; font-weight:700; line-height:1; white-space:nowrap;
+    }
+    .ov-lbl { font-size:30px; }
+    .ov-val { font-size:40px; }
+    #tofrom-text  { top:2px; left:6px; font-size:30px; color:#333; letter-spacing:1px; }
+    #gps-top      { top:4px; right:6px; font-size:18px; color:#ff5555; display:none; }
+    #trk-overlay  { left:6px;  bottom:2px; color:#fff; }
+    #radial-overlay { right:6px; bottom:2px; color:#f0c040; }
+    #app-ver {
+      left:50%; bottom:1px; transform:translateX(-50%);
+      font-size:10px; color:#888; font-weight:400;
     }
 
-    /* ── Paneles laterales — columna vertical ── */
-    .side-panel {
-      width:125px; flex-shrink:0;
-      display:flex; flex-direction:column;
-      align-items:stretch;
-      padding:6px; gap:5px;
-    }
-    .side-obs   { padding-left:max(6px, env(safe-area-inset-left)); }
-    .side-right { padding-right:max(6px, env(safe-area-inset-right)); }
-
-    /* Encabezado (label + valor) */
-    .ctrl-header {
-      flex-shrink:0;
-      display:flex; flex-direction:column;
-      align-items:center; gap:1px;
-    }
-    /* Encabezado tocable: abre el teclado */
-    .ctrl-header.tap {
-      cursor:pointer;
-      border:1px solid #2a2d38; border-radius:10px;
-      padding:2px 0;
-      user-select:none; -webkit-user-select:none;
-    }
-    .ctrl-header.tap:active { background:#1a1d24; }
-
-    .ctrl-tag {
-      font-size:26px; font-weight:700;
-      font-family:'Courier New',monospace;
-      letter-spacing:1px;
-    }
-    .side-obs .ctrl-tag { color:#f0c040; }
-    #obs-display {
-      font-size:52px; color:#f0c040;
-      font-weight:700;
-      font-family:'Courier New',monospace;
-      line-height:1;
-    }
-
-    /* ── HOLD: botón de encendido + número (abre el teclado) ── */
-    #hold-btn {
-      flex-shrink:0; text-align:center; cursor:pointer;
-      font-size:26px; font-weight:700; letter-spacing:1px;
-      font-family:'Courier New',monospace;
-      color:#d060ff; background:#111318;
-      border:2px solid #d060ff; border-radius:10px; padding:2px 0;
-      user-select:none; -webkit-user-select:none;
-    }
-    #hold-btn:active { background:#1a0a22; }
-    #hold-display {
-      font-size:52px; color:#3a3d4a;
-      font-weight:700;
-      font-family:'Courier New',monospace;
-      line-height:1;
-    }
-    #hold-num { cursor:default; }
-    .side-right.holdmode #hold-btn     { background:#d060ff; color:#000; }
-    .side-right.holdmode #hold-display { color:#d060ff; }
-    .side-right.holdmode #hold-num     { border-color:#d060ff; cursor:pointer; }
-
-    /* ── Botón secundario (VAR / HOLD-TURN) ── */
-    .btn-varmode {
-      width:100%; flex-shrink:0;
-      background:#1e2028; border:1px solid #555; color:#ff9900;
-      font-size:19px; font-weight:700; font-family:'Courier New',monospace;
-      border-radius:8px; padding:6px 0; cursor:pointer;
-      text-align:center; letter-spacing:1px;
-      user-select:none; -webkit-user-select:none;
-    }
-    .btn-varmode:active { background:#2a2d38; }
-    .btn-varmode.hold { border-color:#d060ff; color:#d060ff; background:#1a0a22; }
-
-    /* ── Espacios libres (a definir qué va en cada uno) ── */
-    .slots {
+    .grilla {
       flex:1; min-height:0;
-      display:flex; flex-direction:column; gap:5px;
+      display:grid; grid-template-columns:1fr 1fr;
+      grid-template-rows:repeat(5, minmax(0, 1fr)); grid-auto-flow:column;
+      gap:6px; padding:6px;
     }
     .slot {
-      flex:1; min-height:0; overflow:hidden;
-      border:1px solid #a8adb8; border-radius:10px;
+      position:relative; min-width:0; min-height:0; overflow:hidden;
+      border:1px solid #a8adb8; border-radius:10px; color:#fff;
       display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
       font-family:'Courier New',monospace;
+      cursor:pointer; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none;
     }
-    #slot-r3, #slot-r4 { border-color:#ff5555; }
+    .slot-tag  { font-size:26px; font-weight:700; letter-spacing:1px; line-height:1; white-space:nowrap; }
+    .slot-val  { font-size:40px; font-weight:700; line-height:0.82; white-space:nowrap; }
+    .slot-sub  { font-size:32px; font-weight:700; line-height:0.9; white-space:nowrap; }
+    .slot-mini { position:absolute; right:8px; top:4px; font-size:16px; font-weight:700; letter-spacing:1px; line-height:1; }
+    .slot-tag:empty, .slot-sub:empty, .slot-mini:empty, .slot-val:empty { display:none; }
+    .slot.btn .slot-val { letter-spacing:2px; }
+    .slot:not(.vacio):active { filter:brightness(1.35); }
 
-    /* ════ TECLADO NUMÉRICO ════ */
+    /* Colores de cada dato (borde y texto) */
+    .slot.vacio   { border-color:#3a3d4a; cursor:default; }
+    .slot.c-yel   { border-color:#f0c040; color:#f0c040; }
+    .slot.c-dme-v { border-color:#f0c040; }
+    .slot.c-dme-r { border-color:#00e5ff; }
+    .slot.c-dme-v .slot-val, .slot.c-dme-r .slot-val { color:#ff5555; }
+    .slot.c-wht   { border-color:#fff; }
+    .slot.c-cyan  { border-color:#00e5ff; color:#00e5ff; }
+    .slot.c-next  { border-color:#00e5ff; }
+    .slot.c-next .slot-tag { color:#cdd0d8; }
+    .slot.c-next .slot-val { color:#00e5ff; font-weight:400; }
+    .slot.c-brown { border:2px solid #d08a4a; background:rgba(70,34,12,0.3); color:#d08a4a; }
+    .slot.c-green { border-color:#8cff8c; color:#8cff8c; }
+    .slot.c-mag   { border-color:#d060ff; color:#d060ff; }
+    .slot.c-mag-on  { border-color:#28d858; color:#28d858; }   /* fin de la cuenta: titila */
+    .slot.c-mag-off { border-color:#1a0a22; color:#1a0a22; }
+    /* Botones */
+    .slot.b-vor     { border:2px solid #f0c040; background:#1a1500; color:#f0c040; }
+    .slot.b-rte     { border:2px solid #00e5ff; background:#00e5ff; color:#000; }
+    .slot.b-hold, .slot.b-dat { border:2px solid #d060ff; background:#111318; color:#d060ff; }
+    .slot.b-hold-on { border:2px solid #d060ff; background:#d060ff; color:#000; }
+
+    /* ════ TECLADO NUMÉRICO (vertical) ════ */
     #screen-kbd {
       gap:8px;
-      padding:8px max(8px, env(safe-area-inset-right)) 8px max(8px, env(safe-area-inset-left));
+      padding:calc(8px + env(safe-area-inset-top)) calc(8px + env(safe-area-inset-right))
+              calc(8px + env(safe-area-inset-bottom)) calc(8px + env(safe-area-inset-left));
     }
+    .kbd-side { display:contents; }
     .kbd-grid {
-      flex:1.25; min-width:0;
+      order:1; flex:1; min-height:0;
       display:grid; grid-template-columns:repeat(3, 1fr); grid-template-rows:repeat(4, 1fr);
       gap:8px;
     }
-    .kbd-side {
-      flex:1; min-width:0;
-      display:flex; flex-direction:column; gap:8px;
-    }
-    .kbd-row { flex:1; min-height:0; display:flex; gap:8px; }
+    .kbd-row { order:2; flex:0 0 78px; display:flex; gap:8px; }
     .kbd-key {
       flex:1; min-width:0;
       background:#1a1d26; border:1px solid #3a3d4a; border-radius:12px;
@@ -150,52 +121,22 @@
     .kbd-key:active { background:#3a3d4a; }
     .kbd-key.off    { visibility:hidden; }
     .kbd-key.act    { font-size:34px; color:#f0c040; border-color:#f0c040; background:#1a1500; }
+    .kbd-key.turn   { color:#d060ff; border-color:#d060ff; background:#1a0a22; }
     .kbd-key.ok     { background:#1f4e79; border-color:#4a8ad0; }
     .kbd-key.ok:active { background:#2a6aa8; }
     .kbd-key.cancel { font-size:30px; color:#aaa; }
     .kbd-head {
-      flex:1; min-height:0;
+      order:0; flex:0 0 auto; min-height:118px;
       display:flex; flex-direction:column; justify-content:center;
-      border:2px solid #f0c040; border-radius:12px; padding:0 12px;
+      border:2px solid #f0c040; border-radius:12px; padding:4px 12px;
       font-family:'Courier New',monospace;
     }
     #kbd-title { font-size:20px; font-weight:700; color:#f0c040; letter-spacing:1px; }
-    #kbd-disp  { font-size:52px; font-weight:700; color:#fff; line-height:1; letter-spacing:4px; }
+    #kbd-disp  { font-size:60px; font-weight:700; color:#fff; line-height:1; letter-spacing:4px; }
     #kbd-disp.prev { color:#555; }
     #kbd-disp.err  { color:#ff4444; }
     #kbd-msg { font-size:15px; color:#ff4444; min-height:17px; }
 
-    /* ── Modo FLP_HSI ── */
-    .tb-spacer, #flp-toggle {
-      font-size:22px; font-weight:700; color:#00e5ff;
-      font-family:'Courier New',monospace; letter-spacing:2px;
-      background:#0d1a1f; border:2px solid #00e5ff; border-radius:8px;
-      padding:4px 14px; cursor:pointer; display:inline-block;
-      margin-left:auto;
-      user-select:none; -webkit-user-select:none;
-    }
-    /* Espaciador invisible con la forma del botón viejo: conserva el alto de
-       la top-bar, y con él el tamaño del compás */
-    .tb-spacer { visibility:hidden; pointer-events:none; }
-    /* Botón VOR/RTE agrandado: capa sobre la esquina superior derecha,
-       donde antes estaba el dato de intercepción */
-    #flp-toggle {
-      position:absolute; top:2px; right:4px; z-index:150;
-      width:88px; height:64px; margin:0; padding:0;
-      display:flex; align-items:center; justify-content:center;
-      font-size:30px; letter-spacing:1px; border-radius:10px;
-    }
-    #flp-toggle:active { background:#163038; }
-    #flp-toggle.active { background:#00e5ff; color:#000; }
-    /* ── Botón DAT (overlay sobre la rosa) — solo visible en modo RTE ── */
-    #rte-btn {
-      position:absolute; bottom:26px; right:4px; z-index:200;
-      font-size:28px; font-weight:700; color:#f0c040;
-      font-family:'Courier New',monospace; letter-spacing:2px;
-      background:#1a1500cc; border:2px solid #f0c040; border-radius:10px;
-      padding:8px 18px; cursor:pointer;
-      user-select:none; -webkit-user-select:none;
-    }
     /* ── Route picker overlay ── */
     #rte-overlay {
       position:fixed; inset:0; z-index:8000;
@@ -246,88 +187,57 @@
       padding:12px 30px; border:2px solid #555; border-radius:10px; background:#111318;
       user-select:none; -webkit-user-select:none;
     }
-    #right-controls {
-      display:flex; flex-direction:column; flex:1; min-height:0;
-      align-items:stretch; gap:5px;
-    }
-    /* Encabezado izquierdo en RTE: nombre del WP activo */
-    #flp-wp-name {
-      font-size:34px; color:#00e5ff; font-weight:700;
-      font-family:'Courier New',monospace; line-height:52px;
-    }
-
-    /* Contenido de los espacios L1–L4 / R1–R4 */
-    .slot-tag { font-size:15px; font-weight:700; color:#fff; letter-spacing:1px; line-height:1; white-space:nowrap; }
-    .slot-val { font-size:28px; font-weight:700; color:#fff; line-height:1; white-space:nowrap; }
-    .slot-sub { font-size:18px; font-weight:700; color:#fff; line-height:1; white-space:nowrap; }
-    .slot-sub:empty { display:none; }
-    #slot-r2 { cursor:pointer; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; }
-
-    /* ── TOP BAR ── */
-    .top-bar {
-      width:100%; flex-shrink:0;
-      display:flex; justify-content:space-between; align-items:center;
-      gap:18px;   /* TIME y TO/FROM no quedan pegados */
-      padding:1px 6px 0;
-    }
-    #hold-entry {
-      font-size:22px; color:#d060ff; font-weight:700;
-      font-family:'Courier New',monospace; letter-spacing:1px; line-height:1;
-      display:none; cursor:pointer;
-      user-select:none; -webkit-user-select:none;
-    }
-    #gps-top {
-      display:none;
-      font-size:16px; color:#666; font-family:'Courier New',monospace;
-    }
-
-    /* ── HSI container ── */
-    .hsi-container {
-      flex:1; min-height:0;
-      width:100%;
-      display:flex; align-items:center; justify-content:center;
-      position:relative;
-    }
-    #hsi { display:block; width:100%; height:100%; max-width:100%; max-height:100%; }
-
-    /* ── Info-bar ── */
-    .info-bar {
-      width:100%; flex-shrink:0;
-      display:flex; flex-direction:row;
-      align-items:flex-end; justify-content:space-between;
-      padding:0 4px 0;
-    }
-    .info-col   { display:flex; flex-direction:column; align-items:flex-start; flex-shrink:0; }
-    .info-col-r { align-items:flex-end; }
-    .info-numrow { display:flex; align-items:baseline; gap:4px; }
-    #vor-badge {
-      font-size:20px; color:#f0c040; font-weight:700;
-      font-family:'Courier New',monospace; letter-spacing:1px; line-height:1;
-      display:inline-block;
-      border:1px solid #4a5568; border-radius:6px;
-      padding:2px 6px 3px; cursor:pointer;
-      user-select:none; -webkit-user-select:none;
-    }
-    #vor-badge:active { background:#1a1d24; }
-    .info-r-label {
-      font-size:20px; color:#ffffff; font-weight:700;
-      font-family:'Courier New',monospace; letter-spacing:1px; line-height:1;
-    }
-    #dme-val    { font-size:36px; font-family:'Courier New',monospace; color:#ff5555; font-weight:700; line-height:1; }
-    .dme-nm     { font-size:12px; color:#fff; font-family:'Courier New',monospace; }
-    #radial-val { font-size:36px; font-family:'Courier New',monospace; color:#fff; font-weight:700; line-height:1; }
-    /* Rumbo (brújula, H) o track GPS (T) — encima de R xxx (en RTE, encima de DAT) */
-    #hdg-overlay {
-      position:absolute; bottom:44px; right:4px; text-align:right; pointer-events:none;
-      color:#ff5555; white-space:nowrap;
-    }
-    #hdg-overlay .info-r-label { color:#ff5555; }
-    #hdg-val { font-size:36px; font-family:'Courier New',monospace; color:#ff5555; font-weight:700; line-height:1; }
-    #tofrom-text {
-      font-size:30px; font-weight:700; line-height:1;
+    /* ════ CONFIGURACIÓN (tocando la rosa en modo VOR) ════ */
+    #screen-config {
+      gap:14px;
+      padding:calc(12px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right))
+              calc(12px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left));
       font-family:'Courier New',monospace;
-      color:#333; letter-spacing:1px;
     }
+    .cfg-tit { font-size:28px; font-weight:700; color:#cdd0d8; letter-spacing:2px; text-align:center; padding:8px 0; }
+    .cfg-op {
+      flex:0 0 104px; border:2px solid #ff9900; border-radius:12px; background:#1e2028;
+      display:flex; align-items:center; justify-content:space-between; padding:0 22px;
+      cursor:pointer; user-select:none; -webkit-user-select:none;
+    }
+    .cfg-op:active { filter:brightness(1.35); }
+    .cfg-op .n { font-size:40px; font-weight:700; color:#ff9900; }
+    .cfg-op .v { font-size:54px; font-weight:700; color:#fff; }
+    .cfg-op.vor { border-color:#f0c040; }
+    .cfg-op.vor .n { color:#f0c040; }
+    .btn-volver {
+      margin-top:auto; flex:0 0 88px; border:2px solid #555; border-radius:12px; background:#111318;
+      display:flex; align-items:center; justify-content:center;
+      font-size:32px; font-weight:700; color:#cdd0d8; font-family:'Courier New',monospace;
+      cursor:pointer; user-select:none; -webkit-user-select:none;
+    }
+    .btn-volver:active { background:#2a2d38; }
+
+    /* ════ DAT: estima a cada WP de la ruta ════ */
+    #screen-wp-est {
+      padding:env(safe-area-inset-top) env(safe-area-inset-right)
+              env(safe-area-inset-bottom) env(safe-area-inset-left);
+      font-family:'Courier New',monospace;
+    }
+    .dat-head { display:flex; gap:8px; padding:8px; flex-shrink:0; }
+    .dat-head .btn-volver { margin-top:0; flex:1; height:70px; font-size:28px; }
+    .dat-head .rutas { border-color:#00e5ff; color:#00e5ff; background:#0d1a1f; }
+    #wp-est-list {
+      flex:1; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch;
+      padding:0 8px 8px; display:flex; flex-direction:column; gap:8px;
+    }
+    .wpe { border:2px solid #3a3d4a; border-radius:12px; background:#141620; padding:8px 14px; cursor:pointer; flex-shrink:0; }
+    .wpe .n { display:flex; justify-content:space-between; align-items:baseline; }
+    .wpe .wp { font-size:44px; color:#f0c040; }
+    .wpe .ix { font-size:20px; color:#8a8f9a; font-weight:700; }
+    .wpe .t  { display:flex; justify-content:space-between; margin-top:4px; }
+    .wpe .t div { display:flex; flex-direction:column; }
+    .wpe .t div + div { align-items:flex-end; }
+    .wpe .l  { font-size:16px; font-weight:700; color:#8a8f9a; letter-spacing:1px; }
+    .wpe .v  { font-size:48px; font-weight:700; color:#fff; line-height:1; }
+    .wpe.act { border-color:#00e5ff; background:#0d1a1f; }
+    .wpe.act .wp { color:#00e5ff; }
+    .wpe.pas { opacity:.45; }
 
     /* ════ SETTINGS SCREEN ════ */
     .settings-header {
@@ -375,43 +285,15 @@
 <!-- ══════════════════ PANTALLA PRINCIPAL ══════════════════ -->
 <div id="screen-main" class="screen">
 
-  <!-- OBS — panel izquierdo -->
-  <div class="side-panel side-obs">
-    <!-- Encabezado: OBS (VOR, toca → teclado) o NEXT + WP activo (RTE) -->
-    <div id="obs-panel" style="display:flex; flex-direction:column; gap:5px; flex:1;">
-      <div id="left-head" class="ctrl-header tap" onclick="leftHeadTap()">
-        <span class="ctrl-tag" id="left-tag">OBS</span>
-        <span id="obs-display">000</span>
-        <span id="flp-wp-name" style="display:none">---</span>
-      </div>
-      <div class="slots">
-        <div class="slot" id="slot-l1"><span class="slot-tag" id="l1-tag">ICP</span><span class="slot-val" id="l1-val">--</span><span class="slot-sub" id="l1-sub"></span></div>
-        <div class="slot" id="slot-l2"><span class="slot-tag" id="l2-tag">ETE</span><span class="slot-val" id="l2-val">--</span><span class="slot-sub" id="l2-sub"></span></div>
-        <div class="slot" id="slot-l3"><span class="slot-tag" id="l3-tag">ETA</span><span class="slot-val" id="l3-val">--</span><span class="slot-sub" id="l3-sub"></span></div>
-        <div class="slot" id="slot-l4"><span class="slot-tag" id="l4-tag"></span><span class="slot-val" id="l4-val">--</span><span class="slot-sub" id="l4-sub"></span></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Centro: top-bar / HSI / info-bar -->
-  <div class="center-panel">
-
-    <div class="top-bar">
-      <span id="hold-entry" onclick="holdTimerTap()">TIME</span>
-      <span id="gps-top"></span>
-      <span id="tofrom-text">---</span>
-      <span class="tb-spacer">VOR</span>
-    </div>
-    <span id="flp-toggle" onclick="flpToggleTap()">VOR</span>
-
+  <!-- 45 % superior: rosa (tocándola en modo VOR → configuración) -->
+  <div class="rosa-zona" onclick="roseTap()">
     <div class="hsi-container">
-      <svg id="hsi" viewBox="14 14 272 272">
+      <svg id="hsi" viewBox="8 8 284 284">
         <defs>
           <clipPath id="clip">
             <circle cx="150" cy="150" r="141"/>
           </clipPath>
         </defs>
-
         <rect x="0" y="0" width="300" height="300" fill="#090a0d"/>
 
         <g clip-path="url(#clip)">
@@ -476,49 +358,29 @@
           <rect x="145" y="10" width="10" height="22" rx="2.5" fill="#dde0ea"/>
 
         </g>
-
       </svg>
-      <!-- DME overlay — esquina inferior izquierda -->
-      <div style="position:absolute;bottom:4px;left:4px;pointer-events:auto;">
-        <span id="vor-badge" onclick="showSettings()">PAR</span>
-        <div class="info-numrow">
-          <span id="dme-val">–––</span>
-          <span class="dme-nm">nm</span>
-        </div>
-      </div>
-      <!-- Rumbo / track — encima del radial -->
-      <div id="hdg-overlay">
-        <span class="info-r-label" id="hdg-lbl"></span>
-        <span id="hdg-val">N↑</span>
-      </div>
-      <!-- Radial overlay — esquina inferior derecha -->
-      <div id="radial-overlay" style="position:absolute;bottom:4px;right:4px;text-align:right;pointer-events:none;">
-        <span class="info-r-label">R</span>
-        <span id="radial-val">–––</span>
-      </div>
-      <!-- Version indicator -->
-      <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;font-family:monospace;pointer-events:none;" id="app-ver">v5.02</div>
-      <!-- Botón RTE — overlay esquina inferior izquierda -->
-      <span id="rte-btn" onclick="rteAction()" style="display:none">DAT</span>
     </div>
+    <span class="ov" id="tofrom-text">---</span>
+    <span class="ov" id="gps-top"></span>
+    <!-- Rumbo de la brújula (HDG, en tierra) o track GPS (TRK, en vuelo) -->
+    <span class="ov" id="trk-overlay"><span class="ov-lbl" id="trk-lbl"></span> <span class="ov-val" id="trk-val">N↑</span></span>
+    <!-- Radial (sólo modo VOR) -->
+    <span class="ov" id="radial-overlay"><span class="ov-lbl">R</span> <span class="ov-val" id="radial-val">–––</span></span>
+    <span class="ov" id="app-ver">v6.00</span>
+  </div>
 
-  </div><!-- /center-panel -->
-
-  <!-- Panel derecho: HOLD + VAR -->
-  <div class="side-panel side-right">
-    <div id="right-controls">
-      <div id="hold-btn" onclick="toggleHoldMode()">HOLD</div>
-      <div id="hold-num" class="ctrl-header tap" onclick="holdNumTap()">
-        <span id="hold-display">---</span>
-      </div>
-      <button id="btn-varmode" class="btn-varmode" onclick="varBtnTap()">VAR</button>
-      <div class="slots">
-        <div class="slot" id="slot-r1"><span class="slot-tag" id="r1-tag">UTC</span><span class="slot-val" id="r1-val">--</span><span class="slot-sub" id="r1-sub"></span></div>
-        <div class="slot" id="slot-r2"><span class="slot-tag" id="r2-tag">LOG</span><span class="slot-val" id="r2-val">--</span><span class="slot-sub" id="r2-sub"></span></div>
-        <div class="slot" id="slot-r3"><span class="slot-tag" id="r3-tag">SOG kt</span><span class="slot-val" id="r3-val">--</span><span class="slot-sub" id="r3-sub"></span></div>
-        <div class="slot" id="slot-r4"><span class="slot-tag" id="r4-tag">ALT GPS ft</span><span class="slot-val" id="r4-val">--</span><span class="slot-sub" id="r4-sub"></span></div>
-      </div>
-    </div>
+  <!-- 55 % inferior: I1–I5 / D1–D5; el contenido de cada uno depende del modo (renderSlots) -->
+  <div class="grilla">
+    <div class="slot vacio" id="slot-i1" onclick="slotTap('i1')"><span class="slot-mini" id="i1-mini"></span><span class="slot-tag" id="i1-tag"></span><span class="slot-val" id="i1-val"></span><span class="slot-sub" id="i1-sub"></span></div>
+    <div class="slot vacio" id="slot-i2" onclick="slotTap('i2')"><span class="slot-mini" id="i2-mini"></span><span class="slot-tag" id="i2-tag"></span><span class="slot-val" id="i2-val"></span><span class="slot-sub" id="i2-sub"></span></div>
+    <div class="slot vacio" id="slot-i3" onclick="slotTap('i3')"><span class="slot-mini" id="i3-mini"></span><span class="slot-tag" id="i3-tag"></span><span class="slot-val" id="i3-val"></span><span class="slot-sub" id="i3-sub"></span></div>
+    <div class="slot vacio" id="slot-i4" onclick="slotTap('i4')"><span class="slot-mini" id="i4-mini"></span><span class="slot-tag" id="i4-tag"></span><span class="slot-val" id="i4-val"></span><span class="slot-sub" id="i4-sub"></span></div>
+    <div class="slot vacio" id="slot-i5" onclick="slotTap('i5')"><span class="slot-mini" id="i5-mini"></span><span class="slot-tag" id="i5-tag"></span><span class="slot-val" id="i5-val"></span><span class="slot-sub" id="i5-sub"></span></div>
+    <div class="slot vacio" id="slot-d1" onclick="slotTap('d1')"><span class="slot-mini" id="d1-mini"></span><span class="slot-tag" id="d1-tag"></span><span class="slot-val" id="d1-val"></span><span class="slot-sub" id="d1-sub"></span></div>
+    <div class="slot vacio" id="slot-d2" onclick="slotTap('d2')"><span class="slot-mini" id="d2-mini"></span><span class="slot-tag" id="d2-tag"></span><span class="slot-val" id="d2-val"></span><span class="slot-sub" id="d2-sub"></span></div>
+    <div class="slot vacio" id="slot-d3" onclick="slotTap('d3')"><span class="slot-mini" id="d3-mini"></span><span class="slot-tag" id="d3-tag"></span><span class="slot-val" id="d3-val"></span><span class="slot-sub" id="d3-sub"></span></div>
+    <div class="slot vacio" id="slot-d4" onclick="slotTap('d4')"><span class="slot-mini" id="d4-mini"></span><span class="slot-tag" id="d4-tag"></span><span class="slot-val" id="d4-val"></span><span class="slot-sub" id="d4-sub"></span></div>
+    <div class="slot vacio" id="slot-d5" onclick="slotTap('d5')"><span class="slot-mini" id="d5-mini"></span><span class="slot-tag" id="d5-tag"></span><span class="slot-val" id="d5-val"></span><span class="slot-sub" id="d5-sub"></span></div>
   </div>
 
 </div><!-- /screen-main -->
@@ -559,18 +421,23 @@
 </div>
 
 
+<!-- ══════════════════ CONFIGURACIÓN ══════════════════ -->
+<div id="screen-config" class="screen" style="display:none;">
+  <div class="cfg-tit">CONFIGURACIÓN</div>
+  <div class="cfg-op vor" onclick="showSettings()"><span class="n">VOR</span><span class="v" id="cfg-vor">PAR</span></div>
+  <div class="cfg-op" onclick="openKbd('VAR')"><span class="n">VAR</span><span class="v" id="cfg-var">0.0</span></div>
+  <div class="btn-volver" onclick="showMain()">VOLVER</div>
+</div>
+
+
 <!-- ══════════════════ ESTIMA A WPS ══════════════════ -->
 <div id="screen-wp-est" class="screen" style="display:none; flex-direction:column;">
 
-  <div class="settings-header">
-    <button class="btn-back" onclick="showMain()">← Volver</button>
-    <span class="settings-title">WPS</span>
-    <button onclick="showMain();showRtePicker();" style="background:none;border:1px solid #555;color:#888;font-family:'Courier New',monospace;font-size:18px;border-radius:6px;padding:4px 12px;cursor:pointer;">RUTAS</button>
+  <div class="dat-head">
+    <div class="btn-volver" onclick="showMain()">← VOLVER</div>
+    <div class="btn-volver rutas" onclick="showMain();showRtePicker();">RUTAS</div>
   </div>
-
-  <div class="settings-body">
-    <div id="wp-est-list"></div>
-  </div>
+  <div id="wp-est-list"></div>
 
 </div>
 
@@ -612,7 +479,7 @@ function getMagVar(id) {
 const S = {
   acLat:null, acLon:null,
   gpsTrack:null, gpsSpeed:0, gpsAcc:null, gpsAlt:null,
-  l1v:'--', l1s:'', logMs:0,
+  l1v:'--', l1s:'', logMs:0, dme:null,
   gpsActive:false, watchId:null,
   selectedVOR:'PAR', obs:0, obsVor:0, predOK:false, routeStr:'', compassHdg:null,
   magVar: getMagVar('PAR'),
@@ -730,14 +597,11 @@ function restoreUi() {
   if (!u) return null;
   if (u.vor && NAVAIDS[u.vor]) { S.selectedVOR = u.vor; S.magVar = getMagVar(u.vor); }
   if (Number.isFinite(u.obs)) S.obs = S.obsVor = norm360(u.obs);
-  $('obs-display').textContent = pad3(S.obs);
-  $('vor-badge').textContent   = S.selectedVOR;
   return u;
 }
 
 function update() {
   saveUi();
-  if (!S.holdMode) $('btn-varmode').textContent = 'VAR ' + fmtVar(S.magVar);
   // En modo FLP el "VOR" es el waypoint activo de la ruta
   let vor = NAVAIDS[S.selectedVOR];
   if (S.flpMode && S.route.length > 1 && S.activeLeg < S.route.length) {
@@ -759,19 +623,16 @@ function update() {
 
   $('g-compass').setAttribute('transform', `rotate(${-magHeading},150,150)`);
   $('g-course') .setAttribute('transform', `rotate(${norm360(S.obs-magHeading)},150,150)`);
-  // H = rumbo de la brújula (< 10 kt); T = track GPS magnético (en vuelo); N↑ sin datos
-  $('hdg-lbl').textContent = useCompass ? 'H' : useTrack ? 'T' : '';
-  $('hdg-val').textContent = (useCompass || useTrack) ? pad3(Math.round(magHeading) % 360) : 'N↑';
-  const dat = $('rte-btn');
-  $('hdg-overlay').style.bottom = (S.flpMode && dat.offsetHeight)
-    ? (dat.offsetTop > 0 ? (dat.parentNode.clientHeight - dat.offsetTop + 6) + 'px' : '84px') : '44px';
+  // HDG = rumbo de la brújula (< 10 kt); TRK = track GPS magnético (en vuelo); N↑ sin datos
+  $('trk-lbl').textContent = useCompass ? 'HDG' : useTrack ? 'TRK' : '';
+  $('trk-val').textContent = (useCompass || useTrack) ? pad3(Math.round(magHeading) % 360) : 'N↑';
 
   if (S.holdMode) {
     $('g-hold').setAttribute('transform',
       `rotate(${norm360(S.holdCourse-magHeading)},150,150)`);
   }
 
-  if (S.acLat === null) { S.l1v = '--'; S.l1s = ''; renderSlots(); return; }
+  if (S.acLat === null) { S.l1v = '--'; S.l1s = ''; S.dme = null; renderSlots(); return; }
 
   const trueRadial = bearing(vor.lat, vor.lon, S.acLat, S.acLon);
   const magRadial  = norm360(trueRadial - magVar);
@@ -804,7 +665,7 @@ function update() {
   tf.style.color = (flag==='TO'||flag==='FROM') ? '#f0c040' : '#333';
 
   $('g-rmi').setAttribute('transform', `rotate(${norm360(brgToVOR-magHeading)},150,150)`);
-  $('dme-val')   .textContent = dist.toFixed(1);
+  S.dme = dist;
   $('radial-val').textContent = pad3(Math.round(magRadial));
 
   // L1 en VOR: distancia y tiempo hasta interceptar el radial del OBS con el track actual
@@ -822,17 +683,12 @@ function update() {
         const kt = S.gpsSpeed * 3600 / 1852;
         const tm = Math.round(s * 60 / kt);
         if (tm <= 99) {
-          S.l1v = s.toFixed(1) + ' NM';
+          S.l1v = s.toFixed(1);
           S.l1s = String(tm).padStart(2, '0') + ' min';
         }
       }
     }
   }
-
-  // Badge del VOR / WP activo
-  $('vor-badge').textContent = S.flpMode
-    ? (S.route[S.activeLeg] ? S.route[S.activeLeg].ident : '---')
-    : (vor.id || S.selectedVOR);
 
   // Auto-avance / alerta cuando se aleja del WP activo
   // Con < 10 kt el ruido del GPS simula alejamientos: no se evalúa.
@@ -864,98 +720,180 @@ function update() {
   }
 
   saveUi();
-  if (S.flpMode) updateFlpPanel();
   renderSlots();
 }
 
 // ═══════════════════════════════════════════════════════════
-//  ESPACIOS L1–L4 / R1–R4
+//  RECTÁNGULOS I1–I5 / D1–D5 (contenido según el modo)
+//    VOR: I1 OBS · I2 ETE · I3 ETA · I4 CRONO · I5 VOR
+//         D1 DME · D2 ICP · D3 TIME (sólo HOLD) · D4 UTC · D5 HOLD
+//    RTE: I1 NEXT · I2 ETE · I3 ETA · I4 CRONO · I5 RTE
+//         D1 DME · D2 ETE FIN · D3 ETA FIN · D4 UTC · D5 DAT
 // ═══════════════════════════════════════════════════════════
 const p2 = n => String(n).padStart(2, '0');
 const fmtHM = min => { const m = Math.round(min); return Math.floor(m / 60) + ':' + p2(m % 60); };
 const fmtZ  = d => p2(d.getUTCHours()) + ':' + p2(d.getUTCMinutes());   // UTC, sin Z
+const SLOTS = ['i1','i2','i3','i4','i5','d1','d2','d3','d4','d5'];
 
-function setSlot(id, val, sub) {
-  $(id + '-val').textContent = val;
-  $(id + '-sub').textContent = sub || '';
+// sp = { tag, val, sub, mini, cls, btn }; null → rectángulo vacío.
+// Sólo toca el DOM (y reajusta la letra) si cambió algo.
+const _slotKey = {};
+function setSlot(id, sp) {
+  sp = sp || {};
+  const cls = 'slot ' + (sp.cls || 'vacio') + (sp.btn ? ' btn' : '');
+  const key = [cls, sp.tag || '', sp.val || '', sp.sub || '', sp.mini || ''].join('|');
+  if (_slotKey[id] === key) return;
+  _slotKey[id] = key;
+  $('slot-' + id).className = cls;
+  $(id + '-tag') .textContent = sp.tag  || '';
+  $(id + '-val') .textContent = sp.val  || '';
+  $(id + '-sub') .textContent = sp.sub  || '';
+  $(id + '-mini').textContent = sp.mini || '';
   fitSlot(id);
 }
 
-// La letra del valor (y de la segunda línea) crece hasta ocupar el rectángulo:
-// limitada por el ancho (se mide a 100 px) y por el alto libre debajo del rótulo.
-const FIT_MAX = 64;
+// El valor crece hasta llenar el rectángulo (limitado por el ancho y por el alto que
+// dejan el rótulo y la segunda línea). Los botones (VOR, RTE, HOLD, DAT) tienen tope.
+// Con segunda línea (ICP: distancia y tiempo) el alto libre se reparte 60/40.
+// El rótulo chico de la esquina (ICP) no ocupa alto: el valor, centrado, le deja
+// libre ese ancho de los dos lados y así no lo pisa.
+const BTN_MAX = 44, SUB_MAX = 32;
 function fitSlot(id) {
-  const box = $('slot-' + id);
-  const W = box.clientWidth - 8, H = box.clientHeight - 6;
+  const box  = $('slot-' + id);
+  const mini = $(id + '-mini');
+  const W = box.clientWidth - 10, H = box.clientHeight - 6;
   if (W <= 0 || H <= 0) return;                 // pantalla oculta: se ajusta al volver
   const tag = $(id + '-tag'), v = $(id + '-val'), sb = $(id + '-sub');
-  const hTag = tag.textContent ? tag.offsetHeight + 2 : 0;
-  const libre = H - hTag;
-  const tieneSub = sb.textContent !== '';
-  const ajustar = (el, hMax) => {
-    if (!el.textContent) return;
-    el.style.fontSize = '100px';
-    const w = el.scrollWidth;
-    el.style.fontSize = Math.floor(Math.min(FIT_MAX, hMax, w > 0 ? 100 * W / w : hMax)) + 'px';
-  };
-  ajustar(v,  tieneSub ? libre * 0.58 : libre);
-  if (tieneSub) ajustar(sb, libre * 0.42 - 2);
+  let libre = H - (tag.textContent ? tag.offsetHeight + 2 : 0);
+  const Wv = mini.textContent ? W - 2 * (mini.offsetWidth + 6) : W;
+  const medir = el => { el.style.fontSize = '100px'; return [el.scrollWidth, el.offsetHeight]; };
+  let hVal = libre;
+  if (sb.textContent) {
+    hVal = (libre - 2) * 0.6;
+    const [ws, hs] = medir(sb);
+    sb.style.fontSize = Math.floor(Math.min(SUB_MAX, 100 * W / ws, 100 * (libre - 2) * 0.4 / hs)) + 'px';
+  }
+  if (!v.textContent) return;
+  const [w, h] = medir(v);
+  if (!w || !h) return;
+  const tope = box.classList.contains('btn') ? BTN_MAX : 200;
+  v.style.fontSize = Math.max(8, Math.floor(Math.min(tope, 100 * Wv / w, 100 * hVal / h))) + 'px';
 }
-function fitSlots() { ['l1','l2','l3','l4','r1','r2','r3','r4'].forEach(fitSlot); }
-// Cada rectángulo se reajusta solo cuando cambia de tamaño (rotación, barra de Safari,
-// volver de otra pantalla). El tamaño del rectángulo no depende de su texto: no hay bucle.
+// Cada rectángulo se reajusta solo cuando cambia de tamaño (barra de Safari, volver
+// de otra pantalla). El tamaño del rectángulo no depende de su texto: no hay bucle.
 function initFitObserver() {
-  if (typeof ResizeObserver !== 'function') { window.addEventListener('resize', () => setTimeout(fitSlots, 50)); return; }
-  const ro = new ResizeObserver(entries => entries.forEach(e => fitSlot(e.target.id.slice(5))));
-  ['l1','l2','l3','l4','r1','r2','r3','r4'].forEach(id => ro.observe($('slot-' + id)));
+  if (typeof ResizeObserver !== 'function') {
+    window.addEventListener('resize', () => setTimeout(() => SLOTS.forEach(fitSlot), 50));
+    return;
+  }
+  const ro = new ResizeObserver(es => es.forEach(e => fitSlot(e.target.id.slice(5))));
+  SLOTS.forEach(id => ro.observe($('slot-' + id)));
 }
 
 function renderSlots() {
-  const kt = S.gpsSpeed * 3600 / 1852;
+  const kt   = S.gpsSpeed * 3600 / 1852;
   const pred = S.predOK && S.acLat !== null;
+  const now  = Date.now();
+  const utc   = { tag:'UTC',   val:fmtZ(new Date(now)), cls:'c-wht' };
+  const crono = { tag:'CRONO', val:cronoTxt(now),       cls:'c-green' };
+  const dme   = S.dme === null ? '--.-' : S.dme.toFixed(1);
 
-  // L1: ICP (VOR) / XTK (RTE)
-  $('l1-tag').textContent = S.flpMode ? 'XTK' : 'ICP';
-  setSlot('l1', S.l1v, S.l1s);
-
-  // L2/L3: ETE y ETA al VOR o al WP activo
-  const tgt = S.flpMode ? S.route[S.activeLeg] : NAVAIDS[S.selectedVOR];
-  if (pred && tgt) {
-    const d = S.flpMode ? cumulativeDistToLeg(S.activeLeg)
-                        : distNm(S.acLat, S.acLon, tgt.lat, tgt.lon);
-    const ete = d / kt * 60;
-    setSlot('l2', fmtHM(ete));
-    setSlot('l3', fmtZ(new Date(Date.now() + ete * 60000)));
-  } else {
-    setSlot('l2', '-:--');
-    setSlot('l3', '--:--');
+  if (S.flpMode) {
+    const wp = S.route[S.activeLeg];
+    let ete = '-:--', eta = '--:--', eteF = '-:--', etaF = '--:--';
+    if (pred && wp) {
+      const m1 = cumulativeDistToLeg(S.activeLeg) / kt * 60;          // al WP activo
+      const m2 = cumulativeDistToLeg(S.route.length - 1) / kt * 60;   // a fin de ruta
+      ete  = fmtHM(m1); eta  = fmtZ(new Date(now + m1 * 60000));
+      eteF = fmtHM(m2); etaF = fmtZ(new Date(now + m2 * 60000));
+    }
+    setSlot('i1', { tag:'NEXT', val: wp ? wp.ident : '---', cls:'c-next' });
+    setSlot('i2', { tag:'ETE', val:ete, cls:'c-cyan' });
+    setSlot('i3', { tag:'ETA', val:eta, cls:'c-cyan' });
+    setSlot('i4', crono);
+    setSlot('i5', { val:'RTE', cls:'b-rte', btn:true });
+    setSlot('d1', { tag:'DME', val:dme, cls:'c-dme-r' });
+    setSlot('d2', { tag:'ETE FIN', val:eteF, cls:'c-brown' });
+    setSlot('d3', { tag:'ETA FIN', val:etaF, cls:'c-brown' });
+    setSlot('d4', utc);
+    setSlot('d5', { val:'DAT', cls:'b-dat', btn:true });
+    return;
   }
 
-  // L4: ETA a fin de ruta, sólo en RTE
-  if (S.flpMode && S.route.length > 1) {
-    $('l4-tag').textContent = 'ETA FIN';
-    if (pred) {
-      const ete = cumulativeDistToLeg(S.route.length - 1) / kt * 60;
-      setSlot('l4', fmtZ(new Date(Date.now() + ete * 60000)));
-    } else setSlot('l4', '--:--');
-  } else {
-    $('l4-tag').textContent = '';
-    setSlot('l4', '');
+  const vor = NAVAIDS[S.selectedVOR];
+  let ete = '-:--', eta = '--:--';
+  if (pred) {
+    const m = distNm(S.acLat, S.acLon, vor.lat, vor.lon) / kt * 60;
+    ete = fmtHM(m); eta = fmtZ(new Date(now + m * 60000));
   }
-
-  // R3 SOG, R4 altitud GPS
-  setSlot('r3', S.acLat !== null ? String(Math.round(kt)) : '--');
-  setSlot('r4', Number.isFinite(S.gpsAlt) ? String(Math.round(S.gpsAlt * 3.28084)) : '----');
+  setSlot('i1', { tag:'OBS', val:pad3(S.obs), cls:'c-yel' });
+  setSlot('i2', { tag:'ETE', val:ete, cls:'c-yel' });
+  setSlot('i3', { tag:'ETA', val:eta, cls:'c-yel' });
+  setSlot('i4', crono);
+  setSlot('i5', { val:'VOR', cls:'b-vor', btn:true });
+  setSlot('d1', { tag:'DME', val:dme, cls:'c-dme-v' });
+  setSlot('d2', { mini:'ICP', val:S.l1v, sub:S.l1s, cls:'c-wht' });
+  setSlot('d3', S.holdMode
+    ? { tag:'TIME', val:holdTimerTxt(), cls: HT.flashing ? (HT.flashOn ? 'c-mag-on' : 'c-mag-off') : 'c-mag' }
+    : null);
+  setSlot('d4', utc);
+  setSlot('d5', S.holdMode ? { tag:'HOLD', val:pad3(S.holdCourse), cls:'b-hold-on' }
+                           : { val:'HOLD', cls:'b-hold', btn:true });
 }
 
-// R1 hora UTC y R2 LOG: se refrescan cada segundo
-function renderReloj() {
-  setSlot('r1', fmtZ(new Date()));
-  setSlot('r2', fmtHM(Math.floor(S.logMs / 60000)));
+// Toques en los rectángulos
+function slotTap(id) {
+  if (id === 'i4') { cronoTap(); return; }
+  if (id === 'i5') { flpToggleTap(); return; }
+  if (S.flpMode) { if (id === 'd5') rteAction(); return; }
+  if (id === 'i1') openKbd('OBS');
+  else if (id === 'd3' && S.holdMode) holdTimerTap();
+  else if (id === 'd5') holdBtnTap();
+}
+
+// Rosa: en modo VOR abre la configuración
+function roseTap() { if (!S.flpMode) showConfig(); }
+
+// D5 en VOR: apagado → toque lo enciende; encendido → toque abre el teclado del curso
+// (y del sentido de giro); mantenerlo apretado 1 s lo apaga.
+let _d5Largo = false;
+function holdBtnTap() {
+  if (_d5Largo) { _d5Largo = false; return; }   // click que sigue al toque largo
+  if (!S.holdMode) toggleHoldMode(); else openKbd('HOLD');
+}
+function initHoldPress() {
+  const el = $('slot-d5');
+  let t = null;
+  const fin = () => { clearTimeout(t); t = null; };
+  el.addEventListener('pointerdown', () => {
+    fin(); _d5Largo = false;
+    if (S.flpMode || !S.holdMode) return;
+    t = setTimeout(() => { t = null; _d5Largo = true; toggleHoldMode(); }, 1000);
+  });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => el.addEventListener(ev, fin));
+  el.addEventListener('contextmenu', e => e.preventDefault());
+}
+
+// Cronómetro (I4), mm:ss: toque → arranca; toque → se detiene; toque → a cero; y así.
+// Se mide con el reloj (no cuenta ticks): no se atrasa si la app queda en segundo plano.
+const CR = { est:0, t0:0, ms:0 };   // est: 0 en cero, 1 corriendo, 2 detenido
+try { Object.assign(CR, JSON.parse(localStorage.getItem('vor_crono')) || {}); } catch(e) {}
+function cronoTap() {
+  const now = Date.now();
+  if (CR.est === 0)      { CR.est = 1; CR.t0 = now; }
+  else if (CR.est === 1) { CR.est = 2; CR.ms = now - CR.t0; }
+  else                   { CR.est = 0; CR.ms = 0; }
+  try { localStorage.setItem('vor_crono', JSON.stringify(CR)); } catch(e) {}
+  renderSlots();
+}
+function cronoTxt(now) {
+  const s = Math.max(0, Math.floor((CR.est === 1 ? now - CR.t0 : CR.ms) / 1000));
+  return p2(Math.floor(s / 60)) + ':' + p2(s % 60);
 }
 
 // LOG de vuelo acumulado: suma el tiempo entre fixes consecutivos con SOG > 50 kt.
-// Un hueco entre fixes (app suspendida) se cuenta hasta 10 min. Toque largo → a cero.
+// Un hueco entre fixes (app suspendida) se cuenta hasta 10 min.
+// v6.00: no tiene rectángulo asignado; se sigue acumulando para cuando se lo ubique.
 const LOG_KT = 50, LOG_GAP_MAX = 10 * 60000;
 let _logT = null;
 try { S.logMs = parseFloat(localStorage.getItem('vor_log_ms')) || 0; } catch(e) {}
@@ -977,16 +915,6 @@ function logReset() {
   if (!confirm('¿Poner el LOG de vuelo en cero?')) return;
   S.logMs = 0; _logT = null;
   try { localStorage.setItem('vor_log_ms', '0'); } catch(e) {}
-  renderReloj();
-}
-
-function initLogPress() {
-  const el = $('slot-r2');
-  let t = null;
-  const fin = () => { clearTimeout(t); t = null; };
-  el.addEventListener('pointerdown', () => { fin(); t = setTimeout(() => { t = null; logReset(); }, 1500); });
-  ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => el.addEventListener(ev, fin));
-  el.addEventListener('contextmenu', e => e.preventDefault());
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1096,38 +1024,21 @@ function holdEntry(magHeading, course, right) {
 
 function toggleHoldMode() {
   S.holdMode = !S.holdMode;
-
-  const panel = document.querySelector('.side-right');
-  const btn   = $('btn-varmode');
-
   if (S.holdMode) {
     S.holdCourse = S.obs;  // siempre toma el OBS actual al entrar
-    panel.classList.add('holdmode');
-    btn.classList.add('hold');
-    $('hold-display').textContent = pad3(S.holdCourse);
     $('g-hold').style.display = '';
-    $('hold-entry').style.display = 'inline-block';
-    holdTimerReset();
     buildHoldGeometry();
-    showHoldTurn();
   } else {
-    panel.classList.remove('holdmode');
-    btn.classList.remove('hold');
-    $('hold-display').textContent = '---';
-    $('g-hold').style.display  = 'none';
-    $('hold-entry').style.display = 'none';
-    holdTimerReset();
+    $('g-hold').style.display = 'none';
   }
+  holdTimerReset();
   update();
 }
 
-// El número del HOLD abre el teclado sólo con la espera activa
-function holdNumTap() { if (S.holdMode) openKbd('HOLD'); }
-
 // ═══════════════════════════════════════════════════════════
-//  CRONÓMETRO HOLD (botón TIME — cuenta regresiva 60s)
+//  CUENTA REGRESIVA DEL HOLD (D3, TIME — 60 s)
 // ═══════════════════════════════════════════════════════════
-const HT = { active:false, flashing:false, secs:60, itvl:null, flashItvl:null };
+const HT = { active:false, flashing:false, flashOn:false, secs:60, itvl:null, flashItvl:null };
 
 function holdTimerTap() {
   if (HT.flashing) {
@@ -1155,15 +1066,8 @@ function holdTimerTick() {
   if (HT.secs <= 0) {
     HT.secs = 0; HT.active = false;
     clearInterval(HT.itvl);
-    HT.flashing = true;
-    let on = true;
-    HT.flashItvl = setInterval(() => {
-      const el = $('hold-entry');
-      if (!el) return;
-      el.style.color       = on ? '#28d858' : '#1a0a22';
-      el.style.borderColor = on ? '#28d858' : '#1a0a22';
-      on = !on;
-    }, 500);
+    HT.flashing = true; HT.flashOn = true;    // titila verde hasta el próximo toque
+    HT.flashItvl = setInterval(() => { HT.flashOn = !HT.flashOn; renderSlots(); }, 500);
   }
   holdTimerRender();
 }
@@ -1171,39 +1075,20 @@ function holdTimerTick() {
 function holdTimerReset() {
   clearInterval(HT.itvl);
   clearInterval(HT.flashItvl);
-  HT.active = false; HT.flashing = false; HT.secs = 60;
+  HT.active = false; HT.flashing = false; HT.flashOn = false; HT.secs = 60;
   holdTimerRender();
 }
 
-function holdTimerRender() {
-  const el = $('hold-entry');
-  if (!el) return;
-  if (HT.flashing) {
-    el.textContent   = '0:00';
-    el.style.fontSize = '33px';
-    return;  // color manejado por flashItvl
-  }
-  const nums = HT.active;
-  el.textContent    = nums
-    ? (Math.floor(HT.secs/60) + ':' + String(HT.secs%60).padStart(2,'0'))
-    : 'TIME';
-  el.style.fontSize  = nums ? '33px' : '22px';
-  el.style.color       = '#d060ff';
-  el.style.borderColor = '#d060ff';
-}
+function holdTimerRender() { renderSlots(); }
+function holdTimerTxt() { const t = HT.flashing ? 0 : HT.secs; return p2(Math.floor(t / 60)) + ':' + p2(t % 60); }
 
-function showHoldTurn() {
-  $('btn-varmode').textContent = S.holdRight ? '↻ DER' : '↺ IZQ';
-}
-
+// Sentido de giro del HOLD: se elige en su teclado (tecla DER/IZQ)
+const holdTurnTxt = () => S.holdRight ? '↻ DER' : '↺ IZQ';
 function toggleHoldTurn() {
   S.holdRight = !S.holdRight;
-  showHoldTurn();
   buildHoldGeometry();
   update();
 }
-
-function varBtnTap() { S.holdMode ? toggleHoldTurn() : openKbd('VAR'); }
 
 // ═══════════════════════════════════════════════════════════
 //  CONTROLES
@@ -1214,7 +1099,6 @@ function obsDirectTo() {
   const trueRadial = bearing(vor.lat, vor.lon, S.acLat, S.acLon);
   const magRadial  = norm360(trueRadial - S.magVar);
   S.obs = Math.round(norm360(magRadial + 180));
-  $('obs-display').textContent = pad3(S.obs);
   update();
 }
 
@@ -1236,9 +1120,13 @@ function openKbd(mode) {
                              : 'VAR ' + S.selectedVOR + '  (− = W)';
   $('kbd-sign').classList.toggle('off', !esVar);
   $('kbd-dot') .classList.toggle('off', !esVar);
-  $('kbd-dto') .classList.toggle('off', mode !== 'OBS');
+  // D→ en el OBS; en el HOLD la misma tecla elige el sentido de giro
+  $('kbd-dto') .classList.toggle('off', esVar);
+  $('kbd-dto') .classList.toggle('turn', mode === 'HOLD');
+  $('kbd-dto') .textContent = mode === 'HOLD' ? holdTurnTxt() : 'D→';
   $('kbd-180') .classList.toggle('off', esVar);
-  $('screen-main').style.display = 'none';
+  $('screen-main').style.display   = 'none';
+  $('screen-config').style.display = 'none';
   $('screen-kbd').style.display  = 'flex';
   kbdRender('');
 }
@@ -1296,10 +1184,8 @@ function kbdValor() {
 function kbdAplicar(v) {
   if (K.mode === 'OBS') {
     S.obs = v;
-    $('obs-display').textContent = pad3(S.obs);
   } else if (K.mode === 'HOLD') {
     S.holdCourse = v;
-    $('hold-display').textContent = pad3(S.holdCourse);
   } else {
     S.magVar = v;
     localStorage.setItem('magVar_' + S.selectedVOR, S.magVar);
@@ -1327,6 +1213,7 @@ function kbdMas180() {
 }
 
 function kbdDirecto() {
+  if (K.mode === 'HOLD') { toggleHoldTurn(); $('kbd-dto').textContent = holdTurnTxt(); return; }
   if (S.acLat === null) { kbdRender('Sin GPS'); return; }
   closeKbd();
   obsDirectTo();
@@ -1336,12 +1223,22 @@ function kbdDirecto() {
 //  PANTALLAS
 // ═══════════════════════════════════════════════════════════
 function showSettings() {
-  $('screen-main').style.display = 'none';
+  $('screen-main').style.display   = 'none';
+  $('screen-config').style.display = 'none';
   $('screen-settings').style.display = 'flex';
   renderNAVCards();
 }
 
+// Configuración (tocando la rosa en modo VOR): VOR y VAR
+function showConfig() {
+  $('cfg-vor').textContent = S.selectedVOR;
+  $('cfg-var').textContent = fmtVar(S.magVar);
+  $('screen-main').style.display   = 'none';
+  $('screen-config').style.display = 'flex';
+}
+
 function showMain() {
+  $('screen-config').style.display   = 'none';
   $('screen-settings').style.display = 'none';
   $('screen-kbd').style.display      = 'none';
   $('screen-wp-est').style.display   = 'none';
@@ -1390,7 +1287,6 @@ function renderNAVCards() {
     card.onclick = () => {
       S.selectedVOR = id;
       S.magVar = getMagVar(id);
-      $('vor-badge').textContent = id;
       showMain(); // regresa automáticamente al seleccionar
     };
     c.appendChild(card);
@@ -1748,17 +1644,12 @@ function toggleFlpMode() {
     S.obsVor = S.obs;
   } else {
     S.obs = S.obsVor;
-    $('obs-display').textContent = pad3(S.obs);
   }
   if (S.flpMode && S.holdMode) toggleHoldMode(); // apagar hold al entrar en RTE
-  setLeftMode();
   $('radial-overlay').style.display = S.flpMode ? 'none' : '';
   $('tofrom-text').style.display    = S.flpMode ? 'none' : '';
-  // HOLD/VAR siempre visibles en ambos modos
-  $('flp-toggle').classList.toggle('active', S.flpMode);
-  $('flp-toggle').textContent = S.flpMode ? 'RTE' : 'VOR';
-  // DAT no depende de la lista de GitHub: es la única puerta a WPS, al selector y a borrar la ruta activa
-  $('rte-btn').style.display = S.flpMode ? 'inline-block' : 'none';
+  // I5 (VOR/RTE) y D5 (HOLD/DAT) salen de renderSlots. DAT no depende de la lista de
+  // GitHub: es la única puerta a WPS, al selector y a borrar la ruta activa
   update();
 }
 
@@ -1769,29 +1660,6 @@ function cumulativeDistToLeg(idx) {
   for (let i = S.activeLeg; i < idx; i++)
     d += distNm(S.route[i].lat, S.route[i].lon, S.route[i+1].lat, S.route[i+1].lon);
   return d;
-}
-
-function updateFlpPanel() {
-  const wp = S.route[S.activeLeg];
-  $('flp-wp-name').textContent = wp ? wp.ident : '---';
-}
-
-// Encabezado izquierdo: OBS en VOR, NEXT + WP activo en RTE
-function setLeftMode() {
-  $('left-tag').textContent = S.flpMode ? 'NEXT' : 'OBS';
-  $('left-tag').style.color = S.flpMode ? '#cdd0d8' : '';
-  $('obs-display').style.display = S.flpMode ? 'none' : '';
-  $('flp-wp-name').style.display = S.flpMode ? '' : 'none';
-}
-
-function leftHeadTap() { if (!S.flpMode) openKbd('OBS'); }
-
-// ▲/▼ cambian SOLO la vista previa, no el WP activo
-function flpNextLeg() {
-  if (S.previewLeg < S.route.length - 1) { S.previewLeg++; updateFlpPanel(); }
-}
-function flpPrevLeg() {
-  if (S.previewLeg > 1) { S.previewLeg--; updateFlpPanel(); }
 }
 
 // Alerta: ruta no respetada
@@ -1914,28 +1782,24 @@ function renderWpEst() {
   const list = $('wp-est-list');
   list.innerHTML = '';
   const kt = S.gpsSpeed * 3600 / 1852;
+  const n  = S.route.length - 1;
   S.route.forEach((wp, idx) => {
     if (idx === 0) return;
-    const isActive = idx === S.activeLeg;
-    let etStr = '-- min', etaStr = '--:--';
-    if (S.predOK && S.acLat !== null) {
-      const d = cumulativeDistToLeg(idx);
-      const etMin = d / kt * 60;
-      etStr = Math.round(etMin) + ' min';
-      const eta = new Date(Date.now() + etMin * 60000);
-      etaStr = String(eta.getUTCHours()).padStart(2,'0') + ':' +
-               String(eta.getUTCMinutes()).padStart(2,'0');
+    const act = idx === S.activeLeg, pas = idx < S.activeLeg;
+    let ete = '-:--', eta = '--:--';
+    if (pas) ete = '--';                       // ya pasado: no hay estima
+    else if (S.predOK && S.acLat !== null) {
+      const m = cumulativeDistToLeg(idx) / kt * 60;
+      ete = fmtHM(m);
+      eta = fmtZ(new Date(Date.now() + m * 60000));
     }
     const card = document.createElement('div');
-    card.className = 'rte-card';
-    if (isActive) card.style.borderColor = '#00e5ff';
+    card.className = 'wpe' + (act ? ' act' : '') + (pas ? ' pas' : '');
     card.innerHTML =
-      '<div class="rte-card-nombre" style="color:' + (isActive ? '#00e5ff' : '#f0c040') + ';font-size:22px">' +
-        idx + '/' + (S.route.length-1) + '  ' + wp.ident + (isActive ? '  ◀' : '') +
-      '</div>' +
-      '<div style="font-size:26px;font-family:\'Courier New\',monospace;color:#fff;font-weight:700;margin-top:4px">' +
-        etStr + ' / ' + etaStr +
-      '</div>';
+      '<div class="n"><span class="wp">' + wp.ident + (act ? ' ◀' : '') + '</span>' +
+      '<span class="ix">' + idx + '/' + n + '</span></div>' +
+      '<div class="t"><div><span class="l">ETE</span><span class="v">' + ete + '</span></div>' +
+      '<div><span class="l">ETA</span><span class="v">' + eta + '</span></div></div>';
     card.onclick = () => {
       S.activeLeg = idx; S.previewLeg = idx;
       S.prevDistToActive = null; S.minDistToActive = Infinity;
@@ -1945,20 +1809,18 @@ function renderWpEst() {
     };
     list.appendChild(card);
   });
+  const a = list.querySelector('.wpe.act');
+  if (a) a.scrollIntoView({ block:'nearest' });
 }
 
 function flpClearRoute() {
   localStorage.removeItem('vor_route');
   document.cookie = 'vor_route=;path=/;max-age=0';
-  if (S.flpMode) { S.obs = S.obsVor; $('obs-display').textContent = pad3(S.obs); }
+  if (S.flpMode) S.obs = S.obsVor;
   S.route = []; S.routeStr = ''; S.activeLeg = 1; S.previewLeg = 1; S.flpMode = false;
   S.prevDistToActive = null; S.minDistToActive = Infinity;
   S.distIncreasingCount = 0; S.routeAlert = false;
   document.getElementById('route-alert')?.remove();
-  $('flp-toggle').classList.remove('active');
-  $('flp-toggle').textContent = 'VOR';
-  $('rte-btn').style.display = 'none';
-  setLeftMode();
   $('radial-overlay').style.display = '';
   $('tofrom-text').style.display = '';
   update();
@@ -2055,10 +1917,9 @@ checkForUpdate();
 drawCompassRose();
 buildHoldGeometry();
 loadRoute(restoreUi());
-update();   // pinta el botón VAR con la declinación aunque todavía no haya GPS
-renderReloj();
-setInterval(renderReloj, 1000);
-initLogPress();
+update();   // pinta los rectángulos aunque todavía no haya GPS
+setInterval(renderSlots, 500);   // UTC, cronómetro y cuenta del HOLD
+initHoldPress();
 initFitObserver();
 fetchRoutes();
 startGPS();
