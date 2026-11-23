@@ -46,7 +46,14 @@
     .ov-lbl { font-size:30px; }
     .ov-val { font-size:40px; }
     #tofrom-text  { top:2px; left:6px; font-size:30px; color:#333; letter-spacing:1px; }
-    #gps-top      { top:4px; right:6px; font-size:18px; color:#ff5555; display:none; }
+    #gps-top      { top:6px; left:50%; transform:translateX(-50%); font-size:18px; color:#ff5555; display:none; }
+    /* NAV1 activo (sólo modo VOR): tocarlo abre la lista para cambiarlo */
+    #nav1-badge {
+      top:2px; right:6px; font-size:30px; color:#f0c040; background:#1a1500;
+      border:2px solid #f0c040; border-radius:8px; padding:3px 10px;
+      pointer-events:auto; cursor:pointer; user-select:none; -webkit-user-select:none;
+    }
+    #nav1-badge:active { filter:brightness(1.4); }
     #trk-overlay  { left:6px;  bottom:2px; color:#fff; }
     #radial-overlay { right:6px; bottom:2px; color:#f0c040; }
     #app-ver {
@@ -393,11 +400,12 @@
     </div>
     <span class="ov" id="tofrom-text">---</span>
     <span class="ov" id="gps-top"></span>
+    <span class="ov" id="nav1-badge" onclick="event.stopPropagation(); showSettings('NAV1')">PAR</span>
     <!-- Rumbo de la brújula (HDG, en tierra) o track GPS (TRK, en vuelo) -->
     <span class="ov" id="trk-overlay"><span class="ov-lbl" id="trk-lbl"></span> <span class="ov-val" id="trk-val">N↑</span></span>
     <!-- Radial (sólo modo VOR) -->
     <span class="ov" id="radial-overlay"><span class="ov-lbl">R</span> <span class="ov-val" id="radial-val">–––</span></span>
-    <span class="ov" id="app-ver">v6.02</span>
+    <span class="ov" id="app-ver">v6.03</span>
   </div>
 
   <!-- 55 % inferior: I1–I5 / D1–D5; el contenido de cada uno depende del modo (renderSlots) -->
@@ -2581,6 +2589,7 @@ function update() {
   $('trk-val').textContent = (useCompass || useTrack) ? pad3(Math.round(magHeading) % 360) : 'N↑';
 
   dibujarBrg2(magHeading);
+  $('nav1-badge').textContent = navId(S.selectedVOR);
 
   if (S.holdMode) {
     $('g-hold').setAttribute('transform',
@@ -2617,7 +2626,7 @@ function update() {
 
   const tf = $('tofrom-text');
   tf.textContent = (flag === 'OFF') ? '---' : flag;
-  tf.style.color = (flag==='TO'||flag==='FROM') ? '#f0c040' : '#333';
+  tf.style.color = (flag==='TO'||flag==='FROM') ? '#fff' : '#333';
 
   $('g-rmi').setAttribute('transform', `rotate(${norm360(brgToVOR-magHeading)},150,150)`);
   S.dme = dist;
@@ -3714,6 +3723,7 @@ function toggleFlpMode() {
   if (S.flpMode && S.holdMode) toggleHoldMode(); // apagar hold al entrar en RTE
   $('radial-overlay').style.display = S.flpMode ? 'none' : '';
   $('tofrom-text').style.display    = S.flpMode ? 'none' : '';
+  $('nav1-badge').style.display     = S.flpMode ? 'none' : '';
   // I5 (VOR/RTE) y D5 (HOLD/DAT) salen de renderSlots. DAT no depende de la lista de
   // GitHub: es la única puerta a WPS, al selector y a borrar la ruta activa
   update();
@@ -3889,6 +3899,7 @@ function flpClearRoute() {
   document.getElementById('route-alert')?.remove();
   $('radial-overlay').style.display = '';
   $('tofrom-text').style.display = '';
+  $('nav1-badge').style.display = '';
   update();
 }
 
